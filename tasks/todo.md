@@ -23,15 +23,15 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Create the self-contained skill directory and a CLI shell that runs via `uv run --script` from any location. Also add `Finding`, exit-code constants and the dev tooling config, so every later task has a place to land.
 
 **Acceptance criteria:**
-- [ ] `uv run --script SK/scripts/onto.py --help` and `--version` work from the repo root and from a copy of `SK/` in a nested temp directory (Decision 1).
-- [ ] An unknown subcommand or bad flag exits `2` with an actionable message on stderr. Every subcommand from the spec is registered with its `--help` text and examples, and an unimplemented one exits `2` with "not implemented yet".
-- [ ] `SKILL.md` has spec-conformant frontmatter (name, description, compatibility, metadata.version) and a placeholder body. `--version` reads the same version.
+- [x] `uv run --script SK/scripts/onto.py --help` and `--version` work from the repo root and from a copy of `SK/` in a nested temp directory (Decision 1).
+- [x] An unknown subcommand or bad flag exits `2` with an actionable message on stderr. Every subcommand from the spec is registered with its `--help` text and examples, and an unimplemented one exits `2` with "not implemented yet".
+- [x] `SKILL.md` has spec-conformant frontmatter (name, description, compatibility, metadata.version) and a placeholder body. `--version` reads the same version.
 
 **Verification:** PYTEST (`tests/test_cli.py`), LINT. Manually: `--help` output reads well.
 
 **Dependencies:** None
 
-**Files:** `SK/SKILL.md`, `SK/scripts/onto.py`, `SK/scripts/ontokit/{__init__,cli,findings}.py`, `pyproject.toml` (dev tool config only: ruff and pytest settings, no dependencies), `tests/test_cli.py`
+**Files:** `SK/SKILL.md`, `SK/scripts/onto.py`, `SK/scripts/ontokit/{__init__,cli,findings}.py`, `ruff.toml` + `pytest.ini` (dev config; used instead of a `pyproject.toml` so `uv run` never treats this repo as a project), `.gitattributes` (LF normalisation), `.gitignore`, `tests/test_cli.py`
 
 **Scope:** M
 
