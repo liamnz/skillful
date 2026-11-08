@@ -98,16 +98,10 @@
   .pane { border-left: var(--border-width) solid var(--border); background: var(--surface); overflow: auto; padding: var(--space-5) var(--space-5) var(--space-7); }
   .pane .meta { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-muted); }
   .pane h2 { font-size: var(--text-xl); font-weight: var(--weight-semibold); line-height: var(--line-height-tight); margin: var(--space-2) 0 0; }
-  /* Section headings: a monospace key is a field stored in the concept's YAML file, named exactly as there;
-     a sentence-case heading is computed (from other files, the validator or git) and says where from. */
-  .pane h3 { font-size: var(--text-xs); font-weight: var(--weight-semibold); color: var(--text-faint); margin: var(--space-5) 0 var(--space-1); }
-  .pane h3.key { font-family: var(--font-mono); font-weight: var(--weight-regular); color: var(--text-muted); }
-  .pane h3 .src { font-weight: var(--weight-regular); }
-  .pane .derived-start { margin-top: var(--space-6); padding-top: var(--space-1); border-top: var(--border-width) solid var(--border); }
-  .pane .k { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-faint); }
-  .pane .source { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-faint); margin-top: var(--space-1); }
-  .pane .from { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-faint); }
-  .pane .key-note { margin-top: var(--space-6); font-size: var(--text-xs); color: var(--text-faint); }
+  /* Section headings use the concept file's field names (underscores read as spaces). */
+  .pane h3 { font-size: var(--text-xs); font-weight: var(--weight-semibold); color: var(--text-faint); margin: var(--space-5) 0 var(--space-1);
+    text-transform: uppercase; letter-spacing: 0.04em; }
+  .pane .id { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-faint); }
   .pane p { margin: 0; }
   .definition { font-size: var(--text-md); max-width: var(--measure); }
   .pane ul { list-style: none; margin: 0; padding: 0; }
@@ -193,45 +187,43 @@
   </main>
 
   <aside class="pane" aria-label="Concept details">
-    <div class="meta"><svg width="12" height="12" viewBox="-6 -6 12 12" class="k1"><circle class="shape" r="4.5"/></svg><span><span class="k">kind:</span> entity · <span class="k">status:</span> defined</span></div>
+    <div class="meta"><svg width="12" height="12" viewBox="-6 -6 12 12" class="k1"><circle class="shape" r="4.5"/></svg>entity · defined</div>
     <h2>Customer</h2>
-    <div class="source">docs/ontology/concepts/customer.yaml</div>
+    <div class="id">customer</div>
 
-    <h3 class="key">definition</h3>
+    <h3>Definition</h3>
     <p class="definition">A person or business that has created an account with the shop and accepted the terms of service, whether or not they have bought anything.</p>
 
-    <h3 class="key">discouraged_terms</h3>
+    <h3>Discouraged terms</h3>
     <ul>
       <li><span class="term">client</span> <span class="muted">— Finance and the old CRM say 'client'</span></li>
       <li><span class="term">shopper</span> <span class="muted">— Marketing copy</span></li>
     </ul>
 
-    <h3 class="key">examples</h3>
+    <h3>Examples</h3>
     <ul><li>Someone who signed up yesterday and has not ordered yet</li></ul>
-    <h3 class="key">non_examples</h3>
+    <h3>Non examples</h3>
     <ul><li class="muted">A visitor who browsed the shop without creating an account</li></ul>
 
-    <h3 class="key">relations</h3>
+    <h3>Relations</h3>
     <ul>
-      <li>Customer <span class="rel-label">has many</span> <a href="#">Orders</a> <span class="from">has · 1:N</span></li>
-      <li>Customer <span class="rel-label">has many</span> <a href="#">Subscriptions</a> <span class="from">has · 1:N</span></li>
+      <li>Customer <span class="rel-label">has many</span> <a href="#">Orders</a></li>
+      <li>Customer <span class="rel-label">has many</span> <a href="#">Subscriptions</a></li>
     </ul>
 
-    <h3 class="key">implemented_in</h3>
+    <h3>Implemented in</h3>
     <div class="impl">
       <div><code>models/marts/dim_customer.sql</code> <span class="faint">·</span> <code>customer_id</code></div>
-      <div class="when"><span class="k">reviewed_at:</span> not set · never reviewed</div>
+      <div class="when">Never reviewed</div>
     </div>
 
-    <h3 class="derived-start">Incoming relations <span class="src">· stated in other concept files</span></h3>
+    <h3>Incoming relations</h3>
     <ul>
-      <li><span class="rel-label">has subtype</span> <a href="#">Active customer</a> <span class="from">active-customer.yaml</span></li>
-      <li><span class="rel-label">has subtype</span> <a href="#">Churned account</a> <span class="faint">(proposed)</span> <span class="from">churned-account.yaml</span></li>
-      <li><span class="rel-label">has attribute</span> <a href="#">Customer region</a> <span class="from">customer-region.yaml</span></li>
-      <li><span class="rel-label">measured by</span> <a href="#">Retention rate</a> <span class="from">retention-rate.yaml</span></li>
+      <li><span class="rel-label">has subtype</span> <a href="#">Active customer</a></li>
+      <li><span class="rel-label">has subtype</span> <a href="#">Churned account</a> <span class="faint">(proposed)</span></li>
+      <li><span class="rel-label">has attribute</span> <a href="#">Customer region</a></li>
+      <li><span class="rel-label">measured by</span> <a href="#">Retention rate</a></li>
     </ul>
-
-    <p class="key-note">Monospace headings are fields in this concept's YAML file, named as they are there. Other headings are computed and say where from.</p>
   </aside>
 </div>
 <p class="caption">Customer is selected: its depth-1 neighbourhood is at full contrast and everything else fades. Each concept is a box enclosing its name, with its kind glyph (colour and shape) inside. Every edge touching Customer is labelled with its relation name (and cardinality, where recorded); the hovered Customer → Order label is at full contrast. Faded edges show their label on hover. Badges: a warning on Active customer (illustrative drift) and an info finding on Subscription (<code>related_to</code>).</p>
@@ -240,23 +232,23 @@
   <section class="variant" aria-label="Detail pane for a proposed concept">
     <div class="variant-title">Detail pane: proposed concept, with an agent suggestion</div>
     <div class="pane">
-      <div class="meta"><svg width="12" height="12" viewBox="-6 -6 12 12" class="k1"><circle class="shape proposed" r="4.2"/></svg><span><span class="k">kind:</span> entity · <span class="k">status:</span> proposed</span></div>
+      <div class="meta"><svg width="12" height="12" viewBox="-6 -6 12 12" class="k1"><circle class="shape proposed" r="4.2"/></svg>entity · proposed</div>
       <h2>Churned account</h2>
-      <div class="source">docs/ontology/concepts/churned-account.yaml</div>
-      <h3 class="key">definition</h3>
-      <div class="needs" style="margin-top: 0"><strong>Needs a definition.</strong> Nobody has defined this concept yet. Write it in your own words in <code>definition</code>, then set <code>status: defined</code>.</div>
-      <h3 class="key">relations</h3>
-      <ul><li>Churned account <span class="rel-label">is a</span> <a href="#">Customer</a> <span class="from">is_a</span></li></ul>
-      <h3 class="key">implemented_in</h3>
+      <div class="id">churned-account</div>
+      <h3>Definition</h3>
+      <div class="needs" style="margin-top: 0"><strong>Needs a definition.</strong> Nobody has defined this concept yet. Write it in your own words in <code>concepts/churned-account.yaml</code>, then set <code>status: defined</code>.</div>
+      <h3>Relations</h3>
+      <ul><li>Churned account <span class="rel-label">is a</span> <a href="#">Customer</a></li></ul>
+      <h3>Implemented in</h3>
       <div class="impl">
         <div><code>models/marts/fct_churn.sql</code> <span class="faint">·</span> <code>is_churned</code></div>
-        <div class="when"><span class="k">reviewed_at:</span> not set · never reviewed</div>
+        <div class="when">Never reviewed</div>
       </div>
-      <h3 class="key">proposal</h3>
+      <h3>Proposal</h3>
       <div class="suggestion">
-        <div class="who"><span class="k">suggested_definition</span> · written by the agent, not a definition</div>
+        <div class="who">Suggested definition · written by the agent, not a definition</div>
         <p>A customer whose most recent subscription ended more than 60 days ago.</p>
-        <div class="who" style="margin-top: var(--space-2)"><span class="k">rationale</span></div>
+        <div class="who" style="margin-top: var(--space-2)">Rationale</div>
         <p class="muted" style="font-style: normal">Introduced as is_churned in models/marts/fct_churn.sql this sprint.</p>
       </div>
     </div>
@@ -265,16 +257,16 @@
   <section class="variant" aria-label="Detail pane with findings">
     <div class="variant-title">Detail pane: a concept with findings</div>
     <div class="pane">
-      <div class="meta"><svg width="12" height="12" viewBox="-6 -6 12 12" class="k1"><circle class="shape" r="4.5"/></svg><span><span class="k">kind:</span> entity · <span class="k">status:</span> defined</span></div>
+      <div class="meta"><svg width="12" height="12" viewBox="-6 -6 12 12" class="k1"><circle class="shape" r="4.5"/></svg>entity · defined</div>
       <h2>Active customer</h2>
-      <div class="source">docs/ontology/concepts/active-customer.yaml</div>
-      <h3>Findings <span class="src">· from validate</span></h3>
+      <div class="id">active-customer</div>
+      <h3>Findings</h3>
       <ul>
         <li class="finding"><span class="dot warn"></span><span><span class="code">W106 · drift</span><br>models/marts/dim_customer.sql: code near 'is_active' changed since this concept file was last committed (3f9c2e1). Check that the definition still matches.</span></li>
       </ul>
-      <h3 class="key">definition</h3>
+      <h3>Definition</h3>
       <p class="definition">A customer who has made at least one paid order in the trailing 90 days, regardless of whether they hold a subscription.</p>
-      <h3 class="key">open_questions</h3>
+      <h3>Open questions</h3>
       <ul><li>Should an order that was later fully refunded still count?</li></ul>
     </div>
   </section>

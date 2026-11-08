@@ -292,7 +292,7 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
   - examples and non-examples, rules and open questions;
   - incoming and outgoing relations as links using inverse labels, with cardinality sentences in both directions;
   - `implemented_in` entries with their review commit and date, or "never reviewed";
-  - section headings that are the exact YAML keys for stored fields, and source-naming headings for computed sections (incoming relations, findings);
+  - section headings named after the concept schema's fields (Incoming relations and Findings for the sections that aren't fields);
   - a clearly marked "needs a definition" for `proposed` concepts, and agent suggestions visually separate and labelled.
 - [ ] `graph-model.js` neighbourhood queries are tested via `page.evaluate`.
 
