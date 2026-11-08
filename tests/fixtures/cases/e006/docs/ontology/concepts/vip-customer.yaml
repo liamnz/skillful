@@ -1,0 +1,8 @@
+id: vip-customer
+name: VIP customer
+kind: entity
+status: defined
+definition: >
+  A customer the account team manages personally because of their annual spend.
+relations:
+  - {type: is_a, target: loyal-customer}

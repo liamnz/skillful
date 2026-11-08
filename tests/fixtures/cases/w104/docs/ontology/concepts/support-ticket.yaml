@@ -1,0 +1,8 @@
+id: support-ticket
+name: Support ticket
+kind: entity
+status: defined
+definition: >
+  A request for help raised with the support team about an order or a charge.
+relations:
+  - {type: placed_by, target: legacy-account}

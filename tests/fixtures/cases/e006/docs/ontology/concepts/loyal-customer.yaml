@@ -1,0 +1,8 @@
+id: loyal-customer
+name: Loyal customer
+kind: entity
+status: defined
+definition: >
+  A customer who has placed a paid order in each of the last four quarters.
+relations:
+  - {type: is_a, target: vip-customer}

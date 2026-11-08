@@ -105,6 +105,18 @@ class Ontology:
     def settings(self) -> Settings:
         return self.manifest.settings if self.manifest else Settings()
 
+    @property
+    def kinds(self) -> dict[str, dict[str, Any]]:
+        """Every usable kind: core, then extensions. A core id always keeps its core meaning (E010)."""
+        extensions = self.manifest.kind_extensions if self.manifest else {}
+        return {**extensions, **self.core.kinds}
+
+    @property
+    def relation_types(self) -> dict[str, dict[str, Any]]:
+        """Every usable relation type: core, then extensions. Core ids keep their core meaning (E010)."""
+        extensions = self.manifest.relation_extensions if self.manifest else {}
+        return {**extensions, **self.core.relation_types}
+
 
 @cache
 def core_vocabulary() -> CoreVocabulary:

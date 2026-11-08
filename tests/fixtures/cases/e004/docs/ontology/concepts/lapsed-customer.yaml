@@ -1,0 +1,9 @@
+id: lapsed-customer
+name: Lapsed customer
+kind: entity
+status: defined
+definition: >
+  A customer whose most recent paid order was placed more than a year ago.
+relations:
+  - {type: is_a, target: customer}
+  - {type: part_of, target: loyalty-programme}

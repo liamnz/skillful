@@ -1,0 +1,8 @@
+id: gift-order
+name: Gift order
+kind: event
+status: defined
+definition: >
+  The purchase of products to be delivered to someone other than the buyer.
+relations:
+  - {type: is_a, target: order}

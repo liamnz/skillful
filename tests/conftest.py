@@ -57,6 +57,18 @@ def project(tmp_path: Path) -> Callable[[str | None], Path]:
     return lambda case=None: make_project(tmp_path, case)
 
 
+def collect_findings(project: Path) -> list:
+    """Every finding for a project, in process and without git: fast, for check tests."""
+    from ontokit.context import Context
+    from ontokit.validate import collect
+
+    return collect(project / "docs" / "ontology", Context(git=None))
+
+
+def codes_in(findings: list) -> set[str]:
+    return {f.code for f in findings}
+
+
 def findings_json(result: subprocess.CompletedProcess[str]) -> list[dict]:
     return json.loads(result.stdout)
 

@@ -198,9 +198,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** The graph-integrity checks over relations, including the cardinality rules.
 
 **Acceptance criteria:**
-- [ ] E004, E006 (cycles in any `acyclic` type, core or extension, with the cycle path in the message), E013, E014, W104, W111 and I204 each have a triggering fixture and produce exactly their code.
-- [ ] E013 covers cardinality on `is_a`/`attribute_of` and `1:N`/`N:1` on `related_to`. E014 covers the same relationship stated twice with conflicting cardinality.
-- [ ] The baseline stays clean.
+- [x] E004, E006 (cycles in any `acyclic` type, core or extension, with the cycle path in the message), E013, E014, W104, W111 and I204 each have a triggering fixture and produce exactly their code.
+- [x] E013 covers cardinality on `is_a`/`attribute_of` and `1:N`/`N:1` on `related_to`. E014 covers the same relationship stated twice with conflicting cardinality.
+- [x] The baseline stays clean.
 
 **Verification:** PYTEST (`tests/test_checks_relations.py`), LINT
 
