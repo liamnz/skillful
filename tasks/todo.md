@@ -487,8 +487,8 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Scope:** M
 
 ### Checkpoint 5: Packaged
-- [ ] PYTEST, UI and LINT all green from a clean clone.
-- [ ] Success criterion 9 passes.
+- [x] PYTEST, UI and LINT all green from a clean clone.
+- [x] Success criterion 9 passes.
 
 ---
 
