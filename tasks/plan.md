@@ -92,9 +92,9 @@ T1 skeleton ──► T2 schemas+loader+validate ──┬─► T3 init ──�
 - [x] T11: Term and definition checks (E007, E008, W101, W102, W103, W109, I201, I202)
 - [x] T12: Vocabulary extensions: checks (E005, E010–E012, W110, W112, W113, I203) and the `vocab new`/`vocab list` commands
 - [x] T13: Filesystem, staleness and `impact` (E009, W105, W107)
-- [ ] T14: CLI conventions hardening (`--strict`, `--limit`, golden JSON, exit codes, `schema_version`)
+- [x] T14: CLI conventions hardening (`--strict`, `--limit`, golden JSON, exit codes, `schema_version`)
 
-**Checkpoint 3:** every finding code has a fixture, and the baseline is clean. Success criteria 1–5a pass.
+**Checkpoint 3 (criteria met 2026-11-09; merge awaits review at Checkpoint 4):** every finding code has a fixture, and the baseline is clean. Success criteria 1–5a pass.
 
 ### Phase 4: HTML features (JS track)
 - [ ] T15: Selection, neighbourhood focus, hover preview, detail pane

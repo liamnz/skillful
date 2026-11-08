@@ -1,0 +1,121 @@
+[
+  {
+    "type": "kind",
+    "id": "entity",
+    "core": true,
+    "status": "defined",
+    "definition": "A thing the domain keeps track of over time, with an identity of its own (e.g. Customer, Order).",
+    "usage": 4
+  },
+  {
+    "type": "kind",
+    "id": "event",
+    "core": true,
+    "status": "defined",
+    "definition": "Something that happens at a point in time and is recorded (e.g. Order placed, Subscription cancelled).",
+    "usage": 1
+  },
+  {
+    "type": "kind",
+    "id": "attribute",
+    "core": true,
+    "status": "defined",
+    "definition": "A property describing a single entity or event, with no identity of its own (e.g. Customer region, Order amount).",
+    "usage": 1
+  },
+  {
+    "type": "kind",
+    "id": "metric",
+    "core": true,
+    "status": "defined",
+    "definition": "A quantity computed by aggregating over many instances of entities or events, to assess something (e.g. Retention rate, Average order value). A numeric property of a single instance is an attribute, not a metric.",
+    "usage": 1
+  },
+  {
+    "type": "relation",
+    "id": "is_a",
+    "core": true,
+    "status": "defined",
+    "definition": "Source is a subtype of target: every instance of the source is an instance of the target. Acyclic and transitive.",
+    "usage": 1,
+    "inverse": "has_subtype",
+    "acyclic": true,
+    "from": [],
+    "to": []
+  },
+  {
+    "type": "relation",
+    "id": "part_of",
+    "core": true,
+    "status": "defined",
+    "definition": "Source is a component of target and makes no sense without it.",
+    "usage": 1,
+    "inverse": "has_part",
+    "acyclic": true,
+    "from": [],
+    "to": []
+  },
+  {
+    "type": "relation",
+    "id": "attribute_of",
+    "core": true,
+    "status": "defined",
+    "definition": "Source attribute describes instances of the target.",
+    "usage": 1,
+    "inverse": "has_attribute",
+    "acyclic": false,
+    "from": [
+      "attribute"
+    ],
+    "to": [
+      "entity",
+      "event"
+    ]
+  },
+  {
+    "type": "relation",
+    "id": "related_to",
+    "core": true,
+    "status": "defined",
+    "definition": "Symmetric catch-all for a connection nobody has named precisely yet. Allowed, but each use is an invitation to name the relationship.",
+    "usage": 0,
+    "inverse": "related_to",
+    "acyclic": false,
+    "from": [],
+    "to": []
+  },
+  {
+    "type": "relation",
+    "id": "measures",
+    "core": false,
+    "status": "defined",
+    "definition": "The source metric is computed from instances of the target and summarises some aspect of them.",
+    "usage": 1,
+    "inverse": "measured_by",
+    "acyclic": false,
+    "from": [
+      "metric"
+    ],
+    "to": [
+      "entity",
+      "event"
+    ]
+  },
+  {
+    "type": "relation",
+    "id": "placed_by",
+    "core": false,
+    "status": "defined",
+    "definition": "The source order or ordering event was initiated by the target customer, who is responsible for paying for it.",
+    "usage": 2,
+    "inverse": "places",
+    "acyclic": false,
+    "from": [
+      "entity",
+      "event"
+    ],
+    "to": [
+      "entity"
+    ]
+  }
+]

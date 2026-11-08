@@ -18,7 +18,7 @@ from typing import Any
 from .drift import git_path
 from .findings import EXIT_ENVIRONMENT, EXIT_OK
 from .gitinfo import Git
-from .io import Ontology, OntologyNotFound, load
+from .io import Ontology, OntologyUnavailable, load
 
 
 def impact(ontology: Ontology, changed: list[str]) -> dict[str, Any]:
@@ -64,7 +64,7 @@ def run(args: argparse.Namespace) -> int:
         return EXIT_ENVIRONMENT
     try:
         ontology, _ = load(Path(args.root))
-    except OntologyNotFound as exc:
+    except OntologyUnavailable as exc:
         sys.stderr.write(f"Error: {exc}\n")
         return EXIT_ENVIRONMENT
 

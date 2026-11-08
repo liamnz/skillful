@@ -1,0 +1,9 @@
+id: promo-code
+name: Promo code
+kind: attribute
+status: defined
+definition: A discount code.
+relations:
+  - {type: attribute_of, target: order}
+  - {type: related_to, target: customer}
+  - {type: part_of, target: coupon-batch}

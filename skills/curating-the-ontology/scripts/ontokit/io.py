@@ -21,8 +21,12 @@ MANIFEST_FILE = "ontology.yaml"
 CONCEPTS_DIR = "concepts"
 
 
-class OntologyNotFound(Exception):
-    """The ontology root or its manifest does not exist."""
+# The record schema version this skill reads and writes (ontology.yaml `schema_version`).
+RECORD_SCHEMA_VERSION = 1
+
+
+class OntologyUnavailable(Exception):
+    """The ontology can't be used: no manifest, or a schema_version this skill doesn't support."""
 
 
 @dataclass(frozen=True)
@@ -197,15 +201,26 @@ def _concept_from(data: dict[str, Any], path: Path) -> Concept:
 
 
 def load(root: Path) -> tuple[Ontology, list[Finding]]:
-    """Load the ontology at `root`. Raises OntologyNotFound if there is no manifest."""
+    """Load the ontology at `root`. Raises OntologyUnavailable if there is no manifest."""
     manifest_path = root / MANIFEST_FILE
     if not manifest_path.is_file():
-        raise OntologyNotFound(
+        raise OntologyUnavailable(
             f"No ontology found at {display_path(root)} (missing {MANIFEST_FILE}). "
             "Run 'onto.py init' to create one, or pass --root."
         )
 
     manifest, findings = _load_manifest(manifest_path)
+    if manifest is not None and manifest.schema_version != RECORD_SCHEMA_VERSION:
+        newer = manifest.schema_version > RECORD_SCHEMA_VERSION
+        advice = (
+            "Update the skill to a version that supports it."
+            if newer
+            else f"Migrate the records to schema_version {RECORD_SCHEMA_VERSION}, or use an older version of the skill."
+        )
+        raise OntologyUnavailable(
+            f"{display_path(manifest_path)} uses schema_version {manifest.schema_version}, but this skill reads "
+            f"schema_version {RECORD_SCHEMA_VERSION}. {advice}"
+        )
 
     files = sorted((root / CONCEPTS_DIR).glob("*.yaml"))
     stems = {f.stem for f in files}

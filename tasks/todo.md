@@ -262,9 +262,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Make the script conventions hold across all commands, and lock the output formats.
 
 **Acceptance criteria:**
-- [ ] `validate --strict` exits `1` on warnings. `--limit` caps findings and impact lists, reporting the truncation on stderr. A `schema_version` mismatch gives an actionable message.
-- [ ] Golden `--json` files exist for `validate` (baseline + multi-finding fixture), `vocab list` and `impact`. Each exit code 0–4 has at least one test.
-- [ ] A sweep test confirms every command supports `--help`, runs with stdin closed without hanging (with a timeout), and that every write command writes nothing under `--dry-run`.
+- [x] `validate --strict` exits `1` on warnings. `--limit` caps findings and impact lists, reporting the truncation on stderr. A `schema_version` mismatch gives an actionable message.
+- [x] Golden `--json` files exist for `validate` (baseline + multi-finding fixture), `vocab list` and `impact`. Each exit code 0–4 has at least one test.
+- [x] A sweep test confirms every command supports `--help`, runs with stdin closed without hanging (with a timeout), and that every write command writes nothing under `--dry-run`.
 
 **Verification:** PYTEST (`tests/test_conventions.py`), LINT
 
@@ -275,8 +275,8 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Scope:** S–M
 
 ### Checkpoint 3: Validator complete
-- [ ] Every finding code in the spec table has a fixture that triggers it. The baseline triggers none (a parametrised test that reads the code list from the checks registry).
-- [ ] Success criteria 1–5a pass. PYTEST and LINT green.
+- [x] Every finding code in the spec table has a fixture that triggers it. The baseline triggers none (a parametrised test that reads the code list from the checks registry).
+- [x] Success criteria 1–5a pass. PYTEST and LINT green.
 
 ---
 

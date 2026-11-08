@@ -23,7 +23,7 @@ import yaml
 
 from .context import Context
 from .findings import EXIT_ENVIRONMENT, EXIT_OK, EXIT_REFUSED, EXIT_USAGE, Finding, finding
-from .io import MANIFEST_FILE, Ontology, OntologyNotFound, display_path, load
+from .io import MANIFEST_FILE, Ontology, OntologyUnavailable, display_path, load
 from .schema import schema_errors
 
 ID_PATTERN = re.compile(r"^[a-z][a-z0-9_]*$")
@@ -272,7 +272,7 @@ def _row(vocab_type: str, vocab_id: str, entry: dict[str, Any], core: bool, used
 def run_list(args: argparse.Namespace) -> int:
     try:
         ontology, _ = load(Path(args.root))
-    except OntologyNotFound as exc:
+    except OntologyUnavailable as exc:
         sys.stderr.write(f"Error: {exc}\n")
         return EXIT_ENVIRONMENT
     rows = vocabulary_rows(ontology)
@@ -446,7 +446,7 @@ def run_new(args: argparse.Namespace) -> int:
     root = Path(args.root)
     try:
         ontology, findings = load(root)
-    except OntologyNotFound as exc:
+    except OntologyUnavailable as exc:
         sys.stderr.write(f"Error: {exc}\n")
         return EXIT_ENVIRONMENT
     if ontology.manifest is None:
