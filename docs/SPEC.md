@@ -310,19 +310,21 @@ Deciding whether an unmapped file really introduces a domain concept is the agen
 ### Graph view
 
 - **Visual encoding.**
-  - *Kind* is shown by colour **and** shape, so colour is never the only cue.
-  - *Status* is shown as solid (`defined`), dashed or hollow (`proposed`, i.e. "needs a definition") or faded (`deprecated`).
+  - Each concept is drawn as a **box enclosing its name**, so the name is always attached to its concept and edges meet the box edge. The box holds a small kind glyph, then the name.
+  - *Kind* is shown by the glyph's colour **and** shape, so colour is never the only cue.
+  - *Status* is shown by the box outline: solid (`defined`), dashed with a hollow glyph (`proposed`, i.e. "needs a definition"), or faded (`deprecated`).
   - Concepts with validator findings get a badge whose colour reflects severity.
   - Edges are directed (`related_to` is drawn undirected and dashed). **Relation type is shown by a text label on the edge** (the relation name, e.g. `is a`, `part of`), not by line pattern, because patterns become indistinguishable beyond three or four types. Every edge touching the selected concept is labelled; any other edge shows its label on hover; zooming in far enough labels all visible edges (see semantic zoom). The label includes the cardinality when one is recorded (e.g. `has · 1:N`). There are no crow's-foot or other cardinality marks, to keep the structure quiet. A legend of kinds, line styles and relation types is always visible, and hovering a legend entry shows its definition.
   - Core kinds have fixed encodings in every project, so the same kind looks the same everywhere. Kind extensions get colour/shape pairs from a fixed palette, assigned deterministically by sorted id so they don't change between builds. Beyond 8 kinds, the extra kinds share a neutral fallback encoding and W113 explains why.
 - **Focus and neighbourhood (main way to cut clutter).** Selecting a concept centres it, opens its detail pane, and highlights its neighbourhood (concepts up to N hops away; default 1, adjustable 1–3) while fading the rest. People explore one neighbourhood at a time instead of the whole hairball.
 - **Exploration.** Pan, zoom and fit-to-view. Drag a concept to pin it in place, and reset the layout. Clicking a related concept moves the focus there, and breadcrumbs let you step back.
 - **Hover preview.** Hovering shows the concept's name, kind and the first sentence of its definition, without changing the selection.
-- **Semantic zoom.** When zoomed out, only labels of high-degree or selected concepts are shown; zooming in reveals all concept labels, and further in, all edge labels. The graph stays readable at about 300 concepts.
+- **Semantic zoom.** When zoomed out, boxes collapse to their kind glyph, except for the selected concept and high-degree concepts, which keep their boxes. Zooming in restores all boxes, and further in, all edge labels. The graph stays readable at about 300 concepts.
 - **Deterministic layout; stability as a best effort.**
   - **Guaranteed:** the same ontology always produces the same layout. Positions are seeded from concept ids and the layout runs a fixed number of iterations.
   - **Best effort:** across edits, id-seeding tends to keep familiar concepts roughly where they were, so a small addition usually only nudges its neighbours. This helps people's spatial memory of the domain survive rebuilds.
   - **Not guaranteed:** larger changes are allowed to reshape the picture. When the model genuinely evolves, the layout *should* reflect it. `build` does not carry positions over from previous builds.
+- **Boxes never overlap.** The layout's collision force uses each box's measured width and height (not a circle radius), and boxes sit inside the canvas.
 - **Hierarchy option.** A toggle lays out `acyclic` relation types (core `is_a` and `part_of`, plus any extension marked `acyclic`) as a top-down hierarchy instead of a force layout.
 - **Overlays** (toggleable):
   - *Health:* highlights concepts with findings, grouped by Gruber criterion.
@@ -385,8 +387,8 @@ Deciding whether an unmapped file really introduces a domain concept is the agen
 
    | Dimension | Encoding | Not encoded by |
    |---|---|---|
-   | Kind | colour **and** shape | — |
-   | Status | outline style: solid (`defined`), dashed (`proposed`), reduced opacity (`deprecated`) | colour |
+   | Kind | glyph colour **and** shape, inside the concept's box | box colour |
+   | Status | box outline style: solid (`defined`), dashed (`proposed`), reduced opacity (`deprecated`) | colour |
    | Severity | small badge using the semantic colour family | kind colours |
    | Relation type | text label on the edge (with cardinality, if recorded): on the selected concept's edges, on hover, and when zoomed in. Line style adds only a hollow arrowhead for `is_a` and a dashed, undirected line for `related_to` | colour, stroke pattern |
    | Focus | full contrast plus the accent outline; everything else fades | — |
@@ -417,10 +419,11 @@ All styling flows from CSS custom properties defined once in `assets/html/tokens
 
 ### Graph style
 
-- Nodes are small (a radius comparable to the label's cap height), so structure shows before detail.
-- Labels sit beside nodes in `--text-muted`. They become `--text` when focused or in the neighbourhood. Each label has a `--bg`-coloured halo (stroke under the text) so it stays readable over edges.
+- Each concept is a compact box (`--node-height`, `--radius-sm` corners, `--space-2` padding) filled with `--bg`, holding a `--node-glyph-size` kind glyph and the name in `--text-xs`. Box width follows the name.
+- At rest the outline is `--border` and the name `--text-muted`. In the focused neighbourhood they become `--text-muted` and `--text`. The selected box gets a `--node-selected-width` `--accent` outline and a semibold name.
+- Finding badges sit on the box's top-right corner.
 - Edges are 1 px in `--border` at rest. Focused neighbourhood edges use `--text-muted` with visible arrowheads.
-- Edge labels are `--text-xs` in `--text-muted` (`--text` when hovered), centred on the edge with a wide `--bg` halo (`--edge-label-halo`) that breaks the line beneath them. They are placed to avoid concept labels; when two would overlap, the concept label wins and the edge label moves along its edge.
+- Edge labels are `--text-xs` in `--text-muted` (`--text` when hovered), centred on the edge with a wide `--bg` halo (`--edge-label-halo`) that breaks the line beneath them. They are placed to avoid concept boxes; when one would overlap a box, it moves along its edge.
 - Hover, selected and in-neighbourhood states are each visually distinct.
 - The canvas has no background grid or other chart junk. Pan and zoom controls are small, neutral and out of the way.
 - **Legibility check at scale:** with the 300-concept fixture zoomed to fit, the graph must read as a structure (clusters and hubs visible), not a hairball. Semantic zoom and focus are the means of getting there.

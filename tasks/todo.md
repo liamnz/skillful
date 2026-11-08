@@ -170,10 +170,10 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Scope:** M
 
 ### T9: Deterministic graph render
-**Description:** The spine of the view: a seeded, fixed-tick force layout rendered once as SVG, with the kind (colour + shape), status (outline) and relation type (edge labels; hollow arrowhead for `is_a`, dashed undirected `related_to`) encodings, plus labels with halos. Styled only via tokens, per the approved mockup. Sets up the Playwright harness. **Asks you before downloading Chromium.**
+**Description:** The spine of the view: a seeded, fixed-tick force layout rendered once as SVG, with each concept as a box enclosing its name, the kind (glyph colour + shape), status (box outline) and relation type (edge labels; hollow arrowhead for `is_a`, dashed undirected `related_to`) encodings, plus edge labels with halos. Styled only via tokens, per the approved mockup. Sets up the Playwright harness. **Asks you before downloading Chromium.**
 
 **Acceptance criteria:**
-- [ ] One node per concept and one edge per relation (`related_to` without an arrowhead). Core kinds use their fixed slots and shapes.
+- [ ] One box per concept and one edge per relation (`related_to` without an arrowhead), with no two boxes overlapping. Core kinds use their fixed slots and glyph shapes.
 - [ ] Two loads of the same build give identical node positions. There is no animated settling.
 - [ ] Loads from `file://` with the network blocked and zero console errors. The sample project visually matches the approved mockup's structure and style.
 

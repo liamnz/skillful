@@ -74,14 +74,17 @@
   /* SVG graph styling */
   .edge { fill: none; stroke: var(--border); stroke-width: var(--edge-width); }
   .edge.focus { stroke: var(--text-muted); stroke-width: var(--edge-width-focus); }
-  .edge.faded, .node.faded, .label.faded, .badge.faded { opacity: var(--faded-opacity); }
+  .edge.faded, .node.faded { opacity: var(--faded-opacity); }
   .edge-label { font-size: var(--text-xs); fill: var(--text-muted); paint-order: stroke; stroke: var(--bg); stroke-width: var(--edge-label-halo); stroke-linejoin: round; }
   .edge-label.hover { fill: var(--text); }
-  .label { font-size: var(--text-xs); fill: var(--text-muted); paint-order: stroke; stroke: var(--bg); stroke-width: var(--label-halo); stroke-linejoin: round; }
+  .label { font-size: var(--text-xs); fill: var(--text-muted); }
   .label.near { fill: var(--text); }
-  .label.selected { fill: var(--text); font-weight: var(--weight-semibold); font-size: var(--text-sm); }
-  .node.deprecated { opacity: var(--deprecated-opacity); }
-  .ring { fill: none; stroke: var(--accent); stroke-width: 2; }
+  .label.selected { fill: var(--text); font-weight: var(--weight-semibold); }
+  .node.deprecated, .box.deprecated { opacity: var(--deprecated-opacity); }
+  .box { fill: var(--bg); stroke: var(--border); stroke-width: var(--border-width); }
+  .box.near { stroke: var(--text-muted); }
+  .box.selected { stroke: var(--accent); stroke-width: var(--node-selected-width); }
+  .box.proposed { stroke-dasharray: 3 2; }
   .arrow { fill: var(--text-muted); }
   .arrow-hollow { fill: var(--bg); stroke: var(--text-muted); stroke-width: 1; }
   .k1 { --k: var(--kind-1); } .k2 { --k: var(--kind-2); } .k3 { --k: var(--kind-3); } .k4 { --k: var(--kind-4); }
@@ -169,9 +172,9 @@
       </div>
       <div>
         <h4>Status</h4>
-        <div class="row"><svg width="12" height="12" viewBox="-6 -6 12 12" class="k1"><circle class="shape" r="4.5"/></svg>defined</div>
-        <div class="row"><svg width="12" height="12" viewBox="-6 -6 12 12" class="k1"><circle class="shape proposed" r="4.2"/></svg>proposed</div>
-        <div class="row"><svg width="12" height="12" viewBox="-6 -6 12 12" class="k1"><circle class="shape node deprecated" r="4.5"/></svg>deprecated</div>
+        <div class="row"><svg width="20" height="12"><rect class="box near" x="0.5" y="0.5" width="19" height="11" rx="2"/></svg>defined</div>
+        <div class="row"><svg width="20" height="12"><rect class="box near proposed" x="0.5" y="0.5" width="19" height="11" rx="2"/></svg>proposed</div>
+        <div class="row"><svg width="20" height="12"><rect class="box near deprecated" x="0.5" y="0.5" width="19" height="11" rx="2"/></svg>deprecated</div>
         <h4 style="margin-top: var(--space-2)">Findings</h4>
         <div class="row"><svg width="10" height="10" viewBox="-5 -5 10 10"><circle class="badge error" r="3.5"/></svg>error
           <svg width="10" height="10" viewBox="-5 -5 10 10"><circle class="badge warn" r="3.5"/></svg>warning
@@ -220,7 +223,7 @@
     </div>
   </aside>
 </div>
-<p class="caption">Customer is selected: its depth-1 neighbourhood is at full contrast and everything else fades. Every edge touching Customer is labelled with its relation name (and cardinality, where recorded); the hovered Customer → Order label is at full contrast. Faded edges show their label on hover. Badges: a warning on Active customer (illustrative drift) and an info finding on Subscription (<code>related_to</code>).</p>
+<p class="caption">Customer is selected: its depth-1 neighbourhood is at full contrast and everything else fades. Each concept is a box enclosing its name, with its kind glyph (colour and shape) inside. Every edge touching Customer is labelled with its relation name (and cardinality, where recorded); the hovered Customer → Order label is at full contrast. Faded edges show their label on hover. Badges: a warning on Active customer (illustrative drift) and an info finding on Subscription (<code>related_to</code>).</p>
 
 <div class="variants">
   <section class="variant" aria-label="Detail pane for a proposed concept">
@@ -276,44 +279,53 @@
       <div style="padding: var(--space-2) var(--space-3); background: var(--surface-raised)"><span style="color: var(--text-muted)">'client' →</span> use <strong>Customer</strong></div>
       <div style="padding: var(--space-2) var(--space-3); color: var(--text-muted)">Client account <span style="color: var(--text-faint)">· deprecated</span></div>
     </div>
+    <div style="margin-top: var(--space-5); font-size: var(--text-xs); color: var(--text-faint)">Zoomed out: boxes collapse to their kind glyph; the selected concept keeps its box</div>
+    <svg id="overview" class="mini" width="300" height="215" style="margin-top: var(--space-1)" role="img" aria-label="Zoomed-out graph"></svg>
   </section>
 </div>
 
 <script>
   // Mockup only: draws the hand-placed sample graph and toggles the theme.
+  // Sizes come from tokens.css so the mockup carries no raw style values of its own.
+  const tok = (name) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name));
+  const H = tok("--node-height"), PAD = tok("--space-2"), GLYPH = tok("--node-glyph-size"), GAP = tok("--space-2");
+  const RADIUS = tok("--radius-sm");
+
+  // Kind glyphs, drawn about g px across.
   const SHAPES = {
-    entity: { k: "k1", el: (s) => `<circle r="${4.5 * s}"/>` },
-    event: { k: "k2", el: (s) => `<polygon points="0,${-5.5 * s} ${5.5 * s},0 0,${5.5 * s} ${-5.5 * s},0"/>` },
-    attribute: { k: "k3", el: (s) => `<rect x="${-4 * s}" y="${-4 * s}" width="${8 * s}" height="${8 * s}"/>` },
-    metric: { k: "k4", el: (s) => `<polygon points="0,${-5 * s} ${5 * s},${4.2 * s} ${-5 * s},${4.2 * s}"/>` },
+    entity: { k: "k1", el: (g) => `<circle r="${g / 2}"/>` },
+    event: { k: "k2", el: (g) => `<polygon points="0,${-g / 2 - 1} ${g / 2 + 1},0 0,${g / 2 + 1} ${-g / 2 - 1},0"/>` },
+    attribute: { k: "k3", el: (g) => `<rect x="${-g / 2 + 0.5}" y="${-g / 2 + 0.5}" width="${g - 1}" height="${g - 1}"/>` },
+    metric: { k: "k4", el: (g) => `<polygon points="0,${-g / 2 - 0.5} ${g / 2 + 0.5},${g / 2 - 0.5} ${-g / 2 - 0.5},${g / 2 - 0.5}"/>` },
   };
   // Relation type is read from the edge label. Line style carries only what a label can't show at a
   // glance: is_a gets a hollow arrowhead, related_to is dashed and undirected, all others are solid.
   const DASH = { related_to: "6 4" };
   const RELATIONS = ["is_a", "part_of", "attribute_of", "related_to", "derived_from", "has", "measures"];
+  // Box centres, hand-placed for the mockup.
   const N = {
-    "customer": [400, 320, "Customer", "entity"],
-    "active-customer": [285, 215, "Active customer", "entity"],
-    "churned-account": [225, 385, "Churned account", "entity", "proposed"],
-    "client-account": [120, 480, "Client account", "entity", "deprecated"],
-    "customer-region": [300, 430, "Customer region", "attribute"],
+    "customer": [330, 335, "Customer", "entity"],
+    "active-customer": [165, 245, "Active customer", "entity"],
+    "churned-account": [150, 420, "Churned account", "entity", "proposed"],
+    "client-account": [105, 480, "Client account", "entity", "deprecated"],
+    "customer-region": [290, 500, "Customer region", "attribute"],
     "retention-rate": [455, 455, "Retention rate", "metric"],
-    "order": [590, 300, "Order", "entity"],
-    "order-line": [700, 375, "Order line", "entity"],
-    "product": [790, 440, "Product", "entity"],
-    "order-amount": [705, 250, "Order amount", "attribute"],
-    "order-placed": [725, 310, "Order placed", "event"],
-    "refund-issued": [640, 205, "Refund issued", "event"],
-    "gross-revenue": [560, 420, "Gross revenue", "metric"],
-    "net-revenue": [610, 505, "Net revenue", "metric"],
-    "average-order-value": [690, 470, "Average order value", "metric"],
-    "subscription": [470, 170, "Subscription", "entity"],
-    "subscription-plan": [340, 95, "Subscription plan", "entity"],
-    "plan-price": [205, 60, "Plan price", "attribute"],
-    "subscription-status": [560, 95, "Subscription status", "attribute"],
-    "subscription-started": [600, 140, "Subscription started", "event"],
-    "subscription-cancelled": [480, 55, "Subscription cancelled", "event"],
-    "monthly-recurring-revenue": [390, 245, "Monthly recurring revenue", "metric"],
+    "order": [600, 335, "Order", "entity"],
+    "order-line": [745, 420, "Order line", "entity"],
+    "product": [790, 520, "Product", "entity"],
+    "order-amount": [775, 270, "Order amount", "attribute"],
+    "order-placed": [785, 345, "Order placed", "event"],
+    "refund-issued": [745, 195, "Refund issued", "event"],
+    "gross-revenue": [570, 585, "Gross revenue", "metric"],
+    "net-revenue": [740, 625, "Net revenue", "metric"],
+    "average-order-value": [610, 480, "Average order value", "metric"],
+    "subscription": [420, 175, "Subscription", "entity"],
+    "subscription-plan": [205, 120, "Subscription plan", "entity"],
+    "plan-price": [105, 45, "Plan price", "attribute"],
+    "subscription-status": [620, 60, "Subscription status", "attribute"],
+    "subscription-started": [620, 120, "Subscription started", "event"],
+    "subscription-cancelled": [400, 55, "Subscription cancelled", "event"],
+    "monthly-recurring-revenue": [560, 245, "Monthly recurring revenue", "metric"],
   };
   const E = [
     ["active-customer", "is_a", "customer"], ["churned-account", "is_a", "customer"],
@@ -330,8 +342,6 @@
   ];
   const SELECTED = "customer";
   const HOVER_EDGE = 2; // customer -> order
-  // Where each focused edge's label sits along it (0 = source, 1 = target), nudged clear of node labels.
-  const LABEL_AT = { 1: 0.45, 3: 0.66 };
   const BADGES = { "active-customer": "warn", "subscription": "info" };
   const near = new Set([SELECTED]);
   E.forEach(([s, , t]) => { if (s === SELECTED) near.add(t); if (t === SELECTED) near.add(s); });
@@ -344,58 +354,96 @@
         <path class="arrow-hollow" d="M1,1 L9,5 L1,9 z"/></marker></defs>`;
   }
 
-  function trim(x1, y1, x2, y2, by) {
-    const d = Math.hypot(x2 - x1, y2 - y1);
-    return [x2 - ((x2 - x1) / d) * by, y2 - ((y2 - y1) / d) * by];
+  // Where the line from a box's centre towards (tx, ty) leaves the box, plus a small gap.
+  function exit(b, tx, ty, gap) {
+    const dx = tx - b.x, dy = ty - b.y;
+    const t = Math.min((b.w / 2 + gap) / Math.abs(dx || 1e-9), (b.h / 2 + gap) / Math.abs(dy || 1e-9));
+    return [b.x + dx * t, b.y + dy * t];
+  }
+
+  function measure(svg, nodes) {
+    const probe = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    svg.appendChild(probe);
+    const boxes = {};
+    for (const [id, [x, y, label]] of Object.entries(nodes)) {
+      probe.setAttribute("class", id === SELECTED ? "label selected" : "label");
+      probe.textContent = label;
+      boxes[id] = { x, y, w: Math.ceil(probe.getComputedTextLength()) + PAD * 2 + GLYPH + GAP, h: H };
+    }
+    probe.remove();
+    return boxes;
+  }
+
+  function nodeMarkup(id, b, label, kind, status, state, opts) {
+    const shape = SHAPES[kind];
+    const proposed = status === "proposed" ? "proposed" : "";
+    let out = `<g class="node ${opts.fade && !state ? "faded" : ""} ${status === "deprecated" ? "deprecated" : ""}" transform="translate(${b.x - b.w / 2},${b.y - b.h / 2})">`;
+    out += `<rect class="box ${state} ${proposed}" x="0.5" y="0.5" width="${b.w - 1}" height="${b.h - 1}" rx="${RADIUS}"/>`;
+    out += `<g class="${shape.k}" transform="translate(${PAD + GLYPH / 2},${b.h / 2})">` +
+      shape.el(GLYPH).replace(/^<(\w+)/, `<$1 class="shape ${proposed}"`) + "</g>";
+    out += `<text class="label ${state}" x="${PAD + GLYPH + GAP}" y="${b.h / 2 + 4}">${label}</text>`;
+    if (BADGES[id] && opts.badges) out += `<circle class="badge ${BADGES[id]}" cx="${b.w - 1}" cy="1" r="3.5"/>`;
+    return out + "</g>";
   }
 
   function draw(svg, nodes, edges, opts) {
-    const scale = opts.scale || 1;
+    const boxes = measure(svg, nodes);
     let out = markers();
     let labels = "";
     edges.forEach(([s, type, t, card], i) => {
-      const [x1, y1] = nodes[s], [x2r, y2r] = nodes[t];
+      const a = boxes[s], b = boxes[t];
       const focus = s === SELECTED || t === SELECTED;
-      const [x2, y2] = trim(x1, y1, x2r, y2r, 9 * scale);
+      const [x1, y1] = exit(a, b.x, b.y, 1);
+      const [x2, y2] = exit(b, a.x, a.y, focus && type !== "related_to" ? 3 : 1);
       const head = !focus || type === "related_to" ? "" : type === "is_a" ? 'marker-end="url(#hollow)"' : 'marker-end="url(#arrow)"';
       out += `<line class="edge ${focus ? "focus" : opts.fade ? "faded" : ""}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
         stroke-dasharray="${DASH[type] || ""}" ${head}/>`;
       if (opts.edgeLabels && (focus || opts.hoverEdge === i)) {
-        const at = LABEL_AT[i] ?? 0.5;
-        const mx = x1 + (x2r - x1) * at, my = y1 + (y2r - y1) * at + 4;
+        const mx = (x1 + x2) / 2, my = (y1 + y2) / 2 + 4;
         labels += `<text class="edge-label ${opts.hoverEdge === i ? "hover" : ""}" x="${mx}" y="${my}" text-anchor="middle">${type.replace(/_/g, " ")}${card ? " · " + card : ""}</text>`;
       }
     });
-    Object.entries(nodes).forEach(([id, [x, y, label, kind, status]]) => {
-      const isNear = near.has(id);
-      const fade = opts.fade && !isNear ? "faded" : "";
-      const shape = SHAPES[kind];
-      const cls = status === "proposed" ? "shape proposed" : "shape";
-      out += `<g class="node ${shape.k} ${fade} ${status === "deprecated" ? "deprecated" : ""}" transform="translate(${x},${y})">`;
-      if (id === SELECTED) out += `<circle class="ring" r="${9.5 * scale}"/>`;
-      out += shape.el(scale).replace(/^<(\w+)/, `<$1 class="${cls}"`) + "</g>";
-      if (BADGES[id] && opts.badges) {
-        out += `<circle class="badge ${BADGES[id]} ${fade}" cx="${x + 6 * scale}" cy="${y - 6 * scale}" r="3.5"/>`;
-      }
-      if (opts.labels) {
-        const lc = id === SELECTED ? "selected" : isNear ? "near" : fade;
-        out += `<text class="label ${lc}" x="${x + 10 * scale}" y="${y + 4}">${label}</text>`;
-      }
+    Object.entries(nodes).forEach(([id, [, , label, kind, status]]) => {
+      const isNear = !opts.fade || near.has(id);
+      const state = id === SELECTED ? "selected" : isNear ? "near" : "";
+      out += nodeMarkup(id, boxes[id], label, kind, status, state, opts);
     });
     svg.innerHTML = out + labels;
   }
 
-  draw(document.getElementById("graph"), N, E, { fade: true, labels: true, edgeLabels: true, badges: true, hoverEdge: HOVER_EDGE });
+  draw(document.getElementById("graph"), N, E, { fade: true, edgeLabels: true, badges: true, hoverEdge: HOVER_EDGE });
 
-  // Mini-graph: the selected concept and its depth-1 neighbours on a small circle.
+  // Mini-graph: the selected concept in the middle, its depth-1 neighbours in two columns.
   const miniIds = [...near].filter((id) => id !== SELECTED);
-  const mini = { [SELECTED]: [120, 75, ...N[SELECTED].slice(2)] };
+  const half = Math.ceil(miniIds.length / 2);
+  const mini = { [SELECTED]: [179, 75, ...N[SELECTED].slice(2)] };
   miniIds.forEach((id, i) => {
-    const a = (i / miniIds.length) * 2 * Math.PI - Math.PI / 2;
-    mini[id] = [120 + Math.cos(a) * 95, 75 + Math.sin(a) * 52, ...N[id].slice(2)];
+    const col = i < half ? 0 : 1, row = col ? i - half : i;
+    mini[id] = [col ? 296 : 62, 27 + row * 48, ...N[id].slice(2)];
   });
   const miniEdges = E.filter(([s, , t]) => mini[s] && mini[t]);
-  draw(document.getElementById("mini"), mini, miniEdges, { fade: false, labels: true, badges: false, scale: 0.9 });
+  draw(document.getElementById("mini"), mini, miniEdges, { fade: false, edgeLabels: false, badges: false });
+
+  // Zoomed-out overview: every concept as its kind glyph at one third scale; the selection keeps its box.
+  (function overview() {
+    const svg = document.getElementById("overview"), k = 0.33, ox = 8, oy = 0;
+    const at = (id) => [ox + N[id][0] * k, oy + N[id][1] * k];
+    let out = "";
+    E.forEach(([s, , t]) => {
+      const [x1, y1] = at(s), [x2, y2] = at(t);
+      out += `<line class="edge" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+    });
+    Object.entries(N).forEach(([id, [, , , kind, status]]) => {
+      if (id === SELECTED) return;
+      const [x, y] = at(id);
+      out += `<g class="node ${SHAPES[kind].k} ${status === "deprecated" ? "deprecated" : ""}" transform="translate(${x},${y})">` +
+        SHAPES[kind].el(GLYPH - 1).replace(/^<(\w+)/, `<$1 class="shape ${status === "proposed" ? "proposed" : ""}"`) + "</g>";
+    });
+    const [sx, sy] = at(SELECTED);
+    const boxes = measure(svg, { [SELECTED]: [sx, sy, N[SELECTED][2]] });
+    out += nodeMarkup(SELECTED, boxes[SELECTED], N[SELECTED][2], N[SELECTED][3], undefined, "selected", { fade: false });
+    svg.innerHTML = out;
+  })();
 
   // Legend: the three line styles, then the relation types in use (hover shows each definition).
   const line = (dash, head) => `<svg width="28" height="10">${markers()}<line class="edge focus" x1="1" y1="5" x2="24" y2="5"

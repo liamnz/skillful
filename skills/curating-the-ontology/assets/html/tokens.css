@@ -74,11 +74,12 @@
   --toolbar-height: 48px;
   --pane-width: 400px;
 
-  /* Graph */
-  --node-size: 64; /* d3-shape symbol area in px^2 (about a 9 px circle) */
+  /* Graph: each concept is a box enclosing its kind glyph and name */
+  --node-height: 24px;
+  --node-glyph-size: 9px; /* kind glyph inside the box; also the whole node when zoomed out */
+  --node-selected-width: 2px; /* accent outline on the selected box */
   --edge-width: 1px;
   --edge-width-focus: 1.5px;
-  --label-halo: 3px;
   --edge-label-halo: 5px; /* wide enough to break the edge line under its label */
   --faded-opacity: 0.18;
   --deprecated-opacity: 0.45;
