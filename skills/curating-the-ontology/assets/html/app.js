@@ -135,7 +135,15 @@
 
   const hopsControl = segmented("Hops", HOPS, state.hops, (hops) => setState({ hops }));
   hopsControl.classList.add("hops");
-  toolbar.append(hopsControl);
+  const overlayControl = segmented(
+    "Overlay",
+    OVERLAYS,
+    state.overlay,
+    (overlay) => setState({ overlay }),
+    (o) => o[0].toUpperCase() + o.slice(1),
+  );
+  overlayControl.classList.add("overlay");
+  toolbar.append(hopsControl, overlayControl);
 
   // Filters: kind, status and relation type. Checked means shown.
   const filterButton = el("button", "button filters-button", "Filters");
@@ -232,6 +240,14 @@
   workspace.append(main, pane);
   addTab("graph", "Graph", canvas);
   addTab("list", "List", listPanel);
+  const healthPanel = el("section", "health-panel");
+  healthPanel.id = "panel-health";
+  healthPanel.hidden = true;
+  main.append(healthPanel);
+  const healthTab = addTab("health", "Health", healthPanel);
+  const healthCount = el("span", "count", String(data.findings.length));
+  healthCount.setAttribute("aria-label", count(data.findings.length, "finding", "findings"));
+  healthTab.append(healthCount);
 
   const app = document.getElementById("app");
   app.className = "app";
@@ -560,7 +576,17 @@
     syncFilters(visible);
     syncTabs();
     const near = state.selected ? G.neighbourhood(visibleAdjacency, state.selected, state.hops) : null;
-    view.update({ selected: state.selected, near, hidden: visible.hidden, hiddenEdges: visible.types });
+    overlayControl.sync(state.overlay);
+    const overlay = G.overlaySets(model, data, state.overlay);
+    view.update({
+      selected: state.selected,
+      near,
+      hidden: visible.hidden,
+      hiddenEdges: visible.types,
+      highlight: overlay ? overlay.nodes : null,
+      highlightEdges: overlay ? overlay.edges : null,
+    });
+    svg.dataset.overlay = state.overlay;
     renderCrumbs();
     for (const redraw of refreshers) redraw(visible, previous);
 
@@ -665,6 +691,69 @@
     listPanel.replaceChildren(table);
   }
   refreshers.push(renderList);
+
+  // --- Health panel: every finding, grouped by Gruber criterion ------------------------
+
+  const CRITERIA = [
+    ["clarity", "Clarity"],
+    ["coherence", "Coherence"],
+    ["extendibility", "Extendibility"],
+    ["minimal-encoding-bias", "Minimal encoding bias"],
+    ["minimal-commitment", "Minimal ontological commitment"],
+    ["drift", "Drift"],
+    ["staleness", "Staleness"],
+    [null, "Structure"],
+  ];
+
+  function renderHealth() {
+    healthPanel.replaceChildren();
+    if (!data.findings.length) {
+      healthPanel.append(el("p", "empty-note", "No findings. The validator found nothing to flag."));
+      return;
+    }
+    const known = new Set(CRITERIA.map(([id]) => id));
+    const groups = [...CRITERIA];
+    for (const f of data.findings) {
+      if (!known.has(f.criterion)) {
+        known.add(f.criterion);
+        groups.push([f.criterion, f.criterion]);
+      }
+    }
+    for (const [criterion, title] of groups) {
+      const items = data.findings.filter((f) => f.criterion === criterion);
+      if (!items.length) continue;
+      const section = el("section", "criterion");
+      section.dataset.criterion = criterion || "structure";
+      const heading = el("h2", "", title);
+      heading.append(el("span", "count", String(items.length)));
+      const ul = el("ul");
+      for (const f of items) {
+        const li = el("li", "finding");
+        li.dataset.code = f.code;
+        const text = el("div");
+        const where = el("div", "code");
+        where.append(f.code);
+        if (f.concept && nodesById.has(f.concept)) {
+          const a = el("a", "concept-link", nodesById.get(f.concept).name);
+          a.href = `#${encodeURIComponent(f.concept)}`;
+          a.dataset.id = f.concept;
+          a.addEventListener("click", (event) => {
+            event.preventDefault();
+            setState({ selected: f.concept, tab: "graph" });
+          });
+          where.append(" · ", a);
+        } else if (!f.concept) {
+          where.append(" · ontology");
+        }
+        text.append(where, el("p", "", f.message));
+        li.append(OntologyPane.badgeIcon(f.severity), text);
+        ul.append(li);
+      }
+      section.append(heading, ul);
+      healthPanel.append(section);
+    }
+  }
+  renderHealth();
 
   refresh({ selected: null });
   if (location.hash) restoreFromUrl();

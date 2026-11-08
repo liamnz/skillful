@@ -101,7 +101,7 @@ T1 skeleton ──► T2 schemas+loader+validate ──┬─► T3 init ──�
 - [x] T16: Navigation: pan/zoom/fit/pin, breadcrumbs, URL deep links, keyboard
 - [x] T17: Search with redirects
 - [x] T18: Filters and list view
-- [ ] T19: Finding badges, Health/Mud/Drift overlays, Health panel
+- [x] T19: Finding badges, Health/Mud/Drift overlays, Health panel
 - [ ] T20: Vocabulary panel, legend definitions, extension encodings
 - [ ] T21: Hierarchy layout (layered force) and semantic zoom
 - [ ] T22: Scale and design checks (300-concept fixture, performance, contrast, colour-blind, raw-literal lint)

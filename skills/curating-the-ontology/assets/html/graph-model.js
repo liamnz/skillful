@@ -253,6 +253,37 @@
     return { verb: `${words} ${many ? "many" : "one"}`, many };
   }
 
+  // --- Overlays -----------------------------------------------------------------------
+
+  const DRIFT_CODES = new Set(["W105", "W106"]);
+
+  // The concepts and relations an overlay highlights; everything else recedes.
+  //   health  concepts with any finding;
+  //   mud     proposed concepts, concepts with open questions, and relations that use
+  //           related_to or a relation type that is still proposed;
+  //   drift   concepts with W105 or W106 findings.
+  // Returns null for "none".
+  function overlaySets(model, data, overlay) {
+    if (!overlay || overlay === "none") return null;
+    const nodes = new Set();
+    const edges = new Set();
+    if (overlay === "health" || overlay === "drift") {
+      for (const f of data.findings) {
+        if (f.concept && (overlay === "health" || DRIFT_CODES.has(f.code))) nodes.add(f.concept);
+      }
+    } else if (overlay === "mud") {
+      for (const c of data.concepts) {
+        if (c.status === "proposed" || (c.open_questions || []).length) nodes.add(c.id);
+      }
+      for (const e of model.edges) {
+        const type = model.relationTypes.get(e.type);
+        if (e.type === "related_to" || (type && type.status === "proposed")) edges.add(e.id);
+      }
+    }
+    const known = new Set(model.nodes.map((n) => n.id));
+    return { nodes: new Set([...nodes].filter((id) => known.has(id))), edges };
+  }
+
   // --- Search -------------------------------------------------------------------------
 
   const RANKS = ["exact", "prefix", "redirect", "definition"];
@@ -299,6 +330,7 @@
 
   root.OntologyGraph = {
     search,
+    overlaySets,
     hash,
     random,
     seedPosition,

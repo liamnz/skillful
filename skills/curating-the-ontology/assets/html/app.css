@@ -397,6 +397,58 @@ th[aria-sort="descending"] .sort {
   border-left: var(--node-selected-width) solid var(--accent);
 }
 
+/* ---- Health panel ---- */
+.health-panel {
+  overflow: auto;
+  min-height: 0;
+  padding: var(--space-4) var(--space-5);
+}
+
+.health-panel .criterion + .criterion {
+  margin-top: var(--space-5);
+}
+
+.health-panel h2 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.health-panel h2 .count {
+  margin-left: var(--space-2);
+  color: var(--text-faint);
+  font-weight: var(--weight-regular);
+  font-variant-numeric: tabular-nums;
+}
+
+.health-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.health-panel li {
+  padding: var(--space-2) 0;
+  border-top: var(--border-width) solid var(--border);
+  font-size: var(--text-sm);
+}
+
+.health-panel p {
+  margin: 0;
+  max-width: var(--measure);
+  color: var(--text-muted);
+}
+
+.health-panel .code {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.empty-note {
+  color: var(--text-muted);
+}
+
 .definition-cell {
   color: var(--text-muted);
   max-width: var(--measure);
@@ -560,6 +612,19 @@ svg.graph:active {
 
 .node.faded {
   opacity: var(--faded-opacity);
+}
+
+/* Overlays (Health, Mud, Drift): highlighted concepts and relations at full contrast. */
+.node.highlight .box {
+  stroke: var(--text-muted);
+}
+
+.node.highlight .label {
+  fill: var(--text);
+}
+
+.edge-group.highlight .edge {
+  stroke: var(--text-muted);
 }
 
 .focus-ring {

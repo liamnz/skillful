@@ -350,9 +350,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### T19: Finding badges, overlays, Health panel
 **Acceptance criteria:**
-- [ ] Concepts with findings show a severity badge (semantic colours, never kind colours). The detail pane lists their codes and criteria.
-- [ ] The Health, Mud and Drift overlays highlight exactly the specified sets. The Mud overlay includes `related_to` and relations whose type is `proposed`.
-- [ ] The Health panel groups findings by criterion. Clicking one focuses its concept.
+- [x] Concepts with findings show a severity badge (semantic colours, never kind colours). The detail pane lists their codes and criteria.
+- [x] The Health, Mud and Drift overlays highlight exactly the specified sets. The Mud overlay includes `related_to` and relations whose type is `proposed`.
+- [x] The Health panel groups findings by criterion. Clicking one focuses its concept.
 
 **Verification:** UI (fixture build with known findings), LINT
 
