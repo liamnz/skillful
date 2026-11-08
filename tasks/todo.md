@@ -435,14 +435,14 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### T24: `SKILL.md` body and `references/workflow.md`
 **Acceptance criteria:**
-- [ ] The `SKILL.md` body (under 500 lines and about 5k tokens) covers:
+- [x] The `SKILL.md` body (under 500 lines and about 5k tokens) covers:
   - how to resolve `$SKILL`;
   - the hard rules near the top (authorship, canonical terms, consent, never run `review` unconfirmed);
   - the seven workflow steps, with exact commands;
   - gotchas (rebuild to resolve conflicts, stdin, exit codes);
   - "when to read" links to each reference.
-- [ ] `workflow.md` details the proposal, review, health-check and conflict-resolution procedures, including cardinality suggestions with evidence.
-- [ ] No harness-specific vocabulary. Instructions are phrased as actions any shell-capable agent can take.
+- [x] `workflow.md` details the proposal, review, health-check and conflict-resolution procedures, including cardinality suggestions with evidence.
+- [x] No harness-specific vocabulary. Instructions are phrased as actions any shell-capable agent can take.
 
 **Verification:** Manually: read-through with you. Automated: the T26 lint once it exists.
 
