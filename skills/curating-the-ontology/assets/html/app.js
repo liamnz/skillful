@@ -9,6 +9,7 @@
   const SVG_NS = "http://www.w3.org/2000/svg";
   const HOPS = [1, 2, 3];
   const OVERLAYS = ["none", "health", "mud", "drift"];
+  const LAYOUTS = ["force", "hierarchy"];
   const CRUMBS = 5; // breadcrumbs shown at most
 
   function el(tag, className, text) {
@@ -51,6 +52,7 @@
     selected: null,
     hops: 1,
     overlay: "none",
+    layout: "force",
     trail: [], // concepts visited before the selected one, oldest first (breadcrumbs)
     tab: "graph",
     filters: { kinds: new Set(), statuses: new Set(), types: new Set() }, // what is hidden
@@ -108,7 +110,7 @@
     return button;
   }
 
-  toolbar.append(brand, tabs, searchBox, el("div", "counts", summary), spacer);
+  toolbar.append(brand, tabs, searchBox, spacer);
 
   // A segmented control: one button per option, the current one pressed.
   function segmented(label, options, current, onPick, describe = String) {
@@ -143,7 +145,16 @@
     (o) => o[0].toUpperCase() + o.slice(1),
   );
   overlayControl.classList.add("overlay");
-  toolbar.append(hopsControl, overlayControl);
+  const layoutControl = segmented(
+    "Layout",
+    LAYOUTS,
+    state.layout,
+    (layout) => setState({ layout }),
+    (l) => l[0].toUpperCase() + l.slice(1),
+  );
+  layoutControl.classList.add("layout");
+  layoutControl.querySelector(".control-label").classList.add("visually-hidden");
+  toolbar.append(hopsControl, overlayControl, layoutControl);
 
   // Filters: kind, status and relation type. Checked means shown.
   const filterButton = el("button", "button filters-button", "Filters");
@@ -470,6 +481,7 @@
     const hops = Number(params.get("hops"));
     patch.hops = HOPS.includes(hops) ? hops : 1;
     patch.overlay = OVERLAYS.includes(params.get("overlay")) ? params.get("overlay") : "none";
+    patch.layout = LAYOUTS.includes(params.get("layout")) ? params.get("layout") : "force";
     return patch;
   }
 
@@ -477,6 +489,7 @@
     const params = new URLSearchParams();
     if (s.hops !== 1) params.set("hops", s.hops);
     if (s.overlay !== "none") params.set("overlay", s.overlay);
+    if (s.layout !== "force") params.set("layout", s.layout);
     const query = params.toString();
     const id = s.selected ? encodeURIComponent(s.selected) : "";
     return id || query ? `#${id}${query ? `?${query}` : ""}` : "";
@@ -589,6 +602,9 @@
     syncTabs();
     const near = state.selected ? G.neighbourhood(visibleAdjacency, state.selected, state.hops) : null;
     overlayControl.sync(state.overlay);
+    layoutControl.sync(state.layout);
+    const relaidOut = state.layout !== view.layoutMode();
+    if (relaidOut) view.setLayout(state.layout);
     const overlay = G.overlaySets(model, data, state.overlay);
     view.update({
       selected: state.selected,
@@ -610,7 +626,7 @@
       OntologyPane.render(pane, conceptsById.get(state.selected), paneContext);
       pane.scrollTop = 0;
     }
-    if (state.selected && onGraph && (paneChanged || previous.tab !== "graph")) {
+    if (state.selected && onGraph && (paneChanged || previous.tab !== "graph" || relaidOut)) {
       view.centreOn(state.selected);
       view.setTabStop(state.selected);
     }

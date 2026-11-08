@@ -378,9 +378,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### T21: Hierarchy layout and semantic zoom
 **Acceptance criteria:**
-- [ ] The hierarchy toggle lays out the `acyclic` relation types (core and extension) top-down with a layered force. Concepts with several parents are placed sensibly. The layout is deterministic.
-- [ ] When zoomed out, only labels of high-degree, selected or neighbourhood concepts are shown. Zooming in reveals all of them.
-- [ ] Depth levels are computed in `graph-model.js` and tested via `page.evaluate` on a DAG with a diamond.
+- [x] The hierarchy toggle lays out the `acyclic` relation types (core and extension) top-down with a layered force. Concepts with several parents are placed sensibly. The layout is deterministic.
+- [x] When zoomed out, only labels of high-degree, selected or neighbourhood concepts are shown. Zooming in reveals all of them.
+- [x] Depth levels are computed in `graph-model.js` and tested via `page.evaluate` on a DAG with a diamond.
 
 **Verification:** UI, LINT
 

@@ -21,6 +21,8 @@
   // Hierarchy layout: each depth level is pulled hard onto its row.
   const LEVEL_PULL = 1;
   const HIERARCHY_PULL_X = 0.02;
+  const HIERARCHY_LINK = 0.7; // parent-child links pull children under their parents ...
+  const HIERARCHY_LINK_OTHER = 0.3; // ... other relations pull more gently
   // Zoom limits (scale factors) and the semantic-zoom thresholds.
   const MIN_ZOOM = 0.1;
   const MAX_ZOOM = 4;
@@ -131,14 +133,21 @@
     if (mode === "hierarchy") {
       const levels = G.depthLevels(model);
       const rowGap = t.nodeHeight + t.levelGap;
-      const acyclic = model.edges.filter((e) => levels.acyclicTypes.has(e.type));
       for (const n of nodes) n.y = levels.depth.get(n.id) * rowGap;
+      const links = model.edges.map((e) => ({ source: e.source, target: e.target, acyclic: levels.acyclicTypes.has(e.type) }));
       simulation
-        .force("link", d3.forceLink(acyclic.map((e) => ({ source: e.source, target: e.target }))).id((d) => d.id).distance(linkDistance))
+        .force(
+          "link",
+          d3
+            .forceLink(links)
+            .id((d) => d.id)
+            .distance(linkDistance)
+            .strength((l) => (l.acyclic ? HIERARCHY_LINK : HIERARCHY_LINK_OTHER)),
+        )
         .force("charge", d3.forceManyBody().strength(CHARGE).distanceMax(REPULSION_RANGE * t.edgeLength))
         .force("x", d3.forceX(0).strength(HIERARCHY_PULL_X))
         .force("y", d3.forceY((d) => levels.depth.get(d.id) * rowGap).strength(LEVEL_PULL))
-        .force("collide", G.forceBoxCollide(t.spacing, COLLIDE));
+        .force("collide", G.forceBoxCollide(t.spacing, COLLIDE, "x"));
     } else {
       simulation
         .force("link", d3.forceLink(model.edges.map((e) => ({ source: e.source, target: e.target }))).id((d) => d.id).distance(linkDistance))
@@ -148,7 +157,15 @@
         .force("collide", G.forceBoxCollide(t.spacing, COLLIDE));
     }
     for (let i = 0; i < TICKS; i++) simulation.tick();
-    G.separate(nodes, t.spacing);
+    if (mode === "hierarchy") {
+      // Snap each concept onto its row, then resolve overlaps sideways only.
+      const levels = G.depthLevels(model);
+      const rowGap = t.nodeHeight + t.levelGap;
+      for (const n of nodes) n.y = levels.depth.get(n.id) * rowGap;
+      G.separate(nodes, t.spacing, 1000, "x");
+    } else {
+      G.separate(nodes, t.spacing);
+    }
     for (const n of nodes) {
       n.x = round(n.x);
       n.y = round(n.y);
@@ -250,6 +267,12 @@
       .attr("data-shape", (d) => d.encoding.shape)
       .attr("d", (d) => glyphPath(d.encoding.shape, t.glyph))
       .attr("transform", (d) => `translate(${t.pad + t.glyph / 2},${d.h / 2})`);
+    // Semantic zoom: when zoomed out, a minor concept collapses to this glyph at its centre.
+    nodeGroups
+      .append("path")
+      .attr("class", (d) => `glyph-solo ${slotClass(d.encoding.slot)}${d.status === "proposed" ? " proposed" : ""}`)
+      .attr("d", (d) => glyphPath(d.encoding.shape, t.glyph))
+      .attr("transform", (d) => `translate(${d.w / 2},${d.h / 2})`);
     nodeGroups
       .append("text")
       .attr("class", "label")

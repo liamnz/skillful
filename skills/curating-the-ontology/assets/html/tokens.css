@@ -75,8 +75,8 @@
   --pane-width: 400px;
   --preview-width: 300px; /* hover preview card */
   --control-size: 28px; /* square canvas buttons (zoom, fit, reset) */
-  --search-width: 360px;
-  --search-min-width: 200px;
+  --search-width: 280px;
+  --search-min-width: 160px;
   --filters-width: 220px;
   --legend-line-width: 28px; /* legend samples: a line style, a status box */
   --legend-box-width: 20px;

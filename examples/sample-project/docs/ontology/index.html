@@ -88,8 +88,8 @@
   --pane-width: 400px;
   --preview-width: 300px; /* hover preview card */
   --control-size: 28px; /* square canvas buttons (zoom, fit, reset) */
-  --search-width: 360px;
-  --search-min-width: 200px;
+  --search-width: 280px;
+  --search-min-width: 160px;
   --filters-width: 220px;
   --legend-line-width: 28px; /* legend samples: a line style, a status box */
   --legend-box-width: 20px;
@@ -209,6 +209,16 @@ body {
 
 [hidden] {
   display: none !important;
+}
+
+/* Read by screen readers, not shown. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 a {
@@ -887,16 +897,32 @@ svg.graph:active {
 }
 
 /* Kind glyph: colour and shape both encode the kind. Proposed concepts get a hollow glyph. */
-.glyph {
+.glyph,
+.glyph-solo {
   fill: var(--k);
   stroke: none;
 }
 
-.glyph.proposed {
+.glyph.proposed,
+.glyph-solo.proposed {
   fill: var(--bg);
   stroke: var(--k);
   stroke-width: var(--glyph-outline-width);
   stroke-dasharray: var(--dash-proposed-glyph);
+}
+
+/* Semantic zoom. Zoomed out, minor concepts collapse to their kind glyph; hubs, the selection
+   and its neighbourhood keep their boxes. Zoomed in, every visible edge is labelled. */
+.glyph-solo {
+  display: none;
+}
+
+.zoomed-out .node:not(.hub):not(.selected):not(.near) :is(.box, .label, .glyph, .finding-badge) {
+  display: none;
+}
+
+.zoomed-out .node:not(.hub):not(.selected):not(.near) .glyph-solo {
+  display: inline;
 }
 
 .k1 { --k: var(--kind-1); }
@@ -2273,8 +2299,11 @@ THIS SOFTWARE.
   // Depth levels for the hierarchy layout. Edges of `acyclic` relation types (core is_a and
   // part_of, plus extensions marked acyclic) point from child to parent, so a parent sits above
   // its children. A concept's depth is the length of its longest path up to a root, which puts a
-  // concept with several parents below all of them. Concepts in no acyclic relation go on a row
-  // of their own below the rest. Cycles (E006) are cut off after `nodes.length` rounds.
+  // concept with several parents below all of them. Cycles (E006) are cut off after
+  // `nodes.length` rounds.
+  // A concept in no acyclic relation hangs one row below the nearest concept it is related to
+  // (an attribute below its entity, a metric below what it measures), found breadth-first over
+  // the other relations; a group with no hierarchy at all starts its own tree at row 0.
   function depthLevels(model) {
     const acyclicTypes = new Set([...model.relationTypes.values()].filter((r) => r.acyclic).map((r) => r.id));
     const edges = model.edges.filter((e) => acyclicTypes.has(e.type));
@@ -2291,8 +2320,29 @@ THIS SOFTWARE.
       }
       if (!changed) break;
     }
-    const deepest = Math.max(0, ...[...inHierarchy].map((id) => depth.get(id)));
-    for (const n of model.nodes) if (!inHierarchy.has(n.id)) depth.set(n.id, inHierarchy.size ? deepest + 1 : 0);
+    const adj = adjacency(model.nodes, model.edges);
+    const placed = new Set(inHierarchy);
+    const hang = (frontier) => {
+      while (frontier.length) {
+        const next = [];
+        for (const id of frontier) {
+          for (const other of adj.get(id) || []) {
+            if (placed.has(other)) continue;
+            placed.add(other);
+            depth.set(other, depth.get(id) + 1);
+            next.push(other);
+          }
+        }
+        frontier = next.sort();
+      }
+    };
+    hang([...inHierarchy].sort((a, b) => depth.get(a) - depth.get(b) || (a < b ? -1 : 1)));
+    for (const n of [...model.nodes].sort((a, b) => (a.id < b.id ? -1 : 1))) {
+      if (placed.has(n.id)) continue;
+      placed.add(n.id);
+      depth.set(n.id, 0);
+      hang([n.id]);
+    }
     return { depth, acyclicTypes };
   }
 
@@ -2302,8 +2352,9 @@ THIS SOFTWARE.
   }
 
   // A d3-force compatible force that pushes overlapping boxes apart along the axis where
-  // they overlap least. Uses each box's width and height, not a circle radius.
-  function forceBoxCollide(gap, strength) {
+  // they overlap least (or only sideways, with axis "x", which keeps hierarchy rows level).
+  // Uses each box's width and height, not a circle radius.
+  function forceBoxCollide(gap, strength, axis) {
     let nodes = [];
     function force() {
       for (let i = 0; i < nodes.length; i++) {
@@ -2312,7 +2363,7 @@ THIS SOFTWARE.
           const b = nodes[j];
           const [ox, oy] = overlap(a, b, gap);
           if (ox <= 0 || oy <= 0) continue;
-          if (ox < oy) {
+          if (axis === "x" || (axis !== "y" && ox < oy)) {
             const push = (b.x >= a.x ? 1 : -1) * ox * strength * 0.5;
             a.vx -= push;
             b.vx += push;
@@ -2333,7 +2384,7 @@ THIS SOFTWARE.
   // Moves boxes directly until none overlap (with `gap` between them). Run after the
   // simulation so the "boxes never overlap" guarantee doesn't rest on the physics settling.
   // Returns the number of rounds it took.
-  function separate(nodes, gap, maxRounds = 1000) {
+  function separate(nodes, gap, maxRounds = 1000, axis) {
     for (let round = 0; round < maxRounds; round++) {
       let moved = false;
       for (let i = 0; i < nodes.length; i++) {
@@ -2343,7 +2394,7 @@ THIS SOFTWARE.
           const [ox, oy] = overlap(a, b, gap);
           if (ox <= 0 || oy <= 0) continue;
           moved = true;
-          if (ox < oy) {
+          if (axis === "x" || (axis !== "y" && ox < oy)) {
             const push = (b.x >= a.x ? 1 : -1) * (ox / 2 + 0.01);
             a.x -= push;
             b.x += push;
@@ -2560,6 +2611,8 @@ THIS SOFTWARE.
   // Hierarchy layout: each depth level is pulled hard onto its row.
   const LEVEL_PULL = 1;
   const HIERARCHY_PULL_X = 0.02;
+  const HIERARCHY_LINK = 0.7; // parent-child links pull children under their parents ...
+  const HIERARCHY_LINK_OTHER = 0.3; // ... other relations pull more gently
   // Zoom limits (scale factors) and the semantic-zoom thresholds.
   const MIN_ZOOM = 0.1;
   const MAX_ZOOM = 4;
@@ -2670,14 +2723,21 @@ THIS SOFTWARE.
     if (mode === "hierarchy") {
       const levels = G.depthLevels(model);
       const rowGap = t.nodeHeight + t.levelGap;
-      const acyclic = model.edges.filter((e) => levels.acyclicTypes.has(e.type));
       for (const n of nodes) n.y = levels.depth.get(n.id) * rowGap;
+      const links = model.edges.map((e) => ({ source: e.source, target: e.target, acyclic: levels.acyclicTypes.has(e.type) }));
       simulation
-        .force("link", d3.forceLink(acyclic.map((e) => ({ source: e.source, target: e.target }))).id((d) => d.id).distance(linkDistance))
+        .force(
+          "link",
+          d3
+            .forceLink(links)
+            .id((d) => d.id)
+            .distance(linkDistance)
+            .strength((l) => (l.acyclic ? HIERARCHY_LINK : HIERARCHY_LINK_OTHER)),
+        )
         .force("charge", d3.forceManyBody().strength(CHARGE).distanceMax(REPULSION_RANGE * t.edgeLength))
         .force("x", d3.forceX(0).strength(HIERARCHY_PULL_X))
         .force("y", d3.forceY((d) => levels.depth.get(d.id) * rowGap).strength(LEVEL_PULL))
-        .force("collide", G.forceBoxCollide(t.spacing, COLLIDE));
+        .force("collide", G.forceBoxCollide(t.spacing, COLLIDE, "x"));
     } else {
       simulation
         .force("link", d3.forceLink(model.edges.map((e) => ({ source: e.source, target: e.target }))).id((d) => d.id).distance(linkDistance))
@@ -2687,7 +2747,15 @@ THIS SOFTWARE.
         .force("collide", G.forceBoxCollide(t.spacing, COLLIDE));
     }
     for (let i = 0; i < TICKS; i++) simulation.tick();
-    G.separate(nodes, t.spacing);
+    if (mode === "hierarchy") {
+      // Snap each concept onto its row, then resolve overlaps sideways only.
+      const levels = G.depthLevels(model);
+      const rowGap = t.nodeHeight + t.levelGap;
+      for (const n of nodes) n.y = levels.depth.get(n.id) * rowGap;
+      G.separate(nodes, t.spacing, 1000, "x");
+    } else {
+      G.separate(nodes, t.spacing);
+    }
     for (const n of nodes) {
       n.x = round(n.x);
       n.y = round(n.y);
@@ -2789,6 +2857,12 @@ THIS SOFTWARE.
       .attr("data-shape", (d) => d.encoding.shape)
       .attr("d", (d) => glyphPath(d.encoding.shape, t.glyph))
       .attr("transform", (d) => `translate(${t.pad + t.glyph / 2},${d.h / 2})`);
+    // Semantic zoom: when zoomed out, a minor concept collapses to this glyph at its centre.
+    nodeGroups
+      .append("path")
+      .attr("class", (d) => `glyph-solo ${slotClass(d.encoding.slot)}${d.status === "proposed" ? " proposed" : ""}`)
+      .attr("d", (d) => glyphPath(d.encoding.shape, t.glyph))
+      .attr("transform", (d) => `translate(${d.w / 2},${d.h / 2})`);
     nodeGroups
       .append("text")
       .attr("class", "label")
@@ -3367,6 +3441,7 @@ THIS SOFTWARE.
   const SVG_NS = "http://www.w3.org/2000/svg";
   const HOPS = [1, 2, 3];
   const OVERLAYS = ["none", "health", "mud", "drift"];
+  const LAYOUTS = ["force", "hierarchy"];
   const CRUMBS = 5; // breadcrumbs shown at most
 
   function el(tag, className, text) {
@@ -3409,6 +3484,7 @@ THIS SOFTWARE.
     selected: null,
     hops: 1,
     overlay: "none",
+    layout: "force",
     trail: [], // concepts visited before the selected one, oldest first (breadcrumbs)
     tab: "graph",
     filters: { kinds: new Set(), statuses: new Set(), types: new Set() }, // what is hidden
@@ -3466,7 +3542,7 @@ THIS SOFTWARE.
     return button;
   }
 
-  toolbar.append(brand, tabs, searchBox, el("div", "counts", summary), spacer);
+  toolbar.append(brand, tabs, searchBox, spacer);
 
   // A segmented control: one button per option, the current one pressed.
   function segmented(label, options, current, onPick, describe = String) {
@@ -3501,7 +3577,16 @@ THIS SOFTWARE.
     (o) => o[0].toUpperCase() + o.slice(1),
   );
   overlayControl.classList.add("overlay");
-  toolbar.append(hopsControl, overlayControl);
+  const layoutControl = segmented(
+    "Layout",
+    LAYOUTS,
+    state.layout,
+    (layout) => setState({ layout }),
+    (l) => l[0].toUpperCase() + l.slice(1),
+  );
+  layoutControl.classList.add("layout");
+  layoutControl.querySelector(".control-label").classList.add("visually-hidden");
+  toolbar.append(hopsControl, overlayControl, layoutControl);
 
   // Filters: kind, status and relation type. Checked means shown.
   const filterButton = el("button", "button filters-button", "Filters");
@@ -3828,6 +3913,7 @@ THIS SOFTWARE.
     const hops = Number(params.get("hops"));
     patch.hops = HOPS.includes(hops) ? hops : 1;
     patch.overlay = OVERLAYS.includes(params.get("overlay")) ? params.get("overlay") : "none";
+    patch.layout = LAYOUTS.includes(params.get("layout")) ? params.get("layout") : "force";
     return patch;
   }
 
@@ -3835,6 +3921,7 @@ THIS SOFTWARE.
     const params = new URLSearchParams();
     if (s.hops !== 1) params.set("hops", s.hops);
     if (s.overlay !== "none") params.set("overlay", s.overlay);
+    if (s.layout !== "force") params.set("layout", s.layout);
     const query = params.toString();
     const id = s.selected ? encodeURIComponent(s.selected) : "";
     return id || query ? `#${id}${query ? `?${query}` : ""}` : "";
@@ -3947,6 +4034,9 @@ THIS SOFTWARE.
     syncTabs();
     const near = state.selected ? G.neighbourhood(visibleAdjacency, state.selected, state.hops) : null;
     overlayControl.sync(state.overlay);
+    layoutControl.sync(state.layout);
+    const relaidOut = state.layout !== view.layoutMode();
+    if (relaidOut) view.setLayout(state.layout);
     const overlay = G.overlaySets(model, data, state.overlay);
     view.update({
       selected: state.selected,
@@ -3968,7 +4058,7 @@ THIS SOFTWARE.
       OntologyPane.render(pane, conceptsById.get(state.selected), paneContext);
       pane.scrollTop = 0;
     }
-    if (state.selected && onGraph && (paneChanged || previous.tab !== "graph")) {
+    if (state.selected && onGraph && (paneChanged || previous.tab !== "graph" || relaidOut)) {
       view.centreOn(state.selected);
       view.setTabStop(state.selected);
     }

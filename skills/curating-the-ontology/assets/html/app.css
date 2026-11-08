@@ -21,6 +21,16 @@ body {
   display: none !important;
 }
 
+/* Read by screen readers, not shown. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 a {
   color: var(--text);
   text-decoration: underline;
@@ -697,16 +707,32 @@ svg.graph:active {
 }
 
 /* Kind glyph: colour and shape both encode the kind. Proposed concepts get a hollow glyph. */
-.glyph {
+.glyph,
+.glyph-solo {
   fill: var(--k);
   stroke: none;
 }
 
-.glyph.proposed {
+.glyph.proposed,
+.glyph-solo.proposed {
   fill: var(--bg);
   stroke: var(--k);
   stroke-width: var(--glyph-outline-width);
   stroke-dasharray: var(--dash-proposed-glyph);
+}
+
+/* Semantic zoom. Zoomed out, minor concepts collapse to their kind glyph; hubs, the selection
+   and its neighbourhood keep their boxes. Zoomed in, every visible edge is labelled. */
+.glyph-solo {
+  display: none;
+}
+
+.zoomed-out .node:not(.hub):not(.selected):not(.near) :is(.box, .label, .glyph, .finding-badge) {
+  display: none;
+}
+
+.zoomed-out .node:not(.hub):not(.selected):not(.near) .glyph-solo {
+  display: inline;
 }
 
 .k1 { --k: var(--kind-1); }

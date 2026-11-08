@@ -85,8 +85,11 @@
   // Depth levels for the hierarchy layout. Edges of `acyclic` relation types (core is_a and
   // part_of, plus extensions marked acyclic) point from child to parent, so a parent sits above
   // its children. A concept's depth is the length of its longest path up to a root, which puts a
-  // concept with several parents below all of them. Concepts in no acyclic relation go on a row
-  // of their own below the rest. Cycles (E006) are cut off after `nodes.length` rounds.
+  // concept with several parents below all of them. Cycles (E006) are cut off after
+  // `nodes.length` rounds.
+  // A concept in no acyclic relation hangs one row below the nearest concept it is related to
+  // (an attribute below its entity, a metric below what it measures), found breadth-first over
+  // the other relations; a group with no hierarchy at all starts its own tree at row 0.
   function depthLevels(model) {
     const acyclicTypes = new Set([...model.relationTypes.values()].filter((r) => r.acyclic).map((r) => r.id));
     const edges = model.edges.filter((e) => acyclicTypes.has(e.type));
@@ -103,8 +106,29 @@
       }
       if (!changed) break;
     }
-    const deepest = Math.max(0, ...[...inHierarchy].map((id) => depth.get(id)));
-    for (const n of model.nodes) if (!inHierarchy.has(n.id)) depth.set(n.id, inHierarchy.size ? deepest + 1 : 0);
+    const adj = adjacency(model.nodes, model.edges);
+    const placed = new Set(inHierarchy);
+    const hang = (frontier) => {
+      while (frontier.length) {
+        const next = [];
+        for (const id of frontier) {
+          for (const other of adj.get(id) || []) {
+            if (placed.has(other)) continue;
+            placed.add(other);
+            depth.set(other, depth.get(id) + 1);
+            next.push(other);
+          }
+        }
+        frontier = next.sort();
+      }
+    };
+    hang([...inHierarchy].sort((a, b) => depth.get(a) - depth.get(b) || (a < b ? -1 : 1)));
+    for (const n of [...model.nodes].sort((a, b) => (a.id < b.id ? -1 : 1))) {
+      if (placed.has(n.id)) continue;
+      placed.add(n.id);
+      depth.set(n.id, 0);
+      hang([n.id]);
+    }
     return { depth, acyclicTypes };
   }
 
@@ -114,8 +138,9 @@
   }
 
   // A d3-force compatible force that pushes overlapping boxes apart along the axis where
-  // they overlap least. Uses each box's width and height, not a circle radius.
-  function forceBoxCollide(gap, strength) {
+  // they overlap least (or only sideways, with axis "x", which keeps hierarchy rows level).
+  // Uses each box's width and height, not a circle radius.
+  function forceBoxCollide(gap, strength, axis) {
     let nodes = [];
     function force() {
       for (let i = 0; i < nodes.length; i++) {
@@ -124,7 +149,7 @@
           const b = nodes[j];
           const [ox, oy] = overlap(a, b, gap);
           if (ox <= 0 || oy <= 0) continue;
-          if (ox < oy) {
+          if (axis === "x" || (axis !== "y" && ox < oy)) {
             const push = (b.x >= a.x ? 1 : -1) * ox * strength * 0.5;
             a.vx -= push;
             b.vx += push;
@@ -145,7 +170,7 @@
   // Moves boxes directly until none overlap (with `gap` between them). Run after the
   // simulation so the "boxes never overlap" guarantee doesn't rest on the physics settling.
   // Returns the number of rounds it took.
-  function separate(nodes, gap, maxRounds = 1000) {
+  function separate(nodes, gap, maxRounds = 1000, axis) {
     for (let round = 0; round < maxRounds; round++) {
       let moved = false;
       for (let i = 0; i < nodes.length; i++) {
@@ -155,7 +180,7 @@
           const [ox, oy] = overlap(a, b, gap);
           if (ox <= 0 || oy <= 0) continue;
           moved = true;
-          if (ox < oy) {
+          if (axis === "x" || (axis !== "y" && ox < oy)) {
             const push = (b.x >= a.x ? 1 : -1) * (ox / 2 + 0.01);
             a.x -= push;
             b.x += push;
