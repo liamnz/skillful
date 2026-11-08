@@ -74,7 +74,62 @@
         });
       }
     }
-    return { nodes, edges };
+    return {
+      nodes,
+      edges,
+      kinds: new Map(data.vocabulary.kinds.map((k) => [k.id, k])),
+      relationTypes: new Map(data.vocabulary.relation_types.map((r) => [r.id, r])),
+    };
+  }
+
+  // Depth levels for the hierarchy layout. Edges of `acyclic` relation types (core is_a and
+  // part_of, plus extensions marked acyclic) point from child to parent, so a parent sits above
+  // its children. A concept's depth is the length of its longest path up to a root, which puts a
+  // concept with several parents below all of them. Cycles (E006) are cut off after
+  // `nodes.length` rounds.
+  // A concept in no acyclic relation hangs one row below the nearest concept it is related to
+  // (an attribute below its entity, a metric below what it measures), found breadth-first over
+  // the other relations; a group with no hierarchy at all starts its own tree at row 0.
+  function depthLevels(model) {
+    const acyclicTypes = new Set([...model.relationTypes.values()].filter((r) => r.acyclic).map((r) => r.id));
+    const edges = model.edges.filter((e) => acyclicTypes.has(e.type));
+    const inHierarchy = new Set(edges.flatMap((e) => [e.source, e.target]));
+    const depth = new Map(model.nodes.map((n) => [n.id, 0]));
+    for (let round = 0; round < model.nodes.length; round++) {
+      let changed = false;
+      for (const e of edges) {
+        const below = depth.get(e.target) + 1;
+        if (depth.get(e.source) < below) {
+          depth.set(e.source, below);
+          changed = true;
+        }
+      }
+      if (!changed) break;
+    }
+    const adj = adjacency(model.nodes, model.edges);
+    const placed = new Set(inHierarchy);
+    const hang = (frontier) => {
+      while (frontier.length) {
+        const next = [];
+        for (const id of frontier) {
+          for (const other of adj.get(id) || []) {
+            if (placed.has(other)) continue;
+            placed.add(other);
+            depth.set(other, depth.get(id) + 1);
+            next.push(other);
+          }
+        }
+        frontier = next.sort();
+      }
+    };
+    hang([...inHierarchy].sort((a, b) => depth.get(a) - depth.get(b) || (a < b ? -1 : 1)));
+    for (const n of [...model.nodes].sort((a, b) => (a.id < b.id ? -1 : 1))) {
+      if (placed.has(n.id)) continue;
+      placed.add(n.id);
+      depth.set(n.id, 0);
+      hang([n.id]);
+    }
+    return { depth, acyclicTypes };
   }
 
   // How far two centred boxes ({x, y, w, h}) overlap on each axis, including a gap.
@@ -83,8 +138,9 @@
   }
 
   // A d3-force compatible force that pushes overlapping boxes apart along the axis where
-  // they overlap least. Uses each box's width and height, not a circle radius.
-  function forceBoxCollide(gap, strength) {
+  // they overlap least (or only sideways, with axis "x", which keeps hierarchy rows level).
+  // Uses each box's width and height, not a circle radius.
+  function forceBoxCollide(gap, strength, axis) {
     let nodes = [];
     function force() {
       for (let i = 0; i < nodes.length; i++) {
@@ -93,7 +149,7 @@
           const b = nodes[j];
           const [ox, oy] = overlap(a, b, gap);
           if (ox <= 0 || oy <= 0) continue;
-          if (ox < oy) {
+          if (axis === "x" || (axis !== "y" && ox < oy)) {
             const push = (b.x >= a.x ? 1 : -1) * ox * strength * 0.5;
             a.vx -= push;
             b.vx += push;
@@ -114,7 +170,7 @@
   // Moves boxes directly until none overlap (with `gap` between them). Run after the
   // simulation so the "boxes never overlap" guarantee doesn't rest on the physics settling.
   // Returns the number of rounds it took.
-  function separate(nodes, gap, maxRounds = 1000) {
+  function separate(nodes, gap, maxRounds = 1000, axis) {
     for (let round = 0; round < maxRounds; round++) {
       let moved = false;
       for (let i = 0; i < nodes.length; i++) {
@@ -124,7 +180,7 @@
           const [ox, oy] = overlap(a, b, gap);
           if (ox <= 0 || oy <= 0) continue;
           moved = true;
-          if (ox < oy) {
+          if (axis === "x" || (axis !== "y" && ox < oy)) {
             const push = (b.x >= a.x ? 1 : -1) * (ox / 2 + 0.01);
             a.x -= push;
             b.x += push;
@@ -163,12 +219,154 @@
     return at(0.5);
   }
 
+  // --- Graph queries ------------------------------------------------------------------
+
+  // Undirected adjacency: id -> sorted neighbour ids. `edges` may be a filtered subset.
+  function adjacency(nodes, edges) {
+    const out = new Map(nodes.map((n) => [n.id, new Set()]));
+    for (const e of edges) {
+      if (out.has(e.source) && out.has(e.target)) {
+        out.get(e.source).add(e.target);
+        out.get(e.target).add(e.source);
+      }
+    }
+    return new Map([...out].map(([id, set]) => [id, [...set].sort()]));
+  }
+
+  // Concepts up to `hops` relations away from `id`, following relations in either direction.
+  // Returns id -> distance (the concept itself is 0).
+  function neighbourhood(adj, id, hops) {
+    const distance = new Map([[id, 0]]);
+    let frontier = [id];
+    for (let d = 1; d <= hops && frontier.length; d++) {
+      const next = [];
+      for (const node of frontier) {
+        for (const other of adj.get(node) || []) {
+          if (!distance.has(other)) {
+            distance.set(other, d);
+            next.push(other);
+          }
+        }
+      }
+      frontier = next;
+    }
+    return distance;
+  }
+
+  // The first sentence of a definition, for previews.
+  function firstSentence(text) {
+    const trimmed = (text || "").trim().replace(/\s+/g, " ");
+    const match = trimmed.match(/^.*?[.!?](?=\s|$)/);
+    return match ? match[0] : trimmed;
+  }
+
+  // A plural for display only ("Order line" -> "Order lines"). Plain English rules on the last word.
+  function plural(name) {
+    if (/(s|x|z|ch|sh)$/i.test(name)) return `${name}es`;
+    if (/[^aeiou]y$/i.test(name)) return `${name.slice(0, -1)}ies`;
+    return `${name}s`;
+  }
+
+  // How a relation reads in prose. `cardinality` is read source:target ("1:N": one source, many
+  // targets). From the source, the target side counts; from the target (`incoming`), the source side.
+  function relationPhrase(label, cardinality, incoming) {
+    const words = label.replace(/_/g, " ");
+    if (!cardinality) return { verb: words, many: false };
+    const [sourceSide, targetSide] = cardinality.split(":");
+    const far = incoming ? sourceSide : targetSide;
+    const many = far !== "1";
+    return { verb: `${words} ${many ? "many" : "one"}`, many };
+  }
+
+  // --- Overlays -----------------------------------------------------------------------
+
+  const DRIFT_CODES = new Set(["W105", "W106"]);
+
+  // The concepts and relations an overlay highlights; everything else recedes.
+  //   health  concepts with any finding;
+  //   mud     proposed concepts, concepts with open questions, and relations that use
+  //           related_to or a relation type that is still proposed;
+  //   drift   concepts with W105 or W106 findings.
+  // Returns null for "none".
+  function overlaySets(model, data, overlay) {
+    if (!overlay || overlay === "none") return null;
+    const nodes = new Set();
+    const edges = new Set();
+    if (overlay === "health" || overlay === "drift") {
+      for (const f of data.findings) {
+        if (f.concept && (overlay === "health" || DRIFT_CODES.has(f.code))) nodes.add(f.concept);
+      }
+    } else if (overlay === "mud") {
+      for (const c of data.concepts) {
+        if (c.status === "proposed" || (c.open_questions || []).length) nodes.add(c.id);
+      }
+      for (const e of model.edges) {
+        const type = model.relationTypes.get(e.type);
+        if (e.type === "related_to" || (type && type.status === "proposed")) edges.add(e.id);
+      }
+    }
+    const known = new Set(model.nodes.map((n) => n.id));
+    return { nodes: new Set([...nodes].filter((id) => known.has(id))), edges };
+  }
+
+  // --- Search -------------------------------------------------------------------------
+
+  const RANKS = ["exact", "prefix", "redirect", "definition"];
+
+  function normalise(text) {
+    return (text || "").toLowerCase().replace(/\s+/g, " ").trim();
+  }
+
+  // True if `text` starts with `q`, or any word in it does.
+  function startsWord(text, q) {
+    return text.startsWith(q) || text.split(/[\s\-_/]+/).some((word) => word.startsWith(q));
+  }
+
+  // Search results, best first, each concept at most once at its best rank:
+  //   exact     the name equals the query;
+  //   prefix    the name, or a word in it, starts with the query;
+  //   redirect  a discouraged term matches: shown as "'term' -> use Name", never as an equal match;
+  //   definition the definition (or, failing all else, the name) contains the query.
+  // Ties are broken by name, then id, so the order is deterministic.
+  function search(concepts, query, limit = 10) {
+    const q = normalise(query);
+    if (!q) return [];
+    const results = [];
+    for (const c of concepts) {
+      const name = normalise(c.name);
+      let hit = null;
+      if (name === q) hit = { rank: "exact" };
+      else if (startsWord(name, q)) hit = { rank: "prefix" };
+      else {
+        const term = (c.discouraged_terms || []).find((t) => startsWord(normalise(t.term), q));
+        if (term) hit = { rank: "redirect", term: term.term };
+        else if (normalise(c.definition).includes(q) || name.includes(q)) hit = { rank: "definition" };
+      }
+      if (hit) results.push({ id: c.id, name: c.name, ...hit });
+    }
+    results.sort(
+      (a, b) =>
+        RANKS.indexOf(a.rank) - RANKS.indexOf(b.rank) ||
+        a.name.localeCompare(b.name) ||
+        (a.id < b.id ? -1 : a.id > b.id ? 1 : 0),
+    );
+    return results.slice(0, limit);
+  }
+
   root.OntologyGraph = {
+    search,
+    overlaySets,
     hash,
     random,
     seedPosition,
     edgeLabel,
     buildModel,
+    depthLevels,
+    adjacency,
+    neighbourhood,
+    firstSentence,
+    plural,
+    relationPhrase,
     forceBoxCollide,
     separate,
     exitPoint,

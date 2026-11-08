@@ -33,21 +33,21 @@
   --surface: #f6f7f8;
   --surface-raised: #eceef1;
   --border: #d8dce0;
-  --text-faint: #666e77;
+  --text-faint: #626a73;
   --text-muted: #4a525b;
   --text: #1c2024;
 
   /* Kind palette. Core kinds have fixed slots and shapes:
      entity 1 circle, event 2 diamond, attribute 3 square, metric 4 triangle.
      Slots 5-8 go to extension kinds by sorted id. Warm red/amber are kept for severity. */
-  --kind-1: #16856d; /* teal green */
-  --kind-2: #7a4fd0; /* violet */
-  --kind-3: #c23a83; /* magenta */
-  --kind-4: #6a8417; /* olive */
-  --kind-5: #a35d24; /* brown */
-  --kind-6: #4c5f96; /* slate blue */
-  --kind-7: #11849a; /* cyan */
-  --kind-8: #86772a; /* khaki */
+  --kind-1: #10725d; /* teal green */
+  --kind-2: #946df6; /* violet */
+  --kind-3: #c84e89; /* magenta */
+  --kind-4: #77985e; /* olive */
+  --kind-5: #82452c; /* brown */
+  --kind-6: #2735e0; /* blue */
+  --kind-7: #3c9aaf; /* cyan */
+  --kind-8: #877201; /* khaki */
   --kind-fallback: #7d858e; /* kinds beyond 8 (see W113) */
 
   /* Semantic colours */
@@ -86,6 +86,18 @@
   /* Layout */
   --toolbar-height: 48px;
   --pane-width: 400px;
+  --preview-width: 300px; /* hover preview card */
+  --control-size: 28px; /* square canvas buttons (zoom, fit, reset) */
+  --search-width: 280px;
+  --search-min-width: 160px;
+  --filters-width: 220px;
+  --legend-line-width: 28px; /* legend samples: a line style, a status box */
+  --legend-box-width: 20px;
+  --legend-sample-height: 12px;
+  --legend-types-width: 22ch;
+  --underline-offset: 2px;
+  --heading-tracking: 0.04em; /* letter spacing of the small uppercase pane headings */
+  --badge-baseline-shift: 2px; /* aligns an inline badge with the first line of text */
 
   /* Graph: each concept is a box enclosing its kind glyph and name */
   --node-height: 24px;
@@ -106,6 +118,10 @@
   --dash-proposed-glyph: 2 1.5; /* hollow kind glyph of a proposed concept */
   --glyph-outline-width: 1.5px;
   --dash-related: 6 4; /* the dashed, undirected related_to line */
+  --edge-stub-length: 20px; /* an edge to a filtered-out concept: a short stub, not the whole line */
+  --dash-stub: 2 2;
+  --focus-ring-offset: 3px; /* keyboard focus ring, outside the box */
+  --hierarchy-level-gap: 48px; /* hierarchy layout: space between depth rows */
   --faded-opacity: 0.18;
   --deprecated-opacity: 0.45;
 
@@ -125,14 +141,14 @@
     --text-faint: #8d959e;
     --text-muted: #b2b9c0;
     --text: #e7eaed;
-    --kind-1: #3cc3a1;
-    --kind-2: #a88cf2;
-    --kind-3: #f07ab8;
-    --kind-4: #a8c64a;
-    --kind-5: #e09a5c;
-    --kind-6: #8fa1dc;
-    --kind-7: #4cc7dc;
-    --kind-8: #cdbb63;
+    --kind-1: #2fa98a;
+    --kind-2: #d79eff;
+    --kind-3: #d993b4;
+    --kind-4: #bbe12d;
+    --kind-5: #c7803e;
+    --kind-6: #888cc9;
+    --kind-7: #84e2f1;
+    --kind-8: #c5b770;
     --kind-fallback: #8d959e;
     --accent: #6fa3ff;
     --error: #ff6d62;
@@ -151,14 +167,14 @@
   --text-faint: #8d959e;
   --text-muted: #b2b9c0;
   --text: #e7eaed;
-  --kind-1: #3cc3a1;
-  --kind-2: #a88cf2;
-  --kind-3: #f07ab8;
-  --kind-4: #a8c64a;
-  --kind-5: #e09a5c;
-  --kind-6: #8fa1dc;
-  --kind-7: #4cc7dc;
-  --kind-8: #cdbb63;
+  --kind-1: #2fa98a;
+  --kind-2: #d79eff;
+  --kind-3: #d993b4;
+  --kind-4: #bbe12d;
+  --kind-5: #c7803e;
+  --kind-6: #888cc9;
+  --kind-7: #84e2f1;
+  --kind-8: #c5b770;
   --kind-fallback: #8d959e;
   --accent: #6fa3ff;
   --error: #ff6d62;
@@ -191,7 +207,47 @@ body {
   line-height: var(--line-height);
 }
 
-/* ---- Frame: toolbar over the graph canvas ---- */
+[hidden] {
+  display: none !important;
+}
+
+/* Read by screen readers, not shown. */
+.visually-hidden {
+  position: absolute;
+  width: var(--border-width);
+  height: var(--border-width);
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: var(--underline-offset);
+}
+
+a:hover {
+  text-decoration-color: var(--text-muted);
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: var(--node-selected-width) solid var(--accent);
+  outline-offset: var(--border-width);
+}
+
+/* ---- Frame: toolbar over the workspace (graph canvas and detail pane) ---- */
 .app {
   display: grid;
   grid-template-rows: var(--toolbar-height) 1fr;
@@ -202,10 +258,11 @@ body {
 .toolbar {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-3);
   padding: 0 var(--space-4);
   border-bottom: var(--border-width) solid var(--border);
   font-size: var(--text-sm);
+  min-width: 0;
 }
 
 .brand {
@@ -222,11 +279,490 @@ body {
 .counts {
   color: var(--text-faint);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.spacer {
+  flex: 1;
+}
+
+/* ---- Search ---- */
+.search {
+  position: relative;
+  flex: 0 1 var(--search-width);
+  min-width: var(--search-min-width);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.search:focus-within {
+  border-color: var(--accent);
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+}
+
+.search input::placeholder {
+  color: var(--text-faint);
+}
+
+kbd {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-1);
+  background: var(--bg);
+}
+
+.search-results {
+  position: absolute;
+  z-index: 3;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.search-results li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-results li[aria-selected="true"] {
+  background: var(--surface-raised);
+}
+
+.search-results li.none {
+  color: var(--text-faint);
+  cursor: default;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+.seg {
+  display: inline-flex;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.seg button {
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-left: var(--border-width) solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: var(--line-height-tight);
+}
+
+.seg button:first-child {
+  border-left: 0;
+}
+
+.seg button[aria-pressed="true"] {
+  color: var(--text);
+  background: var(--surface-raised);
+  font-weight: var(--weight-semibold);
+}
+
+/* ---- Tabs ---- */
+.tabs {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.tab {
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab[aria-selected="true"] {
+  color: var(--text);
+  background: var(--surface-raised);
+}
+
+.tab .count {
+  margin-left: var(--space-1);
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.button {
+  padding: var(--space-1) var(--space-2);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.button:hover {
+  color: var(--text);
+}
+
+.button.active {
+  color: var(--text);
+  background: var(--surface-raised);
+}
+
+/* ---- Filters ---- */
+.filters {
+  position: relative;
+}
+
+.filters-panel {
+  position: absolute;
+  z-index: 3;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  display: grid;
+  gap: var(--space-3);
+  min-width: var(--filters-width);
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.filters-panel fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.filters-panel legend {
+  margin-bottom: var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--text-faint);
+}
+
+.filter-head,
+.filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.filters-panel .filter-head {
+  width: 100%;
+}
+
+.filter-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-faint);
+  font-size: var(--text-xs);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: var(--underline-offset);
+  cursor: pointer;
+}
+
+.link-button:hover {
+  color: var(--text);
+}
+
+/* "only" appears on the row under the pointer or keyboard focus, keeping the list quiet. */
+.filter-row .only {
+  visibility: hidden;
+}
+
+.filter-row:hover .only,
+.filter-row:focus-within .only {
+  visibility: visible;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  cursor: pointer;
+}
+
+.check input {
+  margin: 0 var(--space-1) 0 0;
+  accent-color: var(--accent);
+}
+
+/* An edge whose other end is filtered out: a short stub says "connected off-screen". */
+.edge-group.stub .edge {
+  stroke-dasharray: var(--dash-stub);
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 0;
+}
+
+.main {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+  min-width: 0;
+}
+
+/* ---- List view ---- */
+.list-panel {
+  overflow: auto;
+  min-height: 0;
+  padding: var(--space-4);
+}
+
+.concept-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.concept-table caption {
+  text-align: left;
+  color: var(--text-faint);
+  font-size: var(--text-xs);
+  padding-bottom: var(--space-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.concept-table th,
+.concept-table td {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-width) solid var(--border);
+  vertical-align: baseline;
+}
+
+.concept-table tbody th {
+  font-weight: var(--weight-regular);
+  white-space: nowrap;
+}
+
+.concept-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  padding: 0;
+}
+
+.concept-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.sort {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  background: transparent;
+  color: var(--text-faint);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  text-align: inherit;
+  cursor: pointer;
+}
+
+th[aria-sort="ascending"] .sort::after {
+  content: " \2191";
+}
+
+th[aria-sort="descending"] .sort::after {
+  content: " \2193";
+}
+
+th[aria-sort="ascending"] .sort,
+th[aria-sort="descending"] .sort {
+  color: var(--text);
+}
+
+.concept-table tbody tr {
+  cursor: pointer;
+}
+
+.concept-table tbody tr:hover {
+  background: var(--surface);
+}
+
+.concept-table tbody tr[aria-selected="true"] {
+  background: var(--surface-raised);
+}
+
+.concept-table tbody tr[aria-selected="true"] > th {
+  border-left: var(--node-selected-width) solid var(--accent);
+}
+
+/* ---- Health panel ---- */
+.health-panel {
+  overflow: auto;
+  min-height: 0;
+  padding: var(--space-4) var(--space-5);
+}
+
+.health-panel .criterion + .criterion {
+  margin-top: var(--space-5);
+}
+
+.health-panel h2 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.health-panel h2 .count {
+  margin-left: var(--space-2);
+  color: var(--text-faint);
+  font-weight: var(--weight-regular);
+  font-variant-numeric: tabular-nums;
+}
+
+.health-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.health-panel li {
+  padding: var(--space-2) 0;
+  border-top: var(--border-width) solid var(--border);
+  font-size: var(--text-sm);
+}
+
+.health-panel p {
+  margin: 0;
+  max-width: var(--measure);
+  color: var(--text-muted);
+}
+
+.health-panel .code {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* ---- Vocabulary panel ---- */
+.vocab-panel {
+  overflow: auto;
+  min-height: 0;
+  padding: var(--space-4) var(--space-5);
+}
+
+.vocab-section + .vocab-section {
+  margin-top: var(--space-6);
+}
+
+.vocab-section h2 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.vocab-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.vocab-table th,
+.vocab-table td {
+  text-align: left;
+  vertical-align: baseline;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.vocab-table thead th {
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  font-weight: var(--weight-semibold);
+}
+
+.vocab-table tbody th {
+  font-weight: var(--weight-regular);
+  white-space: nowrap;
+}
+
+.vocab-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.vocab-term {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: var(--underline-offset);
+  cursor: pointer;
+}
+
+.empty-note {
+  color: var(--text-muted);
+}
+
+.definition-cell {
+  color: var(--text-muted);
+  max-width: var(--measure);
+}
+
+.workspace.with-pane {
+  grid-template-columns: 1fr var(--pane-width);
 }
 
 .canvas {
   position: relative;
   min-height: 0;
+  min-width: 0;
   overflow: hidden;
 }
 
@@ -244,16 +780,39 @@ svg.graph {
   display: block;
   width: 100%;
   height: 100%;
+  cursor: grab;
+}
+
+svg.graph:active {
+  cursor: grabbing;
+}
+
+.hidden {
+  display: none;
 }
 
 .edge {
   fill: none;
   stroke: var(--border);
   stroke-width: var(--edge-width);
+  transition: opacity var(--duration-fast) var(--ease-out);
 }
 
 .edge.dashed {
   stroke-dasharray: var(--dash-related);
+}
+
+.edge-group.focus .edge,
+.edge-group.near .edge {
+  stroke: var(--text-muted);
+}
+
+.edge-group.focus .edge {
+  stroke-width: var(--edge-width-focus);
+}
+
+.edge-group.faded .edge {
+  opacity: var(--faded-opacity);
 }
 
 /* An invisible, wider stroke over each edge so a thin line is easy to hover. */
@@ -272,6 +831,14 @@ svg.graph {
   stroke-width: var(--edge-width);
 }
 
+.arrow.focus {
+  fill: var(--text-muted);
+}
+
+.arrow-hollow.focus {
+  stroke: var(--text-muted);
+}
+
 .edge-label {
   visibility: hidden;
   font-size: var(--text-xs);
@@ -283,9 +850,20 @@ svg.graph {
   pointer-events: none;
 }
 
+.edge-label.focus,
+.zoomed-in .edge-label {
+  visibility: visible;
+}
+
 .edge-label.hover {
   visibility: visible;
   fill: var(--text);
+}
+
+.node {
+  cursor: pointer;
+  transition: opacity var(--duration-fast) var(--ease-out);
+  outline: none;
 }
 
 .box {
@@ -307,17 +885,87 @@ svg.graph {
   fill: var(--text-muted);
 }
 
+/* Focus states, each distinct: neighbourhood (stronger outline, full-contrast name),
+   hover (raised fill), selected (accent outline, semibold name). Everything else fades. */
+.node.near .box {
+  stroke: var(--text-muted);
+}
+
+.node.near .label,
+.node.hover .label {
+  fill: var(--text);
+}
+
+.node.hover .box {
+  fill: var(--surface-raised);
+  stroke: var(--text-muted);
+}
+
+.node.selected .box {
+  stroke: var(--accent);
+  stroke-width: var(--node-selected-width);
+}
+
+.label.selected {
+  fill: var(--text);
+  font-weight: var(--weight-semibold);
+}
+
+.node.faded {
+  opacity: var(--faded-opacity);
+}
+
+/* Overlays (Health, Mud, Drift): highlighted concepts and relations at full contrast. */
+.node.highlight .box {
+  stroke: var(--text-muted);
+}
+
+.node.highlight .label {
+  fill: var(--text);
+}
+
+.edge-group.highlight .edge {
+  stroke: var(--text-muted);
+}
+
+.focus-ring {
+  fill: none;
+  stroke: none;
+}
+
+.node:focus-visible .focus-ring {
+  stroke: var(--accent);
+  stroke-width: var(--border-width);
+  stroke-dasharray: var(--dash-proposed);
+}
+
 /* Kind glyph: colour and shape both encode the kind. Proposed concepts get a hollow glyph. */
-.glyph {
+.glyph,
+.glyph-solo {
   fill: var(--k);
   stroke: none;
 }
 
-.glyph.proposed {
+.glyph.proposed,
+.glyph-solo.proposed {
   fill: var(--bg);
   stroke: var(--k);
   stroke-width: var(--glyph-outline-width);
   stroke-dasharray: var(--dash-proposed-glyph);
+}
+
+/* Semantic zoom. Zoomed out, minor concepts collapse to their kind glyph; hubs, the selection
+   and its neighbourhood keep their boxes. Zoomed in, every visible edge is labelled. */
+.glyph-solo {
+  display: none;
+}
+
+.zoomed-out .node:not(.hub):not(.selected):not(.near) :is(.box, .label, .glyph, .finding-badge) {
+  display: none;
+}
+
+.zoomed-out .node:not(.hub):not(.selected):not(.near) .glyph-solo {
+  display: inline;
 }
 
 .k1 { --k: var(--kind-1); }
@@ -329,6 +977,351 @@ svg.graph {
 .k7 { --k: var(--kind-7); }
 .k8 { --k: var(--kind-8); }
 .k-fallback { --k: var(--kind-fallback); }
+
+/* Finding badges: severity is read from the symbol (× error, ! warning, i info); colour reinforces it. */
+.badge {
+  stroke: var(--bg);
+  stroke-width: var(--border-width);
+}
+
+.badge.error { fill: var(--error); }
+.badge.warn { fill: var(--warn); }
+.badge.info { fill: var(--info); }
+
+.badge-glyph {
+  fill: none;
+  stroke: var(--bg);
+  stroke-width: var(--badge-glyph-width);
+  stroke-linecap: round;
+}
+
+/* ---- Canvas overlays: breadcrumbs (top left) and zoom controls (bottom right) ---- */
+.crumbs {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  background: var(--bg);
+}
+
+.crumbs a {
+  color: var(--text-faint);
+}
+
+.crumbs b {
+  color: var(--text-muted);
+  font-weight: var(--weight-semibold);
+}
+
+.zoom {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.zoom button {
+  width: var(--control-size);
+  height: var(--control-size);
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-top: var(--border-width) solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.zoom button:first-child {
+  border-top: 0;
+}
+
+.zoom button:hover {
+  color: var(--text);
+  background: var(--surface-raised);
+}
+
+/* ---- Legend (bottom left, always visible) ---- */
+.legend {
+  position: absolute;
+  left: var(--space-3);
+  bottom: var(--space-3);
+  display: grid;
+  grid-template-columns: auto auto auto;
+  gap: var(--space-2) var(--space-6);
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.legend h4 {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--text-faint);
+}
+
+.legend h4 + .row,
+.legend .row + h4 {
+  margin-top: 0;
+}
+
+.legend .row + h4 {
+  margin-top: var(--space-2);
+}
+
+.legend .row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  line-height: var(--line-height-tight);
+  padding: var(--border-width) 0;
+  cursor: help;
+}
+
+.legend .row.types {
+  display: block;
+  max-width: var(--legend-types-width);
+  color: var(--text-faint);
+  cursor: default;
+}
+
+.legend .type,
+.legend .badge-item {
+  cursor: help;
+}
+
+.legend .badges {
+  gap: var(--space-2);
+  cursor: default;
+}
+
+.badge-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.line-sample {
+  width: var(--legend-line-width);
+  height: var(--legend-sample-height);
+  flex: none;
+}
+
+.line-sample .edge {
+  stroke: var(--text-muted);
+}
+
+.status-sample {
+  width: var(--legend-box-width);
+  height: var(--legend-sample-height);
+  flex: none;
+}
+
+.status-sample .box {
+  stroke: var(--text-muted);
+}
+
+.status-sample.deprecated {
+  opacity: var(--deprecated-opacity);
+}
+
+.legend-tip {
+  position: absolute;
+  z-index: 2;
+  max-width: var(--preview-width);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  font-size: var(--text-sm);
+  pointer-events: none;
+}
+
+/* ---- Hover preview ---- */
+.preview {
+  position: absolute;
+  z-index: 2;
+  max-width: var(--preview-width);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  pointer-events: none;
+  font-size: var(--text-sm);
+}
+
+.preview .meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.preview-name {
+  font-weight: var(--weight-semibold);
+}
+
+.preview-text {
+  color: var(--text-muted);
+}
+
+/* ---- Detail pane ---- */
+.pane {
+  border-left: var(--border-width) solid var(--border);
+  background: var(--surface);
+  overflow: auto;
+  padding: var(--space-5) var(--space-5) var(--space-7);
+  min-height: 0;
+}
+
+.pane .meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.pane h2 {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--line-height-tight);
+  margin: var(--space-2) 0 0;
+}
+
+/* Section headings use the concept file's field names (underscores read as spaces). */
+.pane h3 {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--text-faint);
+  margin: var(--space-5) 0 var(--space-1);
+  text-transform: uppercase;
+  letter-spacing: var(--heading-tracking);
+}
+
+.pane .id {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+}
+
+.pane p {
+  margin: 0;
+}
+
+.definition {
+  font-size: var(--text-md);
+  max-width: var(--measure);
+}
+
+.pane ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pane li {
+  padding: var(--space-1) 0;
+  font-size: var(--text-sm);
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.faint {
+  color: var(--text-faint);
+}
+
+.rel-label {
+  color: var(--text-muted);
+}
+
+.term {
+  font-weight: var(--weight-semibold);
+}
+
+.impl {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+}
+
+.impl .when {
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.finding {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+
+.badge-icon {
+  flex: none;
+  transform: translateY(var(--badge-baseline-shift));
+}
+
+.finding .code {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.needs {
+  border: var(--border-width) dashed var(--text-faint);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.needs strong {
+  color: var(--text);
+}
+
+.suggestion {
+  border-left: var(--node-selected-width) dashed var(--border);
+  padding-left: var(--space-3);
+}
+
+.suggestion .who {
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+}
+
+.suggestion .who + p {
+  margin-bottom: var(--space-2);
+}
+
+.suggestion .suggested {
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.suggestion .rationale {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.kind-icon {
+  flex: none;
+}
 </style>
 </head>
 <body>
@@ -1044,6 +2037,7 @@ svg.graph {
  "ontology": {
   "description": "Domain concepts for the Acme online shop and its coffee subscriptions.",
   "name": "Acme Analytics",
+  "path_to_project": "../../",
   "schema_version": 1
  },
  "schemaVersion": 1,
@@ -1337,7 +2331,62 @@ THIS SOFTWARE.
         });
       }
     }
-    return { nodes, edges };
+    return {
+      nodes,
+      edges,
+      kinds: new Map(data.vocabulary.kinds.map((k) => [k.id, k])),
+      relationTypes: new Map(data.vocabulary.relation_types.map((r) => [r.id, r])),
+    };
+  }
+
+  // Depth levels for the hierarchy layout. Edges of `acyclic` relation types (core is_a and
+  // part_of, plus extensions marked acyclic) point from child to parent, so a parent sits above
+  // its children. A concept's depth is the length of its longest path up to a root, which puts a
+  // concept with several parents below all of them. Cycles (E006) are cut off after
+  // `nodes.length` rounds.
+  // A concept in no acyclic relation hangs one row below the nearest concept it is related to
+  // (an attribute below its entity, a metric below what it measures), found breadth-first over
+  // the other relations; a group with no hierarchy at all starts its own tree at row 0.
+  function depthLevels(model) {
+    const acyclicTypes = new Set([...model.relationTypes.values()].filter((r) => r.acyclic).map((r) => r.id));
+    const edges = model.edges.filter((e) => acyclicTypes.has(e.type));
+    const inHierarchy = new Set(edges.flatMap((e) => [e.source, e.target]));
+    const depth = new Map(model.nodes.map((n) => [n.id, 0]));
+    for (let round = 0; round < model.nodes.length; round++) {
+      let changed = false;
+      for (const e of edges) {
+        const below = depth.get(e.target) + 1;
+        if (depth.get(e.source) < below) {
+          depth.set(e.source, below);
+          changed = true;
+        }
+      }
+      if (!changed) break;
+    }
+    const adj = adjacency(model.nodes, model.edges);
+    const placed = new Set(inHierarchy);
+    const hang = (frontier) => {
+      while (frontier.length) {
+        const next = [];
+        for (const id of frontier) {
+          for (const other of adj.get(id) || []) {
+            if (placed.has(other)) continue;
+            placed.add(other);
+            depth.set(other, depth.get(id) + 1);
+            next.push(other);
+          }
+        }
+        frontier = next.sort();
+      }
+    };
+    hang([...inHierarchy].sort((a, b) => depth.get(a) - depth.get(b) || (a < b ? -1 : 1)));
+    for (const n of [...model.nodes].sort((a, b) => (a.id < b.id ? -1 : 1))) {
+      if (placed.has(n.id)) continue;
+      placed.add(n.id);
+      depth.set(n.id, 0);
+      hang([n.id]);
+    }
+    return { depth, acyclicTypes };
   }
 
   // How far two centred boxes ({x, y, w, h}) overlap on each axis, including a gap.
@@ -1346,8 +2395,9 @@ THIS SOFTWARE.
   }
 
   // A d3-force compatible force that pushes overlapping boxes apart along the axis where
-  // they overlap least. Uses each box's width and height, not a circle radius.
-  function forceBoxCollide(gap, strength) {
+  // they overlap least (or only sideways, with axis "x", which keeps hierarchy rows level).
+  // Uses each box's width and height, not a circle radius.
+  function forceBoxCollide(gap, strength, axis) {
     let nodes = [];
     function force() {
       for (let i = 0; i < nodes.length; i++) {
@@ -1356,7 +2406,7 @@ THIS SOFTWARE.
           const b = nodes[j];
           const [ox, oy] = overlap(a, b, gap);
           if (ox <= 0 || oy <= 0) continue;
-          if (ox < oy) {
+          if (axis === "x" || (axis !== "y" && ox < oy)) {
             const push = (b.x >= a.x ? 1 : -1) * ox * strength * 0.5;
             a.vx -= push;
             b.vx += push;
@@ -1377,7 +2427,7 @@ THIS SOFTWARE.
   // Moves boxes directly until none overlap (with `gap` between them). Run after the
   // simulation so the "boxes never overlap" guarantee doesn't rest on the physics settling.
   // Returns the number of rounds it took.
-  function separate(nodes, gap, maxRounds = 1000) {
+  function separate(nodes, gap, maxRounds = 1000, axis) {
     for (let round = 0; round < maxRounds; round++) {
       let moved = false;
       for (let i = 0; i < nodes.length; i++) {
@@ -1387,7 +2437,7 @@ THIS SOFTWARE.
           const [ox, oy] = overlap(a, b, gap);
           if (ox <= 0 || oy <= 0) continue;
           moved = true;
-          if (ox < oy) {
+          if (axis === "x" || (axis !== "y" && ox < oy)) {
             const push = (b.x >= a.x ? 1 : -1) * (ox / 2 + 0.01);
             a.x -= push;
             b.x += push;
@@ -1426,12 +2476,154 @@ THIS SOFTWARE.
     return at(0.5);
   }
 
+  // --- Graph queries ------------------------------------------------------------------
+
+  // Undirected adjacency: id -> sorted neighbour ids. `edges` may be a filtered subset.
+  function adjacency(nodes, edges) {
+    const out = new Map(nodes.map((n) => [n.id, new Set()]));
+    for (const e of edges) {
+      if (out.has(e.source) && out.has(e.target)) {
+        out.get(e.source).add(e.target);
+        out.get(e.target).add(e.source);
+      }
+    }
+    return new Map([...out].map(([id, set]) => [id, [...set].sort()]));
+  }
+
+  // Concepts up to `hops` relations away from `id`, following relations in either direction.
+  // Returns id -> distance (the concept itself is 0).
+  function neighbourhood(adj, id, hops) {
+    const distance = new Map([[id, 0]]);
+    let frontier = [id];
+    for (let d = 1; d <= hops && frontier.length; d++) {
+      const next = [];
+      for (const node of frontier) {
+        for (const other of adj.get(node) || []) {
+          if (!distance.has(other)) {
+            distance.set(other, d);
+            next.push(other);
+          }
+        }
+      }
+      frontier = next;
+    }
+    return distance;
+  }
+
+  // The first sentence of a definition, for previews.
+  function firstSentence(text) {
+    const trimmed = (text || "").trim().replace(/\s+/g, " ");
+    const match = trimmed.match(/^.*?[.!?](?=\s|$)/);
+    return match ? match[0] : trimmed;
+  }
+
+  // A plural for display only ("Order line" -> "Order lines"). Plain English rules on the last word.
+  function plural(name) {
+    if (/(s|x|z|ch|sh)$/i.test(name)) return `${name}es`;
+    if (/[^aeiou]y$/i.test(name)) return `${name.slice(0, -1)}ies`;
+    return `${name}s`;
+  }
+
+  // How a relation reads in prose. `cardinality` is read source:target ("1:N": one source, many
+  // targets). From the source, the target side counts; from the target (`incoming`), the source side.
+  function relationPhrase(label, cardinality, incoming) {
+    const words = label.replace(/_/g, " ");
+    if (!cardinality) return { verb: words, many: false };
+    const [sourceSide, targetSide] = cardinality.split(":");
+    const far = incoming ? sourceSide : targetSide;
+    const many = far !== "1";
+    return { verb: `${words} ${many ? "many" : "one"}`, many };
+  }
+
+  // --- Overlays -----------------------------------------------------------------------
+
+  const DRIFT_CODES = new Set(["W105", "W106"]);
+
+  // The concepts and relations an overlay highlights; everything else recedes.
+  //   health  concepts with any finding;
+  //   mud     proposed concepts, concepts with open questions, and relations that use
+  //           related_to or a relation type that is still proposed;
+  //   drift   concepts with W105 or W106 findings.
+  // Returns null for "none".
+  function overlaySets(model, data, overlay) {
+    if (!overlay || overlay === "none") return null;
+    const nodes = new Set();
+    const edges = new Set();
+    if (overlay === "health" || overlay === "drift") {
+      for (const f of data.findings) {
+        if (f.concept && (overlay === "health" || DRIFT_CODES.has(f.code))) nodes.add(f.concept);
+      }
+    } else if (overlay === "mud") {
+      for (const c of data.concepts) {
+        if (c.status === "proposed" || (c.open_questions || []).length) nodes.add(c.id);
+      }
+      for (const e of model.edges) {
+        const type = model.relationTypes.get(e.type);
+        if (e.type === "related_to" || (type && type.status === "proposed")) edges.add(e.id);
+      }
+    }
+    const known = new Set(model.nodes.map((n) => n.id));
+    return { nodes: new Set([...nodes].filter((id) => known.has(id))), edges };
+  }
+
+  // --- Search -------------------------------------------------------------------------
+
+  const RANKS = ["exact", "prefix", "redirect", "definition"];
+
+  function normalise(text) {
+    return (text || "").toLowerCase().replace(/\s+/g, " ").trim();
+  }
+
+  // True if `text` starts with `q`, or any word in it does.
+  function startsWord(text, q) {
+    return text.startsWith(q) || text.split(/[\s\-_/]+/).some((word) => word.startsWith(q));
+  }
+
+  // Search results, best first, each concept at most once at its best rank:
+  //   exact     the name equals the query;
+  //   prefix    the name, or a word in it, starts with the query;
+  //   redirect  a discouraged term matches: shown as "'term' -> use Name", never as an equal match;
+  //   definition the definition (or, failing all else, the name) contains the query.
+  // Ties are broken by name, then id, so the order is deterministic.
+  function search(concepts, query, limit = 10) {
+    const q = normalise(query);
+    if (!q) return [];
+    const results = [];
+    for (const c of concepts) {
+      const name = normalise(c.name);
+      let hit = null;
+      if (name === q) hit = { rank: "exact" };
+      else if (startsWord(name, q)) hit = { rank: "prefix" };
+      else {
+        const term = (c.discouraged_terms || []).find((t) => startsWord(normalise(t.term), q));
+        if (term) hit = { rank: "redirect", term: term.term };
+        else if (normalise(c.definition).includes(q) || name.includes(q)) hit = { rank: "definition" };
+      }
+      if (hit) results.push({ id: c.id, name: c.name, ...hit });
+    }
+    results.sort(
+      (a, b) =>
+        RANKS.indexOf(a.rank) - RANKS.indexOf(b.rank) ||
+        a.name.localeCompare(b.name) ||
+        (a.id < b.id ? -1 : a.id > b.id ? 1 : 0),
+    );
+    return results.slice(0, limit);
+  }
+
   root.OntologyGraph = {
+    search,
+    overlaySets,
     hash,
     random,
     seedPosition,
     edgeLabel,
     buildModel,
+    depthLevels,
+    adjacency,
+    neighbourhood,
+    firstSentence,
+    plural,
+    relationPhrase,
     forceBoxCollide,
     separate,
     exitPoint,
@@ -1439,10 +2631,11 @@ THIS SOFTWARE.
   };
 })(window);
 
-// Graph view: lays the model out with d3-force and draws it once as SVG.
-// The layout is deterministic: positions are seeded from concept ids, the simulation uses a
-// seeded random source, and a fixed number of ticks run synchronously before a single render.
-// There is no animated settling. Every size comes from tokens.css.
+// Graph view: lays the model out with d3-force and draws it as SVG, then exposes a small
+// controller. The layout is deterministic: positions are seeded from concept ids, the
+// simulation uses a seeded random source, and a fixed number of ticks run synchronously
+// before anything is drawn. Nothing is animated: state changes only toggle classes, and
+// pan/zoom move the camera, never the concepts. Every size comes from tokens.css.
 (function (root) {
   "use strict";
 
@@ -1458,6 +2651,25 @@ THIS SOFTWARE.
   const PULL_X = 0.03;
   const PULL_Y = 0.06;
   const COLLIDE = 0.8;
+  // The pulls were tuned on a ~25-concept graph. They act on every concept, so in a larger
+  // graph they would crush its clusters together; they shrink with the square root of size.
+  const REFERENCE_SIZE = 25;
+  const UNTANGLE_ABOVE = 2 * REFERENCE_SIZE; // larger graphs get an untangling phase first
+  const UNTANGLE_TICKS = 200;
+  // Hierarchy layout: each depth level is pulled hard onto its row.
+  const LEVEL_PULL = 1;
+  const HIERARCHY_PULL_X = 0.02;
+  const HIERARCHY_LINK = 0.7; // parent-child links pull children under their parents ...
+  const HIERARCHY_LINK_OTHER = 0.3; // ... other relations pull more gently
+  // Zoom limits (scale factors) and the semantic-zoom thresholds.
+  const MIN_ZOOM = 0.1;
+  const MAX_ZOOM = 4;
+  const GLYPH_ONLY_BELOW = 0.6; // boxes collapse to their kind glyph below this scale ...
+  const ALL_LABELS_ABOVE = 1.6; // ... and every edge is labelled above this one
+  // Hubs keep their box when zoomed out: at least HUB_DEGREE relations and in the top
+  // HUB_SHARE of concepts by degree, so a large ontology keeps only its real hubs.
+  const HUB_DEGREE = 4;
+  const HUB_SHARE = 0.1;
 
   function tokens() {
     const style = getComputedStyle(document.documentElement);
@@ -1476,6 +2688,10 @@ THIS SOFTWARE.
       arrowHollow: px("--arrow-hollow-size"),
       labelPad: px("--space-1"),
       fitPad: px("--space-6"),
+      badge: px("--badge-size"),
+      stub: px("--edge-stub-length"),
+      focusRing: px("--focus-ring-offset"),
+      levelGap: px("--hierarchy-level-gap"),
     };
   }
 
@@ -1511,6 +2727,15 @@ THIS SOFTWARE.
     }
   }
 
+  // Finding badge symbols, centred on (0, 0), for a disc of radius r: × error, ! warning, i info.
+  function badgeSymbol(severity, r) {
+    const a = r * 0.34;
+    const s = r * 0.46;
+    if (severity === "error") return `M${-a},${-a}L${a},${a}M${a},${-a}L${-a},${a}`;
+    if (severity === "warn") return `M0,${-s}L0,${s * 0.15}M0,${s * 0.9}L0,${s * 0.95}`;
+    return `M0,${-s}L0,${-s * 0.95}M0,${-s * 0.15}L0,${s}`;
+  }
+
   function slotClass(slot) {
     return slot === "fallback" ? "k-fallback" : `k${slot}`;
   }
@@ -1523,32 +2748,79 @@ THIS SOFTWARE.
     return measure;
   }
 
-  function layout(model, t, measure) {
-    const spread = Math.sqrt(model.nodes.length) * t.edgeLength;
-    const nodes = model.nodes.map((n) => {
+  // Box sizes. Widths use the selected (semibold) label so selecting never makes a box overflow.
+  function sized(model, t, measure) {
+    return model.nodes.map((n) => ({
+      ...n,
+      w: Math.ceil(measure("label selected", n.name)) + t.pad * 2 + t.glyph + t.glyphGap,
+      h: t.nodeHeight,
+    }));
+  }
+
+  // Positions for `nodes` (mutated in place): "force" or "hierarchy" (rows by depth level).
+  function layout(nodes, model, t, mode) {
+    const spread = Math.sqrt(nodes.length) * t.edgeLength;
+    for (const n of nodes) {
       const seed = G.seedPosition(n.id, spread);
-      const w = Math.ceil(measure("label", n.name)) + t.pad * 2 + t.glyph + t.glyphGap;
-      return { ...n, w, h: t.nodeHeight, x: seed.x, y: seed.y };
-    });
-    const links = model.edges.map((e) => ({ source: e.source, target: e.target }));
-    const simulation = d3
-      .forceSimulation(nodes)
-      .stop()
-      .randomSource(G.random(SEED))
-      .force(
-        "link",
-        d3
-          .forceLink(links)
-          .id((d) => d.id)
-          .distance((l) => (l.source.w + l.target.w) / 2 + t.edgeLength),
-      )
-      .force("charge", d3.forceManyBody().strength(CHARGE).distanceMax(REPULSION_RANGE * t.edgeLength))
-      .force("x", d3.forceX(0).strength(PULL_X))
-      .force("y", d3.forceY(0).strength(PULL_Y))
-      .force("collide", G.forceBoxCollide(t.spacing, COLLIDE));
+      n.x = seed.x;
+      n.y = seed.y;
+      n.vx = 0;
+      n.vy = 0;
+      n.fx = null;
+      n.fy = null;
+    }
+    const linkDistance = (l) => (l.source.w + l.target.w) / 2 + t.edgeLength;
+    const damping = Math.min(1, Math.sqrt(REFERENCE_SIZE / Math.max(1, nodes.length)));
+    const simulation = d3.forceSimulation(nodes).stop().randomSource(G.random(SEED));
+    if (mode === "hierarchy") {
+      const levels = G.depthLevels(model);
+      const rowGap = t.nodeHeight + t.levelGap;
+      for (const n of nodes) n.y = levels.depth.get(n.id) * rowGap;
+      const links = model.edges.map((e) => ({ source: e.source, target: e.target, acyclic: levels.acyclicTypes.has(e.type) }));
+      simulation
+        .force(
+          "link",
+          d3
+            .forceLink(links)
+            .id((d) => d.id)
+            .distance(linkDistance)
+            .strength((l) => (l.acyclic ? HIERARCHY_LINK : HIERARCHY_LINK_OTHER)),
+        )
+        .force("charge", d3.forceManyBody().strength(CHARGE).distanceMax(REPULSION_RANGE * t.edgeLength))
+        .force("x", d3.forceX(0).strength(HIERARCHY_PULL_X))
+        .force("y", d3.forceY((d) => levels.depth.get(d.id) * rowGap).strength(LEVEL_PULL))
+        .force("collide", G.forceBoxCollide(t.spacing, COLLIDE, "x"));
+    } else {
+      simulation
+        .force("link", d3.forceLink(model.edges.map((e) => ({ source: e.source, target: e.target }))).id((d) => d.id).distance(linkDistance))
+        .force("charge", d3.forceManyBody().strength(CHARGE).distanceMax(REPULSION_RANGE * t.edgeLength))
+        .force("x", d3.forceX(0).strength(PULL_X * damping))
+        .force("y", d3.forceY(0).strength(PULL_Y * damping))
+        .force("collide", G.forceBoxCollide(t.spacing, COLLIDE));
+    }
+    if (nodes.length > UNTANGLE_ABOVE) {
+      // Large graphs: first let repulsion act at every range so clusters, seeded interleaved,
+      // can pass through each other and separate; then settle with the local forces.
+      const charge = simulation.force("charge");
+      charge.distanceMax(Infinity);
+      for (let i = 0; i < UNTANGLE_TICKS; i++) simulation.tick();
+      charge.distanceMax(REPULSION_RANGE * t.edgeLength);
+      simulation.alpha(1);
+    }
     for (let i = 0; i < TICKS; i++) simulation.tick();
-    G.separate(nodes, t.spacing);
-    return nodes;
+    if (mode === "hierarchy") {
+      // Snap each concept onto its row, then resolve overlaps sideways only.
+      const levels = G.depthLevels(model);
+      const rowGap = t.nodeHeight + t.levelGap;
+      for (const n of nodes) n.y = levels.depth.get(n.id) * rowGap;
+      G.separate(nodes, t.spacing, 1000, "x");
+    } else {
+      G.separate(nodes, t.spacing);
+    }
+    for (const n of nodes) {
+      n.x = round(n.x);
+      n.y = round(n.y);
+    }
   }
 
   function markers(defs, t) {
@@ -1568,26 +2840,34 @@ THIS SOFTWARE.
         .attr("d", path);
     add("arrow-filled", t.arrow, "M0,1 L10,5 L0,9 z", "arrow");
     add("arrow-hollow", t.arrowHollow, "M1,1 L9,5 L1,9 z", "arrow-hollow");
+    add("arrow-filled-focus", t.arrow, "M0,1 L10,5 L0,9 z", "arrow focus");
+    add("arrow-hollow-focus", t.arrowHollow, "M1,1 L9,5 L1,9 z", "arrow-hollow focus");
   }
 
-  function render(svgElement, model) {
+  function render(svgElement, model, options = {}) {
+    const on = { select() {}, hover() {}, pin() {}, ...(options.on || {}) };
     const t = tokens();
     const svg = d3.select(svgElement);
     svg.selectAll("*").remove();
     const measure = measurer(svg);
-    const nodes = layout(model, t, measure);
+    let mode = options.layout === "hierarchy" ? "hierarchy" : "force";
+    const nodes = sized(model, t, measure);
+    layout(nodes, model, t, mode);
     const byId = new Map(nodes.map((n) => [n.id, n]));
-
-    const edges = model.edges.map((e) => {
-      const a = byId.get(e.source);
-      const b = byId.get(e.target);
-      const [x1, y1] = G.exitPoint(a, b.x, b.y, t.clearance);
-      const [x2, y2] = G.exitPoint(b, a.x, a.y, t.clearance);
-      const text = G.edgeLabel(e);
-      const label = G.placeLabel(x1, y1, x2, y2, measure("edge-label", text) + t.labelPad * 2, t.nodeHeight, nodes);
-      return { ...e, x1, y1, x2, y2, text, label };
-    });
+    const degree = new Map(nodes.map((n) => [n.id, 0]));
+    for (const e of model.edges) {
+      degree.set(e.source, degree.get(e.source) + 1);
+      degree.set(e.target, degree.get(e.target) + 1);
+    }
+    const ranked = [...degree.values()].sort((x, y) => y - x);
+    const hubDegree = Math.max(HUB_DEGREE, ranked[Math.max(0, Math.ceil(ranked.length * HUB_SHARE) - 1)] || 0);
+    const edges = model.edges.map((e) => ({
+      ...e,
+      text: G.edgeLabel(e),
+    }));
+    for (const e of edges) e.labelWidth = measure("edge-label", e.text) + t.labelPad * 2;
     measure.remove();
+    const findings = options.findings || new Map(); // id -> worst severity
 
     markers(svg.append("defs"), t);
     const viewport = svg.append("g").attr("class", "viewport");
@@ -1598,21 +2878,14 @@ THIS SOFTWARE.
       .selectAll("g")
       .data(edges, (d) => d.id)
       .join("g")
-      .attr("class", "edge-group");
-    for (const className of ["edge", "edge-hit"]) {
-      edgeGroups
-        .append("line")
-        .attr("class", (d) => (className === "edge" ? `edge ${d.encoding.line}` : className))
-        .attr("data-id", (d) => d.id)
-        .attr("x1", (d) => round(d.x1))
-        .attr("y1", (d) => round(d.y1))
-        .attr("x2", (d) => round(d.x2))
-        .attr("y2", (d) => round(d.y2));
-    }
+      .attr("class", "edge-group")
+      .attr("data-id", (d) => d.id);
     edgeGroups
-      .select("line.edge")
-      .attr("data-type", (d) => d.type)
-      .attr("marker-end", (d) => (d.encoding.arrow === "none" ? null : `url(#arrow-${d.encoding.arrow})`));
+      .append("line")
+      .attr("class", (d) => `edge ${d.encoding.line}`)
+      .attr("data-id", (d) => d.id)
+      .attr("data-type", (d) => d.type);
+    edgeGroups.append("line").attr("class", "edge-hit").attr("data-id", (d) => d.id);
 
     const nodeGroups = viewport
       .append("g")
@@ -1620,9 +2893,19 @@ THIS SOFTWARE.
       .selectAll("g")
       .data(nodes, (d) => d.id)
       .join("g")
-      .attr("class", (d) => `node ${d.status}`)
+      .attr("class", (d) => `node ${d.status}${degree.get(d.id) >= hubDegree ? " hub" : ""}`)
       .attr("data-id", (d) => d.id)
-      .attr("transform", (d) => `translate(${round(d.x - d.w / 2)},${round(d.y - d.h / 2)})`);
+      .attr("tabindex", -1)
+      .attr("role", "button")
+      .attr("aria-label", (d) => `${d.name} (${d.kind}, ${d.status})`);
+    nodeGroups
+      .append("rect")
+      .attr("class", "focus-ring")
+      .attr("x", -t.focusRing)
+      .attr("y", -t.focusRing)
+      .attr("width", (d) => d.w + 2 * t.focusRing)
+      .attr("height", (d) => d.h + 2 * t.focusRing)
+      .attr("rx", t.radius + t.focusRing);
     nodeGroups
       .append("rect")
       .attr("class", (d) => `box ${d.status}`)
@@ -1637,6 +2920,12 @@ THIS SOFTWARE.
       .attr("data-shape", (d) => d.encoding.shape)
       .attr("d", (d) => glyphPath(d.encoding.shape, t.glyph))
       .attr("transform", (d) => `translate(${t.pad + t.glyph / 2},${d.h / 2})`);
+    // Semantic zoom: when zoomed out, a minor concept collapses to this glyph at its centre.
+    nodeGroups
+      .append("path")
+      .attr("class", (d) => `glyph-solo ${slotClass(d.encoding.slot)}${d.status === "proposed" ? " proposed" : ""}`)
+      .attr("d", (d) => glyphPath(d.encoding.shape, t.glyph))
+      .attr("transform", (d) => `translate(${d.w / 2},${d.h / 2})`);
     nodeGroups
       .append("text")
       .attr("class", "label")
@@ -1644,8 +2933,19 @@ THIS SOFTWARE.
       .attr("y", (d) => d.h / 2)
       .attr("dominant-baseline", "central")
       .text((d) => d.name);
+    const badges = nodeGroups
+      .filter((d) => findings.has(d.id))
+      .append("g")
+      .attr("class", (d) => `finding-badge ${findings.get(d.id)}`)
+      .attr("data-severity", (d) => findings.get(d.id))
+      .attr("transform", (d) => `translate(${d.w - t.border},${t.border})`);
+    badges.append("circle").attr("class", (d) => `badge ${findings.get(d.id)}`).attr("r", t.badge / 2);
+    badges
+      .append("path")
+      .attr("class", "badge-glyph")
+      .attr("d", (d) => badgeSymbol(findings.get(d.id), t.badge / 2));
 
-    // Labels sit above the boxes, so they are drawn last. Hidden at rest; shown on hover.
+    // Labels sit above the boxes, so they are drawn last. Hidden at rest.
     const labels = viewport
       .append("g")
       .attr("class", "edge-labels")
@@ -1654,53 +2954,578 @@ THIS SOFTWARE.
       .join("text")
       .attr("class", "edge-label")
       .attr("data-id", (d) => d.id)
-      .attr("x", (d) => round(d.label.x))
-      .attr("y", (d) => round(d.label.y))
       .attr("text-anchor", "middle")
       .attr("dominant-baseline", "central")
       .text((d) => d.text);
-    edgeGroups
-      .on("mouseenter", (_, d) => labels.filter((l) => l.id === d.id).classed("hover", true))
-      .on("mouseleave", (_, d) => labels.filter((l) => l.id === d.id).classed("hover", false));
 
-    // Fit the whole graph in the canvas, never enlarging past 1:1 so text keeps its size.
+    // --- Geometry ------------------------------------------------------------------------
+
+    let state = { hidden: new Set() };
+
+    function placeNodes(selection) {
+      selection.attr("transform", (d) => `translate(${round(d.x - d.w / 2)},${round(d.y - d.h / 2)})`);
+    }
+
+    // Edge end points, clipped to the boxes. An edge to a hidden concept is a short stub.
+    function edgeGeometry(e) {
+      const a = byId.get(e.source);
+      const b = byId.get(e.target);
+      const [x1, y1] = G.exitPoint(a, b.x, b.y, t.clearance);
+      const [x2, y2] = G.exitPoint(b, a.x, a.y, t.clearance);
+      const hiddenA = state.hidden.has(a.id);
+      const hiddenB = state.hidden.has(b.id);
+      if (hiddenA !== hiddenB) {
+        const [sx, sy, ex, ey] = hiddenB ? [x1, y1, x2, y2] : [x2, y2, x1, y1];
+        const length = Math.hypot(ex - sx, ey - sy) || 1;
+        const k = Math.min(1, t.stub / length);
+        return { x1: sx, y1: sy, x2: sx + (ex - sx) * k, y2: sy + (ey - sy) * k, stub: true, towardsSource: hiddenA };
+      }
+      return { x1, y1, x2, y2, stub: false };
+    }
+
+    function placeEdges(groups, labelSel) {
+      groups.each(function (d) {
+        d.geometry = edgeGeometry(d);
+      });
+      groups
+        .selectAll("line")
+        .attr("x1", (d) => round(d.geometry.x1))
+        .attr("y1", (d) => round(d.geometry.y1))
+        .attr("x2", (d) => round(d.geometry.x2))
+        .attr("y2", (d) => round(d.geometry.y2));
+      labelSel.each(function (d) {
+        const g = d.geometry;
+        d.label = G.placeLabel(g.x1, g.y1, g.x2, g.y2, d.labelWidth, t.nodeHeight, nodes);
+      });
+      labelSel.attr("x", (d) => round(d.label.x)).attr("y", (d) => round(d.label.y));
+    }
+
+    function placeAll() {
+      placeNodes(nodeGroups);
+      placeEdges(edgeGroups, labels);
+    }
+
+    function touching(id) {
+      return [edgeGroups.filter((e) => e.source === id || e.target === id), labels.filter((e) => e.source === id || e.target === id)];
+    }
+
+    placeAll();
+    const home = new Map(nodes.map((n) => [n.id, [n.x, n.y]]));
+
+    // --- Camera (pan and zoom) ---------------------------------------------------------
+
+    let scale = 1;
+    const zoom = d3
+      .zoom()
+      .scaleExtent([MIN_ZOOM, MAX_ZOOM])
+      .filter((event) => (!event.ctrlKey || event.type === "wheel") && !event.button)
+      .on("zoom", (event) => {
+        viewport.attr("transform", event.transform);
+        scale = event.transform.k;
+        svg.classed("zoomed-out", scale < GLYPH_ONLY_BELOW).classed("zoomed-in", scale > ALL_LABELS_ABOVE);
+        svg.attr("data-scale", round(scale));
+      });
+    svg.call(zoom).on("dblclick.zoom", null);
+
+    function bounds(ids) {
+      const set = ids ? nodes.filter((n) => ids.has(n.id)) : nodes.filter((n) => !state.hidden.has(n.id));
+      const list = set.length ? set : nodes;
+      return [
+        Math.min(...list.map((n) => n.x - n.w / 2)),
+        Math.min(...list.map((n) => n.y - n.h / 2)),
+        Math.max(...list.map((n) => n.x + n.w / 2)),
+        Math.max(...list.map((n) => n.y + n.h / 2)),
+      ];
+    }
+
+    // A bottom-left corner of the canvas kept clear for an overlaid control (the legend):
+    // {width, height} in screen pixels.
+    const reserved = options.reserveCorner || (() => ({ width: 0, height: 0 }));
+
+    // Fit the visible graph in the canvas, never enlarging past 1:1 so text keeps its size.
+    // With a reserved corner, the graph goes either above it or to its right, whichever
+    // allows the larger scale.
     function fit() {
       if (!nodes.length) return;
       const width = svgElement.clientWidth;
       const height = svgElement.clientHeight;
-      const x0 = Math.min(...nodes.map((n) => n.x - n.w / 2));
-      const x1 = Math.max(...nodes.map((n) => n.x + n.w / 2));
-      const y0 = Math.min(...nodes.map((n) => n.y - n.h / 2));
-      const y1 = Math.max(...nodes.map((n) => n.y + n.h / 2));
-      const scale = Math.min(1, (width - 2 * t.fitPad) / (x1 - x0), (height - 2 * t.fitPad) / (y1 - y0));
-      const tx = width / 2 - scale * (x0 + x1) / 2;
-      const ty = height / 2 - scale * (y0 + y1) / 2;
-      viewport.attr("transform", `translate(${round(tx)},${round(ty)}) scale(${round(scale * 1000) / 1000})`);
+      const corner = reserved();
+      const [x0, y0, x1, y1] = bounds();
+      const scaleFor = (w, h) =>
+        Math.max(MIN_ZOOM, Math.min(1, (w - 2 * t.fitPad) / (x1 - x0 || 1), (h - 2 * t.fitPad) / (y1 - y0 || 1)));
+      const areas = [
+        { left: 0, width, height }, // the whole canvas, when nothing is reserved
+        { left: 0, width, height: height - corner.height }, // above the corner
+        { left: corner.width, width: width - corner.width, height }, // right of the corner
+      ].filter((a, i) => (corner.width || corner.height ? i > 0 : i === 0) && a.width > 0 && a.height > 0);
+      const area = areas.reduce((best, a) => (scaleFor(a.width, a.height) > scaleFor(best.width, best.height) ? a : best));
+      const k = scaleFor(area.width, area.height);
+      const transform = d3.zoomIdentity
+        .translate(
+          round(area.left + area.width / 2 - (k * (x0 + x1)) / 2),
+          round(area.height / 2 - (k * (y0 + y1)) / 2),
+        )
+        .scale(round(k * 1000) / 1000);
+      svg.call(zoom.transform, transform);
     }
+
+    // Move the camera so a concept sits in the centre, keeping the current scale.
+    // When `around` (ids, e.g. the neighbourhood) is given and the view is zoomed out so far
+    // that boxes have collapsed, zoom in until those concepts fit around the centre (never past 1:1).
+    function centreOn(id, around) {
+      const n = byId.get(id);
+      if (!n) return;
+      const width = svgElement.clientWidth;
+      const height = svgElement.clientHeight;
+      let k = scale;
+      if (around && scale < GLYPH_ONLY_BELOW) {
+        let dx = n.w / 2;
+        let dy = n.h / 2;
+        for (const other of around) {
+          const o = byId.get(other);
+          if (!o || state.hidden.has(other)) continue;
+          dx = Math.max(dx, Math.abs(o.x - n.x) + o.w / 2);
+          dy = Math.max(dy, Math.abs(o.y - n.y) + o.h / 2);
+        }
+        const fitK = Math.min((width / 2 - t.fitPad) / dx, (height / 2 - t.fitPad) / dy);
+        k = Math.min(1, Math.max(GLYPH_ONLY_BELOW, fitK));
+      }
+      const transform = d3.zoomIdentity.translate(round(width / 2 - k * n.x), round(height / 2 - k * n.y)).scale(k);
+      svg.call(zoom.transform, transform);
+    }
+
+    // Pan just enough to bring a concept into view (used when the keyboard moves focus).
+    function ensureVisible(id) {
+      const n = byId.get(id);
+      if (!n) return;
+      const transform = d3.zoomTransform(svgElement);
+      const [x, y] = transform.apply([n.x, n.y]);
+      const margin = t.fitPad + n.w * transform.k;
+      if (x < margin || y < margin || x > svgElement.clientWidth - margin || y > svgElement.clientHeight - margin) {
+        centreOn(id);
+      }
+    }
+
+    function zoomBy(factor) {
+      svg.call(zoom.scaleBy, factor);
+    }
+
+    // --- Interaction -------------------------------------------------------------------
+
+    nodeGroups
+      .on("click", (event, d) => {
+        event.stopPropagation();
+        on.select(d.id);
+      })
+      .on("mouseenter", (event, d) => {
+        nodeGroups.classed("hover", (n) => n.id === d.id);
+        on.hover(d.id, event.currentTarget.getBoundingClientRect());
+      })
+      .on("mouseleave", () => {
+        nodeGroups.classed("hover", false);
+        on.hover(null);
+      });
+    svg.on("click", () => on.select(null));
+    edgeGroups
+      .on("mouseenter", (_, d) => labels.filter((l) => l.id === d.id).classed("hover", true))
+      .on("mouseleave", (_, d) => labels.filter((l) => l.id === d.id).classed("hover", false));
+
+    // Drag a concept to pin it where you drop it. Only that concept moves.
+    const drag = d3
+      .drag()
+      .clickDistance(4)
+      .on("start", (event) => event.sourceEvent.stopPropagation())
+      .on("drag", function (event, d) {
+        d.x = round(d.x + event.dx);
+        d.y = round(d.y + event.dy);
+        d.pinned = true;
+        d3.select(this).classed("pinned", true);
+        placeNodes(d3.select(this));
+        const [groups, labelSel] = touching(d.id);
+        placeEdges(groups, labelSel);
+      })
+      .on("end", (_, d) => {
+        if (d.pinned) on.pin(d.id);
+      });
+    nodeGroups.call(drag);
+
+    // Put every concept back where the layout placed it.
+    function resetLayout() {
+      for (const n of nodes) {
+        [n.x, n.y] = home.get(n.id);
+        n.pinned = false;
+      }
+      nodeGroups.classed("pinned", false);
+      placeAll();
+    }
+
+    function setLayout(next) {
+      if (next === mode) return;
+      mode = next;
+      layout(nodes, model, t, mode);
+      for (const n of nodes) home.set(n.id, [n.x, n.y]);
+      nodeGroups.classed("pinned", false);
+      placeAll();
+      fit();
+    }
+
+    // --- State --------------------------------------------------------------------------
+    // state: {selected, near: Map id -> distance | null, hidden: Set, highlight: Set | null,
+    //         highlightEdges: Set | null, hiddenEdges: Set}
+    function update(next) {
+      const previousHidden = state.hidden;
+      state = { hidden: new Set(), hiddenEdges: new Set(), ...next };
+      const near = state.near;
+      const selected = state.selected;
+      const isNear = (id) => !near || near.has(id);
+      const highlight = state.highlight;
+
+      nodeGroups
+        .classed("selected", (d) => d.id === selected)
+        .classed("near", (d) => Boolean(near) && near.has(d.id) && d.id !== selected)
+        .classed("faded", (d) => !isNear(d.id) || (highlight !== null && highlight !== undefined && !highlight.has(d.id)))
+        .classed("highlight", (d) => Boolean(highlight) && highlight.has(d.id))
+        .classed("hidden", (d) => state.hidden.has(d.id))
+        .attr("aria-current", (d) => (d.id === selected ? "true" : null));
+      nodeGroups.selectAll(".label").classed("selected", (d) => d.id === selected);
+
+      const edgeClass = (e) => {
+        const bothHidden = state.hidden.has(e.source) && state.hidden.has(e.target);
+        const typeHidden = state.hiddenEdges.has(e.type);
+        const focus = Boolean(selected) && (e.source === selected || e.target === selected);
+        const inNear = Boolean(near) && near.has(e.source) && near.has(e.target);
+        const lit = !state.highlightEdges || state.highlightEdges.has(e.id);
+        return { hidden: bothHidden || typeHidden, focus, near: inNear && !focus, faded: (near && !inNear) || !lit };
+      };
+      edgeGroups.each(function (e) {
+        e.state = edgeClass(e);
+      });
+      edgeGroups
+        .classed("hidden", (e) => e.state.hidden)
+        .classed("focus", (e) => e.state.focus)
+        .classed("near", (e) => e.state.near)
+        .classed("faded", (e) => e.state.faded)
+        .classed("highlight", (e) => Boolean(state.highlightEdges) && state.highlightEdges.has(e.id));
+      edgeGroups
+        .select("line.edge")
+        .attr("marker-end", (e) => {
+          if (e.encoding.arrow === "none" || (e.geometry && e.geometry.stub && e.geometry.towardsSource)) return null;
+          const lit = e.state.focus || e.state.near;
+          return `url(#arrow-${e.encoding.arrow}${lit ? "-focus" : ""})`;
+        });
+      labels
+        .classed("focus", (e) => e.state.focus && !e.state.hidden)
+        .classed("hidden", (e) => e.state.hidden);
+
+      const hiddenChanged =
+        previousHidden.size !== state.hidden.size || [...state.hidden].some((id) => !previousHidden.has(id));
+      if (hiddenChanged) {
+        placeEdges(edgeGroups, labels);
+        edgeGroups.classed("stub", (e) => e.geometry.stub);
+        edgeGroups
+          .select("line.edge")
+          .attr("marker-end", (e) =>
+            e.encoding.arrow === "none" || (e.geometry.stub && e.geometry.towardsSource)
+              ? null
+              : `url(#arrow-${e.encoding.arrow}${e.state.focus || e.state.near ? "-focus" : ""})`,
+          );
+      }
+    }
+
+    function focusNode(id) {
+      const node = nodeGroups.filter((d) => d.id === id).node();
+      if (node) node.focus({ preventScroll: true });
+    }
+
+    function setTabStop(id) {
+      nodeGroups.attr("tabindex", (d) => (d.id === id ? 0 : -1));
+    }
+
+    update({});
     fit();
-    root.addEventListener("resize", fit);
+    setTabStop(nodes.length ? [...nodes].sort((a, b) => degree.get(b.id) - degree.get(a.id) || a.id.localeCompare(b.id))[0].id : null);
+    let resizeTimer = null;
+    root.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(fit, 50);
+    });
 
     return {
+      update,
+      fit,
+      centreOn,
+      ensureVisible,
+      zoomBy,
+      resetLayout,
+      setLayout,
+      focusNode,
+      setTabStop,
+      layoutMode: () => mode,
+      scale: () => scale,
+      degree: (id) => degree.get(id),
       // Layout coordinates (box centres), independent of the viewport. Used by tests.
       positions: () => Object.fromEntries(nodes.map((n) => [n.id, [n.x, n.y]])),
     };
   }
 
-  root.OntologyGraphView = { render, glyphPath };
+  root.OntologyGraphView = { render, glyphPath, badgeSymbol };
+})(window);
+
+// Concept detail pane. Section headings are the concept file's field names (underscores read as
+// spaces), in the file's order; Findings and Incoming relations are the two sections that are not
+// fields. Fields that are empty are left out, except an empty definition ("Needs a definition").
+(function (root) {
+  "use strict";
+
+  const G = root.OntologyGraph;
+  const SVG_NS = "http://www.w3.org/2000/svg";
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined && text !== null) node.textContent = text;
+    return node;
+  }
+
+  function svgIcon(size, build) {
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("width", size);
+    svg.setAttribute("height", size);
+    svg.setAttribute("viewBox", `${-size / 2} ${-size / 2} ${size} ${size}`);
+    svg.setAttribute("aria-hidden", "true");
+    build(svg);
+    return svg;
+  }
+
+  function path(d, className) {
+    const p = document.createElementNS(SVG_NS, "path");
+    p.setAttribute("d", d);
+    p.setAttribute("class", className);
+    return p;
+  }
+
+  // A kind glyph as a small inline icon (legend, pane, list, previews).
+  function kindIcon(encoding, proposed) {
+    const tokens = getComputedStyle(document.documentElement);
+    const g = parseFloat(tokens.getPropertyValue("--node-glyph-size"));
+    const slot = encoding.slot === "fallback" ? "k-fallback" : `k${encoding.slot}`;
+    return svgIcon(g + 4, (svg) => {
+      svg.setAttribute("class", "kind-icon");
+      svg.append(path(root.OntologyGraphView.glyphPath(encoding.shape, g), `glyph ${slot}${proposed ? " proposed" : ""}`));
+    });
+  }
+
+  // A finding badge as an inline icon: severity is read from the symbol; colour only reinforces it.
+  function badgeIcon(severity) {
+    const tokens = getComputedStyle(document.documentElement);
+    const size = parseFloat(tokens.getPropertyValue("--badge-size"));
+    const icon = svgIcon(size + 2, (svg) => {
+      const disc = document.createElementNS(SVG_NS, "circle");
+      disc.setAttribute("r", size / 2);
+      disc.setAttribute("class", `badge ${severity}`);
+      svg.append(disc, path(root.OntologyGraphView.badgeSymbol(severity, size / 2), "badge-glyph"));
+    });
+    icon.setAttribute("class", "badge-icon");
+    icon.setAttribute("data-severity", severity);
+    return icon;
+  }
+
+  const SEVERITY_WORD = { error: "error", warn: "warning", info: "info" };
+
+  function heading(text) {
+    return el("h3", "", text);
+  }
+
+  function list(items, render) {
+    const ul = el("ul");
+    for (const item of items) {
+      const li = el("li");
+      render(li, item);
+      ul.append(li);
+    }
+    return ul;
+  }
+
+  function shortDate(iso) {
+    return iso ? iso.slice(0, 10) : null;
+  }
+
+  // ctx: {conceptsById, encodingOf(kind), relationTypes (Map), incoming(id), findings(id),
+  //       pathToProject, select(id)}
+  function render(container, concept, ctx) {
+    container.replaceChildren();
+    if (!concept) return;
+    const link = (id, label) => {
+      const target = ctx.conceptsById.get(id);
+      const a = el("a", "concept-link", label || (target ? target.name : id));
+      a.href = `#${encodeURIComponent(id)}`;
+      a.dataset.id = id;
+      a.addEventListener("click", (event) => {
+        event.preventDefault();
+        ctx.select(id);
+      });
+      if (target && target.status !== "defined") {
+        const span = el("span");
+        span.append(a, el("span", "faint", ` (${target.status})`));
+        return span;
+      }
+      return a;
+    };
+
+    const meta = el("div", "meta");
+    meta.append(kindIcon(ctx.encodingOf(concept.kind), concept.status === "proposed"), `${concept.kind} · ${concept.status}`);
+    const title = el("h2", "", concept.name);
+    title.id = "pane-title";
+    container.append(meta, title, el("div", "id", concept.id));
+
+    const findings = ctx.findings(concept.id);
+    if (findings.length) {
+      container.append(heading("Findings"));
+      container.append(
+        list(findings, (li, f) => {
+          li.className = "finding";
+          const text = el("span");
+          text.append(el("span", "code", [f.code, f.criterion].filter(Boolean).join(" · ")), el("br"), f.message);
+          li.append(badgeIcon(f.severity), text);
+          li.setAttribute("aria-label", `${SEVERITY_WORD[f.severity]} ${f.code}`);
+        }),
+      );
+    }
+
+    container.append(heading("Definition"));
+    if (concept.definition) {
+      container.append(el("p", "definition", concept.definition));
+    } else {
+      const needs = el("div", "needs");
+      needs.append(
+        el("strong", "", "Needs a definition."),
+        ` Nobody has defined this concept yet. Write it in your own words in `,
+        el("code", "", `concepts/${concept.id}.yaml`),
+        ", then set ",
+        el("code", "", "status: defined"),
+        ".",
+      );
+      container.append(needs);
+    }
+
+    if (concept.discouraged_terms.length) {
+      container.append(heading("Discouraged terms"));
+      container.append(
+        list(concept.discouraged_terms, (li, term) => {
+          li.append(el("span", "term", term.term));
+          if (term.note) li.append(el("span", "muted", ` — ${term.note}`));
+        }),
+      );
+    }
+    for (const [field, title, className] of [
+      ["examples", "Examples", ""],
+      ["non_examples", "Non examples", "muted"],
+      ["rules", "Rules", ""],
+    ]) {
+      if (concept[field].length) {
+        container.append(heading(title), list(concept[field], (li, text) => {
+          li.textContent = text;
+          if (className) li.className = className;
+        }));
+      }
+    }
+
+    const sentence = (li, subject, label, cardinality, incoming, otherId) => {
+      const phrase = G.relationPhrase(label, cardinality, incoming);
+      const other = ctx.conceptsById.get(otherId);
+      const otherName = other ? (phrase.many ? G.plural(other.name) : other.name) : otherId;
+      li.append(`${subject} `, el("span", "rel-label", phrase.verb), " ", link(otherId, otherName));
+      if (cardinality) li.title = `cardinality ${cardinality}`;
+    };
+
+    if (concept.relations.length) {
+      container.append(heading("Relations"));
+      container.append(
+        list(concept.relations, (li, r) => sentence(li, concept.name, r.type, r.cardinality, false, r.target)),
+      );
+    }
+
+    if (concept.implemented_in.length) {
+      container.append(heading("Implemented in"));
+      const impl = el("div", "impl");
+      for (const entry of concept.implemented_in) {
+        const row = el("div");
+        const a = el("a", "path-link");
+        a.href = `${ctx.pathToProject}${entry.path}`;
+        a.append(el("code", "", entry.path));
+        row.append(a);
+        if (entry.symbol) row.append(el("span", "faint", " · "), el("code", "", entry.symbol));
+        let when = "Never reviewed";
+        if (entry.reviewed_at) {
+          const date = shortDate(entry.reviewed_date);
+          when = date
+            ? `Reviewed at ${entry.reviewed_at.slice(0, 7)} · ${date}`
+            : `Reviewed at ${entry.reviewed_at.slice(0, 7)} (not in this history)`;
+        }
+        impl.append(row, el("div", "when", when));
+      }
+      container.append(impl);
+    }
+
+    if (concept.open_questions.length) {
+      container.append(heading("Open questions"), list(concept.open_questions, (li, q) => (li.textContent = q)));
+    }
+
+    if (concept.proposal && (concept.proposal.rationale || concept.proposal.suggested_definition)) {
+      container.append(heading("Proposal"));
+      const box = el("div", "suggestion");
+      if (concept.proposal.suggested_definition) {
+        box.append(
+          el("div", "who", "Suggested definition · written by the agent, not a definition"),
+          el("p", "suggested", concept.proposal.suggested_definition),
+        );
+      }
+      if (concept.proposal.rationale) {
+        box.append(el("div", "who", "Rationale"), el("p", "rationale", concept.proposal.rationale));
+      }
+      container.append(box);
+    }
+
+    if (concept.replaced_by) {
+      const p = el("p");
+      p.append("Use ", link(concept.replaced_by), " instead.");
+      container.append(heading("Replaced by"), p);
+    }
+
+    const incoming = ctx.incoming(concept.id);
+    if (incoming.length) {
+      container.append(heading("Incoming relations"));
+      container.append(
+        list(incoming, (li, edge) => {
+          const type = ctx.relationTypes.get(edge.type);
+          const inverse = type && type.inverse ? type.inverse : `${edge.type} (inverse)`;
+          sentence(li, concept.name, inverse, edge.cardinality, true, edge.source);
+        }),
+      );
+    }
+  }
+
+  root.OntologyPane = { render, kindIcon, badgeIcon };
 })(window);
 
 // The ontology view. Reads the data contract embedded by `onto.py build` (see ontokit/build.py),
-// builds the graph model (graph-model.js) and draws it (graph-view.js).
+// builds the graph model (graph-model.js), draws it (graph-view.js) and the detail pane (pane.js),
+// and keeps the interface state in one place: every change goes through setState().
 (function () {
   "use strict";
 
   const data = JSON.parse(document.getElementById("ontology-data").textContent);
+  const G = OntologyGraph;
   const SVG_NS = "http://www.w3.org/2000/svg";
+  const HOPS = [1, 2, 3];
+  const OVERLAYS = ["none", "health", "mud", "drift"];
+  const LAYOUTS = ["force", "hierarchy"];
+  const CRUMBS = 5; // breadcrumbs shown at most
 
-  function element(tag, className, text) {
+  function el(tag, className, text) {
     const node = document.createElement(tag);
     if (className) node.className = className;
-    if (text !== undefined) node.textContent = text;
+    if (text !== undefined && text !== null) node.textContent = text;
     return node;
   }
 
@@ -1708,37 +3533,1006 @@ THIS SOFTWARE.
     return `${n} ${n === 1 ? singular : plural}`;
   }
 
-  const model = OntologyGraph.buildModel(data);
-  const summary = [
-    count(data.concepts.length, "concept", "concepts"),
-    count(model.edges.length, "relation", "relations"),
-  ].join(" · ");
+  // --- Model and lookups ---------------------------------------------------------------
 
-  const toolbar = element("header", "toolbar");
-  const brand = element("div", "brand", data.ontology.name);
-  brand.append(element("span", "", "ontology"));
-  toolbar.append(brand, element("div", "counts", summary));
+  const model = G.buildModel(data);
+  const conceptsById = new Map(data.concepts.map((c) => [c.id, c]));
+  const nodesById = new Map(model.nodes.map((n) => [n.id, n]));
+  const adjacency = G.adjacency(model.nodes, model.edges);
+  const incomingEdges = new Map(model.nodes.map((n) => [n.id, []]));
+  for (const e of model.edges) incomingEdges.get(e.target).push(e);
+  const findingsByConcept = new Map();
+  for (const f of data.findings) {
+    if (!f.concept) continue;
+    if (!findingsByConcept.has(f.concept)) findingsByConcept.set(f.concept, []);
+    findingsByConcept.get(f.concept).push(f);
+  }
+  const SEVERITY_RANK = { error: 0, warn: 1, info: 2 };
+  const worstFinding = new Map(
+    [...findingsByConcept].map(([id, list]) => [
+      id,
+      list.reduce((worst, f) => (SEVERITY_RANK[f.severity] < SEVERITY_RANK[worst] ? f.severity : worst), "info"),
+    ]),
+  );
+  const encodingOf = (kind) => (model.kinds.get(kind) || {}).encoding || { slot: "fallback", shape: "circle" };
 
-  const canvas = element("main", "canvas");
+  // --- State ---------------------------------------------------------------------------
+
+  const state = {
+    selected: null,
+    hops: 1,
+    overlay: "none",
+    layout: "force",
+    trail: [], // concepts visited before the selected one, oldest first (breadcrumbs)
+    tab: "graph",
+    filters: { kinds: new Set(), statuses: new Set(), types: new Set() }, // what is hidden
+    sort: { key: "name", dir: "asc" }, // list view
+  };
+  const refreshers = []; // panels that redraw on every state change (list, health, vocabulary)
+
+  // --- Layout --------------------------------------------------------------------------
+
+  const summary = [count(data.concepts.length, "concept", "concepts"), count(model.edges.length, "relation", "relations")].join(
+    " · ",
+  );
+
+  const toolbar = el("header", "toolbar");
+  const brand = el("div", "brand", data.ontology.name);
+  brand.append(el("span", "", "ontology"));
+  const spacer = el("div", "spacer");
+
+  // Search: names, discouraged terms (shown as redirects) and definition text.
+  const searchBox = el("div", "search");
+  const searchInput = el("input");
+  searchInput.type = "search";
+  searchInput.placeholder = "Search concepts and terms";
+  searchInput.setAttribute("aria-label", "Search concepts and terms");
+  searchInput.setAttribute("role", "combobox");
+  searchInput.setAttribute("aria-autocomplete", "list");
+  searchInput.setAttribute("aria-expanded", "false");
+  searchInput.setAttribute("aria-controls", "search-results");
+  searchInput.autocomplete = "off";
+  searchInput.spellcheck = false;
+  const searchKey = el("kbd", "", "/");
+  searchKey.setAttribute("aria-hidden", "true");
+  const searchResults = el("ul", "search-results");
+  searchResults.id = "search-results";
+  searchResults.setAttribute("role", "listbox");
+  searchResults.setAttribute("aria-label", "Search results");
+  searchResults.hidden = true;
+  searchBox.append(searchInput, searchKey, searchResults);
+
+  const tabs = el("nav", "tabs");
+  tabs.setAttribute("role", "tablist");
+  tabs.setAttribute("aria-label", "Views");
+  const tabButtons = new Map();
+  function addTab(id, label, panel) {
+    const button = el("button", "tab", label);
+    button.type = "button";
+    button.id = `tab-${id}`;
+    button.setAttribute("role", "tab");
+    button.setAttribute("aria-controls", panel.id);
+    button.addEventListener("click", () => setState({ tab: id }));
+    tabs.append(button);
+    tabButtons.set(id, { button, panel });
+    panel.setAttribute("role", "tabpanel");
+    panel.setAttribute("aria-labelledby", button.id);
+    return button;
+  }
+
+  toolbar.append(brand, tabs, searchBox, spacer);
+
+  // A segmented control: one button per option, the current one pressed.
+  function segmented(label, options, current, onPick, describe = String) {
+    const group = el("div", "control");
+    group.setAttribute("role", "group");
+    group.setAttribute("aria-label", label);
+    group.append(el("span", "control-label", label));
+    const seg = el("span", "seg");
+    const buttons = options.map((option) => {
+      const button = el("button", "", describe(option));
+      button.type = "button";
+      button.dataset.value = option;
+      button.addEventListener("click", () => onPick(option));
+      seg.append(button);
+      return button;
+    });
+    group.append(seg);
+    group.sync = (value) => {
+      for (const b of buttons) b.setAttribute("aria-pressed", String(b.dataset.value === String(value)));
+    };
+    group.sync(current);
+    return group;
+  }
+
+  const hopsControl = segmented("Hops", HOPS, state.hops, (hops) => setState({ hops }));
+  hopsControl.classList.add("hops");
+  const overlayControl = segmented(
+    "Overlay",
+    OVERLAYS,
+    state.overlay,
+    (overlay) => setState({ overlay }),
+    (o) => o[0].toUpperCase() + o.slice(1),
+  );
+  overlayControl.classList.add("overlay");
+  const layoutControl = segmented(
+    "Layout",
+    LAYOUTS,
+    state.layout,
+    (layout) => setState({ layout }),
+    (l) => l[0].toUpperCase() + l.slice(1),
+  );
+  layoutControl.classList.add("layout");
+  layoutControl.querySelector(".control-label").classList.add("visually-hidden");
+  toolbar.append(hopsControl, overlayControl, layoutControl);
+
+  // Filters: kind, status and relation type. Checked means shown.
+  const filterButton = el("button", "button filters-button", "Filters");
+  filterButton.type = "button";
+  filterButton.setAttribute("aria-expanded", "false");
+  filterButton.setAttribute("aria-controls", "filters-panel");
+  const filterPanel = el("div", "filters-panel");
+  filterPanel.id = "filters-panel";
+  filterPanel.hidden = true;
+  filterPanel.setAttribute("role", "dialog");
+  filterPanel.setAttribute("aria-label", "Filters");
+  const filterWrap = el("div", "filters");
+  filterWrap.append(filterButton, filterPanel);
+  toolbar.append(filterWrap);
+  filterButton.addEventListener("click", () => {
+    filterPanel.hidden = !filterPanel.hidden;
+    filterButton.setAttribute("aria-expanded", String(!filterPanel.hidden));
+  });
+  document.addEventListener("click", (event) => {
+    if (!filterPanel.hidden && !filterWrap.contains(event.target)) {
+      filterPanel.hidden = true;
+      filterButton.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  const kindsInUse = [...new Set(data.concepts.map((c) => c.kind))].sort(
+    (a, b) => (encodingOf(a).slot === "fallback" ? 99 : encodingOf(a).slot) - (encodingOf(b).slot === "fallback" ? 99 : encodingOf(b).slot) || a.localeCompare(b),
+  );
+  const typesInUse = [...new Set(model.edges.map((e) => e.type))].sort();
+  const filterGroups = [
+    ["kinds", "Kind", kindsInUse, (k) => [OntologyPane.kindIcon(encodingOf(k), false), ` ${k}`]],
+    ["statuses", "Status", ["defined", "proposed", "deprecated"], (v) => [v]],
+    ["types", "Relation type", typesInUse, (t) => [t.replace(/_/g, " ")]],
+  ];
+  const filterInputs = [];
+  for (const [key, legend, values, label] of filterGroups) {
+    const fieldset = el("fieldset");
+    fieldset.dataset.group = key;
+    // Choose what you want rather than untick what you don't: All / None per group, and
+    // "only" on each row shows that value alone.
+    const head = el("legend", "filter-head");
+    const setHidden = (hidden) => setState({ filters: { ...state.filters, [key]: new Set(hidden) } });
+    const quick = (text, aria, hidden) => {
+      const b = el("button", "link-button", text);
+      b.type = "button";
+      b.setAttribute("aria-label", aria);
+      b.addEventListener("click", () => setHidden(hidden()));
+      return b;
+    };
+    const actions = el("span", "filter-actions");
+    actions.append(
+      quick("All", `Show every ${legend.toLowerCase()}`, () => []),
+      quick("None", `Hide every ${legend.toLowerCase()}`, () => values),
+    );
+    head.append(el("span", "", legend), actions);
+    fieldset.append(head);
+    for (const value of values) {
+      const line = el("div", "filter-row");
+      const row = el("label", "check");
+      const box = el("input");
+      box.type = "checkbox";
+      box.dataset.group = key;
+      box.value = value;
+      box.addEventListener("change", () => {
+        const next = new Set(state.filters[key]);
+        if (box.checked) next.delete(value);
+        else next.add(value);
+        setState({ filters: { ...state.filters, [key]: next } });
+      });
+      row.append(box, ...label(value));
+      const only = el("button", "link-button only", "only");
+      only.type = "button";
+      only.dataset.value = value;
+      only.setAttribute("aria-label", `Show only ${String(value).replace(/_/g, " ")}`);
+      only.addEventListener("click", () => setHidden(values.filter((v) => v !== value)));
+      line.append(row, only);
+      fieldset.append(line);
+      filterInputs.push(box);
+    }
+    filterPanel.append(fieldset);
+  }
+  const showAll = el("button", "button", "Show all");
+  showAll.type = "button";
+  showAll.addEventListener("click", () =>
+    setState({ filters: { kinds: new Set(), statuses: new Set(), types: new Set() } }),
+  );
+  filterPanel.append(showAll);
+  const workspace = el("div", "workspace");
+  const canvas = el("main", "canvas");
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("class", "graph");
-  svg.setAttribute("role", "img");
+  svg.setAttribute("tabindex", "-1"); // the concepts inside are the tab stops, not the canvas
+  svg.setAttribute("role", "group");
   svg.setAttribute("aria-label", `Concept graph of ${data.ontology.name}: ${summary}`);
   canvas.append(svg);
   if (!data.concepts.length) {
-    canvas.append(element("p", "empty", "No concepts yet. Add one with 'onto.py new', then build again."));
+    canvas.append(el("p", "empty", "No concepts yet. Add one with 'onto.py new', then build again."));
   }
+  const crumbs = el("nav", "crumbs");
+  crumbs.setAttribute("aria-label", "Breadcrumbs");
+  const zoomControls = el("div", "zoom");
+  zoomControls.setAttribute("role", "group");
+  zoomControls.setAttribute("aria-label", "Zoom");
+  canvas.append(crumbs, zoomControls);
+  const preview = el("div", "preview");
+  preview.setAttribute("role", "tooltip");
+  preview.hidden = true;
+  canvas.append(preview);
+
+  const pane = el("aside", "pane");
+  pane.setAttribute("aria-labelledby", "pane-title");
+  pane.hidden = true;
+  canvas.id = "panel-graph";
+  const listPanel = el("section", "list-panel");
+  listPanel.id = "panel-list";
+  listPanel.hidden = true; // hidden before the graph is laid out, so the first fit sees the whole canvas
+  const main = el("div", "main");
+  main.append(canvas, listPanel);
+  workspace.append(main, pane);
+  addTab("graph", "Graph", canvas);
+  addTab("list", "List", listPanel);
+  const healthPanel = el("section", "health-panel");
+  healthPanel.id = "panel-health";
+  healthPanel.hidden = true;
+  main.append(healthPanel);
+  const healthTab = addTab("health", "Health", healthPanel);
+  const healthCount = el("span", "count", String(data.findings.length));
+  healthCount.setAttribute("aria-label", count(data.findings.length, "finding", "findings"));
+  healthTab.append(healthCount);
+  const vocabPanel = el("section", "vocab-panel");
+  vocabPanel.id = "panel-vocabulary";
+  vocabPanel.hidden = true;
+  main.append(vocabPanel);
+  addTab("vocabulary", "Vocabulary", vocabPanel);
 
   const app = document.getElementById("app");
   app.className = "app";
-  app.replaceChildren(toolbar, canvas);
+  app.replaceChildren(toolbar, workspace);
 
-  const view = OntologyGraphView.render(svg, model);
+  // --- Graph ---------------------------------------------------------------------------
+
+  const view = OntologyGraphView.render(svg, model, {
+    findings: worstFinding,
+    // Fit-to-view keeps the graph clear of the legend in the canvas's bottom-left corner.
+    reserveCorner: () => {
+      const legendBox = canvas.querySelector(".legend");
+      if (!legendBox) return { width: 0, height: 0 };
+      const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--space-3"));
+      return { width: legendBox.offsetWidth + gap, height: legendBox.offsetHeight + gap };
+    },
+    on: {
+      select: (id) => setState({ selected: id }),
+      hover: showPreview,
+    },
+  });
+
+  function showPreview(id, rect) {
+    if (!id) {
+      preview.hidden = true;
+      return;
+    }
+    const concept = conceptsById.get(id);
+    const meta = el("div", "meta");
+    meta.append(OntologyPane.kindIcon(encodingOf(concept.kind), concept.status === "proposed"), `${concept.kind} · ${concept.status}`);
+    const text = concept.definition ? G.firstSentence(concept.definition) : "Needs a definition.";
+    preview.replaceChildren(meta, el("div", "preview-name", concept.name), el("div", "preview-text", text));
+    preview.hidden = false;
+    const box = canvas.getBoundingClientRect();
+    const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--space-2"));
+    const left = Math.min(rect.left - box.left, box.width - preview.offsetWidth - gap);
+    const below = rect.bottom - box.top + gap;
+    const top = below + preview.offsetHeight > box.height ? rect.top - box.top - preview.offsetHeight - gap : below;
+    preview.style.left = `${Math.max(gap, left)}px`;
+    preview.style.top = `${Math.max(gap, top)}px`;
+  }
+
+  // Zoom controls: small, neutral, out of the way.
+  for (const [symbol, label, action] of [
+    ["+", "Zoom in", () => view.zoomBy(1.25)],
+    ["−", "Zoom out", () => view.zoomBy(0.8)],
+    ["⤢", "Fit to view", () => view.fit()],
+    ["↺", "Reset layout (unpin dragged concepts)", () => view.resetLayout()],
+  ]) {
+    const button = el("button", "", symbol);
+    button.type = "button";
+    button.title = label;
+    button.setAttribute("aria-label", label);
+    button.addEventListener("click", action);
+    zoomControls.append(button);
+  }
+
+  // --- Keyboard ------------------------------------------------------------------------
+  // Tab enters the graph at one concept. Arrow keys move to the connected concept that lies
+  // most nearly in that direction; Tab and Shift+Tab step through the concepts connected to
+  // the selected one (then leave the graph as usual); Enter or Space selects; Escape clears.
+
+  const DIRECTIONS = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] };
+
+  function focusConcept(id) {
+    view.setTabStop(id);
+    view.ensureVisible(id);
+    view.focusNode(id);
+  }
+
+  function byName(a, b) {
+    return nodesById.get(a).name.localeCompare(nodesById.get(b).name);
+  }
+
+  function towards(fromId, [dx, dy]) {
+    const positions = view.positions();
+    const [x0, y0] = positions[fromId];
+    let best = null;
+    for (const id of visibleAdjacency.get(fromId) || []) {
+      const [x, y] = positions[id];
+      const distance = Math.hypot(x - x0, y - y0) || 1;
+      const cos = ((x - x0) * dx + (y - y0) * dy) / distance;
+      if (cos < 0.3) continue; // more than about 70 degrees off the arrow's direction
+      const score = distance / cos;
+      if (!best || score < best.score) best = { id, score };
+    }
+    return best && best.id;
+  }
+
+  svg.addEventListener("keydown", (event) => {
+    const node = event.target.closest && event.target.closest(".node");
+    if (!node) return;
+    const id = node.dataset.id;
+    if (event.key in DIRECTIONS) {
+      event.preventDefault();
+      const next = towards(id, DIRECTIONS[event.key]);
+      if (next) focusConcept(next);
+    } else if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      setState({ selected: id });
+    } else if (event.key === "Escape") {
+      setState({ selected: null });
+    } else if (event.key === "Tab") {
+      const anchor = state.selected || id;
+      const ring = [anchor, ...[...(visibleAdjacency.get(anchor) || [])].sort(byName)];
+      const at = ring.indexOf(id);
+      const next = at + (event.shiftKey ? -1 : 1);
+      if (at !== -1 && next >= 0 && next < ring.length) {
+        event.preventDefault();
+        focusConcept(ring[next]);
+      }
+    }
+  });
+  svg.addEventListener("focusin", (event) => {
+    const node = event.target.closest && event.target.closest(".node");
+    if (node) view.setTabStop(node.dataset.id);
+  });
+
+  // --- Search ------------------------------------------------------------------------
+
+  let results = [];
+  let active = -1;
+
+  function showResults() {
+    results = G.search(data.concepts, searchInput.value);
+    active = results.length ? 0 : -1;
+    searchResults.replaceChildren();
+    for (const [i, r] of results.entries()) {
+      const li = el("li", `result ${r.rank}`);
+      li.id = `search-result-${i}`;
+      li.setAttribute("role", "option");
+      li.dataset.id = r.id;
+      li.dataset.rank = r.rank;
+      const concept = conceptsById.get(r.id);
+      if (r.rank === "redirect") {
+        li.append(el("span", "muted", `'${r.term}' →`), " use ", el("strong", "", r.name));
+      } else {
+        li.append(OntologyPane.kindIcon(encodingOf(concept.kind), concept.status === "proposed"), " ", r.name);
+        if (concept.status !== "defined") li.append(el("span", "faint", ` · ${concept.status}`));
+        if (r.rank === "definition") li.append(el("span", "faint", " · in definition"));
+      }
+      li.addEventListener("mousedown", (event) => {
+        event.preventDefault(); // keep focus in the input until the choice is made
+        choose(i);
+      });
+      searchResults.append(li);
+    }
+    if (searchInput.value.trim() && !results.length) {
+      const none = el("li", "none", "No matching concepts");
+      none.setAttribute("aria-disabled", "true");
+      searchResults.append(none);
+    }
+    searchResults.hidden = !searchInput.value.trim();
+    searchInput.setAttribute("aria-expanded", String(!searchResults.hidden));
+    markActive();
+  }
+
+  function markActive() {
+    for (const [i, li] of [...searchResults.querySelectorAll(".result")].entries()) {
+      li.setAttribute("aria-selected", String(i === active));
+    }
+    if (active >= 0) searchInput.setAttribute("aria-activedescendant", `search-result-${active}`);
+    else searchInput.removeAttribute("aria-activedescendant");
+  }
+
+  function closeResults() {
+    searchResults.hidden = true;
+    searchInput.setAttribute("aria-expanded", "false");
+  }
+
+  function choose(i) {
+    const r = results[i];
+    if (!r) return;
+    closeResults();
+    searchInput.value = "";
+    setState({ selected: r.id });
+    view.focusNode(r.id); // the graph now has focus, at the chosen concept
+  }
+
+  searchInput.addEventListener("input", showResults);
+  searchInput.addEventListener("focus", () => searchInput.value.trim() && showResults());
+  searchInput.addEventListener("blur", closeResults);
+  searchInput.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      if (!results.length) return;
+      active = (active + (event.key === "ArrowDown" ? 1 : -1) + results.length) % results.length;
+      markActive();
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      choose(Math.max(active, 0));
+    } else if (event.key === "Escape") {
+      searchInput.value = "";
+      closeResults();
+    }
+  });
+
+  // "/" focuses search from anywhere except a text field.
+  document.addEventListener("keydown", (event) => {
+    const typing = event.target.closest && event.target.closest("input, textarea, select, [contenteditable]");
+    if (event.key === "/" && !typing && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+    }
+  });
+
+  // --- URL: #<concept-id>?hops=2&overlay=health ---------------------------------------
+
+  function parseHash(hash) {
+    const text = hash.replace(/^#/, "");
+    const [idPart, query = ""] = text.split("?");
+    const params = new URLSearchParams(query);
+    const patch = { selected: idPart ? decodeURIComponent(idPart) : null };
+    const hops = Number(params.get("hops"));
+    patch.hops = HOPS.includes(hops) ? hops : 1;
+    patch.overlay = OVERLAYS.includes(params.get("overlay")) ? params.get("overlay") : "none";
+    patch.layout = LAYOUTS.includes(params.get("layout")) ? params.get("layout") : "force";
+    return patch;
+  }
+
+  function hashFor(s) {
+    const params = new URLSearchParams();
+    if (s.hops !== 1) params.set("hops", s.hops);
+    if (s.overlay !== "none") params.set("overlay", s.overlay);
+    if (s.layout !== "force") params.set("layout", s.layout);
+    const query = params.toString();
+    const id = s.selected ? encodeURIComponent(s.selected) : "";
+    return id || query ? `#${id}${query ? `?${query}` : ""}` : "";
+  }
+
+  function syncUrl(previous) {
+    const hash = hashFor(state);
+    if (hash === location.hash || (!hash && !location.hash)) return;
+    const url = `${location.pathname}${location.search}${hash || "#"}`;
+    try {
+      if (state.selected !== previous.selected) history.pushState(null, "", url);
+      else history.replaceState(null, "", url);
+    } catch {
+      // Some browsers restrict the History API on file:// pages; the view still works.
+    }
+  }
+
+  function restoreFromUrl() {
+    const patch = parseHash(location.hash);
+    if (patch.selected && !nodesById.has(patch.selected)) patch.selected = null;
+    setState({ ...patch, trail: [] }, { fromUrl: true });
+  }
+  window.addEventListener("popstate", restoreFromUrl);
+  window.addEventListener("hashchange", restoreFromUrl);
+
+  // --- Rendering state -----------------------------------------------------------------
+
+  const paneContext = {
+    conceptsById,
+    encodingOf,
+    relationTypes: model.relationTypes,
+    incoming: (id) => incomingEdges.get(id) || [],
+    findings: (id) => findingsByConcept.get(id) || [],
+    pathToProject: data.ontology.path_to_project || "",
+    select: (id) => setState({ selected: id }),
+  };
+
+  // Selecting a new concept from another records a breadcrumb; going back to one trims the trail.
+  function nextTrail(previous, patch) {
+    if (patch.trail) return patch.trail;
+    const next = patch.selected;
+    if (next === undefined || next === previous.selected) return previous.trail;
+    if (!next) return [];
+    const back = previous.trail.indexOf(next);
+    if (back !== -1) return previous.trail.slice(0, back);
+    return previous.selected ? [...previous.trail, previous.selected].slice(-(CRUMBS - 1)) : [];
+  }
+
+  function setState(patch, options = {}) {
+    const previous = { ...state };
+    const trail = nextTrail(previous, patch);
+    Object.assign(state, patch, { trail });
+    if (state.selected && !nodesById.has(state.selected)) state.selected = null;
+    refresh(previous);
+    if (!options.fromUrl) syncUrl(previous);
+  }
+
+  function renderCrumbs() {
+    crumbs.replaceChildren();
+    crumbs.hidden = !state.selected;
+    if (!state.selected) return;
+    for (const id of state.trail) {
+      const a = el("a", "", nodesById.get(id).name);
+      a.href = `#${encodeURIComponent(id)}`;
+      a.dataset.id = id;
+      a.addEventListener("click", (event) => {
+        event.preventDefault();
+        setState({ selected: id });
+      });
+      crumbs.append(a, el("span", "sep", " › "));
+    }
+    const current = el("b", "", nodesById.get(state.selected).name);
+    current.setAttribute("aria-current", "page");
+    crumbs.append(current);
+  }
+
+  // What the filters leave visible: hidden concepts, hidden relation types, and the edges
+  // (and adjacency) between visible concepts.
+  let visibleAdjacency = adjacency;
+  function visibility() {
+    const { kinds, statuses, types } = state.filters;
+    const hidden = new Set(model.nodes.filter((n) => kinds.has(n.kind) || statuses.has(n.status)).map((n) => n.id));
+    const edges = model.edges.filter((e) => !types.has(e.type) && !hidden.has(e.source) && !hidden.has(e.target));
+    return { hidden, types, edges, nodes: model.nodes.filter((n) => !hidden.has(n.id)) };
+  }
+
+  function syncFilters(visible) {
+    for (const box of filterInputs) box.checked = !state.filters[box.dataset.group].has(box.value);
+    const active = state.filters.kinds.size + state.filters.statuses.size + state.filters.types.size;
+    filterButton.textContent = active ? `Filters · ${active}` : "Filters";
+    filterButton.classList.toggle("active", Boolean(active));
+    filterButton.title = active ? `${visible.nodes.length} of ${model.nodes.length} concepts shown` : "";
+  }
+
+  function syncTabs() {
+    for (const [id, { button, panel }] of tabButtons) {
+      const on = id === state.tab;
+      button.setAttribute("aria-selected", String(on));
+      button.tabIndex = on ? 0 : -1;
+      panel.hidden = !on;
+    }
+  }
+
+  function refresh(previous) {
+    const visible = visibility();
+    if (state.selected && visible.hidden.has(state.selected)) state.selected = null;
+    visibleAdjacency = G.adjacency(visible.nodes, visible.edges);
+    hopsControl.sync(state.hops);
+    syncFilters(visible);
+    syncTabs();
+    const near = state.selected ? G.neighbourhood(visibleAdjacency, state.selected, state.hops) : null;
+    overlayControl.sync(state.overlay);
+    layoutControl.sync(state.layout);
+    const relaidOut = state.layout !== view.layoutMode();
+    if (relaidOut) view.setLayout(state.layout);
+    const overlay = G.overlaySets(model, data, state.overlay);
+    view.update({
+      selected: state.selected,
+      near,
+      hidden: visible.hidden,
+      hiddenEdges: visible.types,
+      highlight: overlay ? overlay.nodes : null,
+      highlightEdges: overlay ? overlay.edges : null,
+    });
+    svg.dataset.overlay = state.overlay;
+    renderCrumbs();
+    for (const redraw of refreshers) redraw(visible, previous);
+
+    const onGraph = state.tab === "graph";
+    const paneChanged = state.selected !== previous.selected;
+    if (paneChanged) {
+      pane.hidden = !state.selected;
+      workspace.classList.toggle("with-pane", Boolean(state.selected));
+      OntologyPane.render(pane, conceptsById.get(state.selected), paneContext);
+      pane.scrollTop = 0;
+    }
+    if (state.selected && onGraph && (paneChanged || previous.tab !== "graph" || relaidOut)) {
+      view.centreOn(state.selected, near ? near.keys() : null);
+      view.setTabStop(state.selected);
+    }
+  }
+
+  // --- List view: a sortable table of the visible concepts -----------------------------
+
+  const LIST_COLUMNS = [
+    { key: "name", label: "Name", value: (c) => c.name.toLowerCase() },
+    { key: "kind", label: "Kind", value: (c) => c.kind },
+    { key: "status", label: "Status", value: (c) => c.status },
+    { key: "relations", label: "Relations", value: (c) => degreeOf(c.id), numeric: true },
+    { key: "findings", label: "Findings", value: (c) => (findingsByConcept.get(c.id) || []).length, numeric: true },
+    { key: "definition", label: "Definition", value: (c) => (c.definition ? G.firstSentence(c.definition).toLowerCase() : "") },
+  ];
+  let visibleDegree = new Map();
+  const degreeOf = (id) => visibleDegree.get(id) || 0;
+
+  function renderList(visible) {
+    visibleDegree = new Map(visible.nodes.map((n) => [n.id, 0]));
+    for (const e of visible.edges) {
+      visibleDegree.set(e.source, visibleDegree.get(e.source) + 1);
+      visibleDegree.set(e.target, visibleDegree.get(e.target) + 1);
+    }
+    const column = LIST_COLUMNS.find((c) => c.key === state.sort.key) || LIST_COLUMNS[0];
+    const direction = state.sort.dir === "desc" ? -1 : 1;
+    const rows = visible.nodes
+      .map((n) => conceptsById.get(n.id))
+      .sort((a, b) => {
+        const x = column.value(a);
+        const y = column.value(b);
+        const order = column.numeric ? x - y : String(x).localeCompare(String(y));
+        return order * direction || a.name.localeCompare(b.name) || (a.id < b.id ? -1 : 1);
+      });
+
+    const table = el("table", "concept-table");
+    const caption = el("caption", "", `${count(rows.length, "concept", "concepts")}${rows.length < model.nodes.length ? ` of ${model.nodes.length} (filtered)` : ""}`);
+    const head = el("thead");
+    const headRow = el("tr");
+    for (const c of LIST_COLUMNS) {
+      const th = el("th");
+      th.scope = "col";
+      if (c.numeric) th.className = "num";
+      const sorted = c.key === column.key;
+      th.setAttribute("aria-sort", sorted ? (direction === 1 ? "ascending" : "descending") : "none");
+      const button = el("button", "sort", c.label);
+      button.type = "button";
+      button.addEventListener("click", () =>
+        setState({ sort: { key: c.key, dir: sorted && direction === 1 ? "desc" : "asc" } }),
+      );
+      th.append(button);
+      headRow.append(th);
+    }
+    head.append(headRow);
+    const body = el("tbody");
+    for (const c of rows) {
+      const tr = el("tr");
+      tr.dataset.id = c.id;
+      if (c.id === state.selected) tr.setAttribute("aria-selected", "true");
+      const nameCell = el("th");
+      nameCell.scope = "row";
+      const link = el("a", "concept-link", c.name);
+      link.href = `#${encodeURIComponent(c.id)}`;
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        setState({ selected: c.id });
+      });
+      nameCell.append(OntologyPane.kindIcon(encodingOf(c.kind), c.status === "proposed"), " ", link);
+      const findings = findingsByConcept.get(c.id) || [];
+      const findingCell = el("td", "num");
+      if (findings.length) {
+        const worst = worstFinding.get(c.id);
+        findingCell.append(OntologyPane.badgeIcon(worst), ` ${findings.length}`);
+        findingCell.setAttribute("aria-label", `${findings.length} (worst: ${worst === "warn" ? "warning" : worst})`);
+      }
+      tr.append(
+        nameCell,
+        el("td", "", c.kind),
+        el("td", "", c.status),
+        el("td", "num", String(degreeOf(c.id))),
+        findingCell,
+        el("td", c.definition ? "definition-cell" : "definition-cell faint", c.definition ? G.firstSentence(c.definition) : "Needs a definition"),
+      );
+      tr.addEventListener("click", (event) => {
+        if (!event.target.closest("a")) setState({ selected: c.id });
+      });
+      body.append(tr);
+    }
+    table.append(caption, head, body);
+    listPanel.replaceChildren(table);
+  }
+  refreshers.push(renderList);
+
+  // --- Health panel: every finding, grouped by Gruber criterion ------------------------
+
+  const CRITERIA = [
+    ["clarity", "Clarity"],
+    ["coherence", "Coherence"],
+    ["extendibility", "Extendibility"],
+    ["minimal-encoding-bias", "Minimal encoding bias"],
+    ["minimal-commitment", "Minimal ontological commitment"],
+    ["drift", "Drift"],
+    ["staleness", "Staleness"],
+    [null, "Structure"],
+  ];
+
+  function renderHealth() {
+    healthPanel.replaceChildren();
+    if (!data.findings.length) {
+      healthPanel.append(el("p", "empty-note", "No findings. The validator found nothing to flag."));
+      return;
+    }
+    const known = new Set(CRITERIA.map(([id]) => id));
+    const groups = [...CRITERIA];
+    for (const f of data.findings) {
+      if (!known.has(f.criterion)) {
+        known.add(f.criterion);
+        groups.push([f.criterion, f.criterion]);
+      }
+    }
+    for (const [criterion, title] of groups) {
+      const items = data.findings.filter((f) => f.criterion === criterion);
+      if (!items.length) continue;
+      const section = el("section", "criterion");
+      section.dataset.criterion = criterion || "structure";
+      const heading = el("h2", "", title);
+      heading.append(el("span", "count", String(items.length)));
+      const ul = el("ul");
+      for (const f of items) {
+        const li = el("li", "finding");
+        li.dataset.code = f.code;
+        const text = el("div");
+        const where = el("div", "code");
+        where.append(f.code);
+        if (f.concept && nodesById.has(f.concept)) {
+          const a = el("a", "concept-link", nodesById.get(f.concept).name);
+          a.href = `#${encodeURIComponent(f.concept)}`;
+          a.dataset.id = f.concept;
+          a.addEventListener("click", (event) => {
+            event.preventDefault();
+            setState({ selected: f.concept, tab: "graph" });
+          });
+          where.append(" · ", a);
+        } else if (!f.concept) {
+          where.append(" · ontology");
+        }
+        text.append(where, el("p", "", f.message));
+        li.append(OntologyPane.badgeIcon(f.severity), text);
+        ul.append(li);
+      }
+      section.append(heading, ul);
+      healthPanel.append(section);
+    }
+  }
+  renderHealth();
+
+  // --- Vocabulary: usage counts, the legend and the Vocabulary panel --------------------
+
+  const kindUsage = new Map();
+  for (const c of data.concepts) kindUsage.set(c.kind, (kindUsage.get(c.kind) || 0) + 1);
+  const typeUsage = new Map();
+  for (const c of data.concepts) for (const r of c.relations) typeUsage.set(r.type, (typeUsage.get(r.type) || 0) + 1);
+  const words = (id) => id.replace(/_/g, " ");
+  const oneLine = (text) => (text || "").replace(/\s+/g, " ").trim();
+  const allKinds = data.vocabulary.kinds.map((k) => k.id);
+  const allTypes = data.vocabulary.relation_types.map((r) => r.id);
+
+  // Show only one kind (or relation type) in the graph: the Vocabulary panel's click action.
+  function filterTo(group, id) {
+    const others = (group === "kinds" ? allKinds : allTypes).filter((x) => x !== id);
+    const filters = { kinds: new Set(), statuses: new Set(), types: new Set() };
+    filters[group] = new Set(others);
+    setState({ filters, tab: "graph", selected: null });
+  }
+
+  // Legend tooltips: the definition of whatever the pointer (or keyboard focus) is on.
+  const legendTip = el("div", "legend-tip");
+  legendTip.setAttribute("role", "tooltip");
+  legendTip.id = "legend-tip";
+  legendTip.hidden = true;
+
+  function explain(row, title, definition) {
+    row.tabIndex = 0;
+    row.dataset.definition = definition;
+    const show = () => {
+      legendTip.replaceChildren(el("div", "preview-name", title), el("div", "preview-text", definition));
+      legendTip.hidden = false;
+      const box = canvas.getBoundingClientRect();
+      const r = row.getBoundingClientRect();
+      const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--space-2"));
+      legendTip.style.left = `${r.left - box.left}px`;
+      legendTip.style.top = `${Math.max(gap, r.top - box.top - legendTip.offsetHeight - gap)}px`;
+      row.setAttribute("aria-describedby", legendTip.id);
+    };
+    const hide = () => {
+      legendTip.hidden = true;
+      row.removeAttribute("aria-describedby");
+    };
+    row.addEventListener("mouseenter", show);
+    row.addEventListener("focus", show);
+    row.addEventListener("mouseleave", hide);
+    row.addEventListener("blur", hide);
+  }
+
+  function lineSample(dash, arrow) {
+    const svgLine = document.createElementNS(SVG_NS, "svg");
+    svgLine.setAttribute("class", "line-sample");
+    svgLine.setAttribute("aria-hidden", "true");
+    svgLine.setAttribute("viewBox", "0 0 28 10");
+    const line = document.createElementNS(SVG_NS, "line");
+    line.setAttribute("x1", "1");
+    line.setAttribute("y1", "5");
+    line.setAttribute("x2", arrow ? "21" : "27");
+    line.setAttribute("y2", "5");
+    line.setAttribute("class", `edge ${dash ? "dashed" : "solid"}`);
+    svgLine.append(line);
+    if (arrow) {
+      const head = document.createElementNS(SVG_NS, "path");
+      head.setAttribute("d", "M21,1.5 L27,5 L21,8.5 Z");
+      head.setAttribute("class", arrow === "hollow" ? "arrow-hollow focus" : "arrow focus");
+      svgLine.append(head);
+    }
+    return svgLine;
+  }
+
+  function statusSample(status) {
+    const sample = document.createElementNS(SVG_NS, "svg");
+    sample.setAttribute("class", `status-sample ${status === "deprecated" ? "deprecated" : ""}`);
+    sample.setAttribute("aria-hidden", "true");
+    sample.setAttribute("viewBox", "0 0 20 12");
+    const rect = document.createElementNS(SVG_NS, "rect");
+    rect.setAttribute("x", "0.5");
+    rect.setAttribute("y", "0.5");
+    rect.setAttribute("width", "19");
+    rect.setAttribute("height", "11");
+    rect.setAttribute("rx", "2");
+    rect.setAttribute("class", `box ${status}`);
+    sample.append(rect);
+    return sample;
+  }
+
+  const STATUS_MEANING = {
+    defined: "A human has written and agreed the definition.",
+    proposed: "Needs a definition: proposed, usually by the agent, and not yet defined by a human.",
+    deprecated: "No longer to be used. Follow replaced_by to the concept that took its place.",
+  };
+  const SEVERITY_MEANING = {
+    error: "Error: the records are inconsistent and validate fails until it is fixed.",
+    warn: "Warning: worth fixing; validate --strict fails on it.",
+    info: "Info: a prompt to look, not a fault.",
+  };
+
+  const legend = el("aside", "legend");
+  legend.setAttribute("aria-label", "Legend");
+  {
+    const kindsCol = el("div");
+    kindsCol.append(el("h4", "", "Kinds"));
+    for (const k of data.vocabulary.kinds) {
+      const row = el("div", "row");
+      row.dataset.kind = k.id;
+      row.append(OntologyPane.kindIcon(k.encoding, false), words(k.id));
+      explain(row, words(k.id), oneLine(k.definition) || "No definition yet (proposed).");
+      kindsCol.append(row);
+    }
+    const relCol = el("div");
+    relCol.append(el("h4", "", "Relations"));
+    const styles = [
+      ["directed, labelled", null, "filled", "A named, directed relation. Its label shows the relation type (and cardinality, if recorded)."],
+      ["is a (subtype)", null, "hollow", oneLine((model.relationTypes.get("is_a") || {}).definition)],
+      ["related to (vague)", "dash", null, oneLine((model.relationTypes.get("related_to") || {}).definition)],
+    ];
+    for (const [label, dash, arrow, meaning] of styles) {
+      const row = el("div", "row");
+      row.append(lineSample(dash, arrow), label);
+      explain(row, label, meaning);
+      relCol.append(row);
+    }
+    const typesRow = el("div", "row types");
+    for (const [i, type] of data.vocabulary.relation_types.filter((r) => typeUsage.get(r.id)).entries()) {
+      if (i) typesRow.append(" · ");
+      const span = el("span", "type", words(type.id));
+      span.dataset.type = type.id;
+      explain(span, words(type.id), oneLine(type.definition) || "No definition yet (proposed).");
+      typesRow.append(span);
+    }
+    relCol.append(typesRow);
+    const statusCol = el("div");
+    statusCol.append(el("h4", "", "Status"));
+    for (const status of ["defined", "proposed", "deprecated"]) {
+      const row = el("div", "row");
+      row.dataset.status = status;
+      row.append(statusSample(status), status);
+      explain(row, status, STATUS_MEANING[status]);
+      statusCol.append(row);
+    }
+    statusCol.append(el("h4", "", "Findings"));
+    const badgeRow = el("div", "row badges");
+    for (const severity of ["error", "warn", "info"]) {
+      const item = el("span", "badge-item");
+      item.dataset.severity = severity;
+      item.append(OntologyPane.badgeIcon(severity), severity === "warn" ? "warning" : severity);
+      explain(item, severity === "warn" ? "warning" : severity, SEVERITY_MEANING[severity]);
+      badgeRow.append(item);
+    }
+    statusCol.append(badgeRow);
+    legend.append(kindsCol, relCol, statusCol);
+  }
+  canvas.append(legend, legendTip);
+  view.fit(); // again, now that the legend's space is known
+
+  function renderVocabulary() {
+    vocabPanel.replaceChildren();
+    const section = (title, entries, group, usage) => {
+      const wrap = el("section", "vocab-section");
+      wrap.append(el("h2", "", title));
+      const table = el("table", "vocab-table");
+      const head = el("tr");
+      for (const label of ["Term", "Status", "Used", group === "types" ? "From → to" : null, "Definition"]) {
+        if (label === null) continue;
+        const th = el("th", label === "Used" ? "num" : "", label);
+        th.scope = "col";
+        head.append(th);
+      }
+      const thead = el("thead");
+      thead.append(head);
+      const tbody = el("tbody");
+      for (const entry of entries) {
+        const tr = el("tr");
+        tr.dataset.id = entry.id;
+        const term = el("th");
+        term.scope = "row";
+        const button = el("button", "vocab-term", words(entry.id));
+        button.type = "button";
+        button.title = `Show only ${words(entry.id)} in the graph`;
+        button.addEventListener("click", () => filterTo(group, entry.id));
+        if (group === "kinds") term.append(OntologyPane.kindIcon(entry.encoding, entry.status === "proposed"), " ");
+        term.append(button);
+        if (group === "types" && entry.inverse) term.append(el("div", "faint", `inverse: ${words(entry.inverse)}`));
+        const used = usage.get(entry.id) || 0;
+        tr.append(term, el("td", "", entry.core ? "core" : entry.status), el("td", "num", String(used)));
+        if (group === "types") {
+          const from = (entry.from || []).join(", ") || "any";
+          const to = (entry.to || []).join(", ") || "any";
+          tr.append(el("td", "faint", entry.from || entry.to ? `${from} → ${to}` : "any"));
+        }
+        tr.append(el("td", entry.definition ? "definition-cell" : "definition-cell faint", oneLine(entry.definition) || "Needs a definition"));
+        tbody.append(tr);
+      }
+      table.append(thead, tbody);
+      wrap.append(table);
+      return wrap;
+    };
+    vocabPanel.append(
+      section("Kinds", data.vocabulary.kinds, "kinds", kindUsage),
+      section("Relation types", data.vocabulary.relation_types, "types", typeUsage),
+    );
+  }
+  renderVocabulary();
+
+  refresh({ selected: null });
+  if (location.hash) restoreFromUrl();
 
   // Exposed for tests and for debugging in the browser console.
   window.ontologyView = {
     data,
     model,
+    state,
+    setState,
+    view,
+    addTab,
+    refreshers,
     d3Loaded: typeof d3 === "object" && typeof d3.forceSimulation === "function",
     positions: view.positions,
     ready: true,

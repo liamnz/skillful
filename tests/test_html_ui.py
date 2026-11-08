@@ -6,90 +6,13 @@ Dev only. Needs pytest-playwright and Playwright's Chromium:
 
 from __future__ import annotations
 
-import shutil
-from collections.abc import Callable, Iterator
 from pathlib import Path
 
 import pytest
 
 pytest.importorskip("playwright")
 
-from conftest import REPO, make_project, run_onto
-from playwright.sync_api import Browser, Page
-
-SAMPLE = REPO / "examples" / "sample-project"
-OUTPUT = Path("docs/ontology/index.html")
-VIEWPORT = {"width": 1280, "height": 720}  # the minimum supported viewport
-
-
-def build(project: Path) -> Path:
-    result = run_onto(["build"], cwd=project)
-    assert result.returncode == 0, result.stderr
-    return project / OUTPUT
-
-
-@pytest.fixture(scope="module")
-def sample_page(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    project = tmp_path_factory.mktemp("ui") / "sample"
-    shutil.copytree(SAMPLE, project, ignore=shutil.ignore_patterns("index.html"))
-    return build(project)
-
-
-class Loaded:
-    """A page opened from file:// with every non-file request blocked and recorded."""
-
-    def __init__(self, page: Page) -> None:
-        self.page = page
-        self.errors: list[str] = []
-        self.requests: list[str] = []
-        page.on("console", lambda msg: msg.type == "error" and self.errors.append(msg.text))
-        page.on("pageerror", lambda exc: self.errors.append(str(exc)))
-
-        def route(r) -> None:
-            if r.request.url.startswith("file:"):
-                r.continue_()
-            else:
-                self.requests.append(r.request.url)
-                r.abort()
-
-        page.route("**/*", route)
-
-    def positions(self) -> dict[str, list[float]]:
-        return self.page.evaluate("window.ontologyView.positions()")
-
-
-@pytest.fixture
-def open_page(browser: Browser) -> Iterator[Callable[..., Loaded]]:
-    contexts = []
-
-    def opener(path: Path, viewport: dict[str, int] = VIEWPORT) -> Loaded:
-        context = browser.new_context(viewport=viewport, offline=True)
-        contexts.append(context)
-        loaded = Loaded(context.new_page())
-        loaded.page.goto(path.as_uri())
-        loaded.page.wait_for_function("window.ontologyView && window.ontologyView.ready")
-        return loaded
-
-    yield opener
-    for context in contexts:
-        context.close()
-
-
-def overlaps(boxes: list[dict[str, float]]) -> list[tuple[int, int]]:
-    """Pairs of rectangles ({x, y, width, height}, top-left origin) that overlap."""
-    found = []
-    for i, a in enumerate(boxes):
-        for j in range(i + 1, len(boxes)):
-            b = boxes[j]
-            if (
-                a["x"] < b["x"] + b["width"]
-                and b["x"] < a["x"] + a["width"]
-                and a["y"] < b["y"] + b["height"]
-                and b["y"] < a["y"] + a["height"]
-            ):
-                found.append((i, j))
-    return found
-
+from conftest import build, make_project, overlaps
 
 # --- Loading ----------------------------------------------------------------------
 

@@ -286,15 +286,15 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** The main way to cut clutter, and the main reading surface.
 
 **Acceptance criteria:**
-- [ ] Selecting a concept centres it, highlights exactly its N-hop neighbourhood (Hops control, 1–3) and fades the rest. Hover, selected and neighbourhood states are each visually distinct. Hovering shows the name, kind and first sentence of the definition without changing the selection.
-- [ ] The detail pane shows:
+- [x] Selecting a concept centres it, highlights exactly its N-hop neighbourhood (Hops control, 1–3) and fades the rest. Hover, selected and neighbourhood states are each visually distinct. Hovering shows the name, kind and first sentence of the definition without changing the selection.
+- [x] The detail pane shows:
   - the definition, set in a readable measure;
   - examples and non-examples, rules and open questions;
   - incoming and outgoing relations as links using inverse labels, with cardinality sentences in both directions;
   - `implemented_in` entries with their review commit and date, or "never reviewed";
   - section headings named after the concept schema's fields (Incoming relations and Findings for the sections that aren't fields);
   - a clearly marked "needs a definition" for `proposed` concepts, and agent suggestions visually separate and labelled.
-- [ ] `graph-model.js` neighbourhood queries are tested via `page.evaluate`.
+- [x] `graph-model.js` neighbourhood queries are tested via `page.evaluate`.
 
 **Verification:** UI, LINT
 
@@ -308,9 +308,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Exploration controls and shareable views.
 
 **Acceptance criteria:**
-- [ ] Pan, zoom (wheel and trackpad), fit-to-view, drag-to-pin and reset layout. Clicking a related concept moves the focus, and breadcrumbs step back.
-- [ ] Deep links (`#id?hops=2&overlay=health`) restore the selection, hops and overlay on load and update as you navigate.
-- [ ] Tab and arrow keys move between connected concepts, and Enter selects, with a visible focus ring using `--accent`.
+- [x] Pan, zoom (wheel and trackpad), fit-to-view, drag-to-pin and reset layout. Clicking a related concept moves the focus, and breadcrumbs step back.
+- [x] Deep links (`#id?hops=2&overlay=health`) restore the selection, hops and overlay on load and update as you navigate.
+- [x] Tab and arrow keys move between connected concepts, and Enter selects, with a visible focus ring using `--accent`.
 
 **Verification:** UI, LINT
 
@@ -322,9 +322,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### T17: Search with redirects
 **Acceptance criteria:**
-- [ ] `/` focuses search. Search matches names, discouraged terms and definition text. Arrow keys and Enter select a result, which moves the graph's focus to it.
-- [ ] A discouraged term shows as a redirect ("'active user' → use **Active customer**"), ranked separately from direct matches.
-- [ ] Results are ordered deterministically (exact name, then prefix, then term redirect, then definition text).
+- [x] `/` focuses search. Search matches names, discouraged terms and definition text. Arrow keys and Enter select a result, which moves the graph's focus to it.
+- [x] A discouraged term shows as a redirect ("'active user' → use **Active customer**"), ranked separately from direct matches.
+- [x] Results are ordered deterministically (exact name, then prefix, then term redirect, then definition text).
 
 **Verification:** UI, LINT
 
@@ -336,9 +336,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### T18: Filters and list view
 **Acceptance criteria:**
-- [ ] Kind, status and relation-type filters apply to the graph and the list alike. Edges to hidden concepts are drawn as stubs.
-- [ ] The list tab is a sortable table of all visible concepts. Its selection is shared with the graph and the detail pane.
-- [ ] The list and detail views give complete non-visual access to everything in the graph: an accessibility smoke check of roles and labels.
+- [x] Kind, status and relation-type filters apply to the graph and the list alike. Edges to hidden concepts are drawn as stubs.
+- [x] The list tab is a sortable table of all visible concepts. Its selection is shared with the graph and the detail pane.
+- [x] The list and detail views give complete non-visual access to everything in the graph: an accessibility smoke check of roles and labels.
 
 **Verification:** UI, LINT
 
@@ -350,9 +350,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### T19: Finding badges, overlays, Health panel
 **Acceptance criteria:**
-- [ ] Concepts with findings show a severity badge (semantic colours, never kind colours). The detail pane lists their codes and criteria.
-- [ ] The Health, Mud and Drift overlays highlight exactly the specified sets. The Mud overlay includes `related_to` and relations whose type is `proposed`.
-- [ ] The Health panel groups findings by criterion. Clicking one focuses its concept.
+- [x] Concepts with findings show a severity badge (semantic colours, never kind colours). The detail pane lists their codes and criteria.
+- [x] The Health, Mud and Drift overlays highlight exactly the specified sets. The Mud overlay includes `related_to` and relations whose type is `proposed`.
+- [x] The Health panel groups findings by criterion. Clicking one focuses its concept.
 
 **Verification:** UI (fixture build with known findings), LINT
 
@@ -364,9 +364,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### T20: Vocabulary panel, legend, extension encodings
 **Acceptance criteria:**
-- [ ] The legend is always visible. Hovering an entry shows its definition.
-- [ ] The Vocabulary panel lists core and extension kinds and relation types, with definition, status, `from`/`to` and usage counts. Clicking an entry filters the graph.
-- [ ] Extension kinds get slots 5–8 and the remaining shapes by sorted id, stable across builds. A ninth or later kind uses the neutral fallback.
+- [x] The legend is always visible. Hovering an entry shows its definition.
+- [x] The Vocabulary panel lists core and extension kinds and relation types, with definition, status, `from`/`to` and usage counts. Clicking an entry filters the graph.
+- [x] Extension kinds get slots 5–8 and the remaining shapes by sorted id, stable across builds. A ninth or later kind uses the neutral fallback.
 
 **Verification:** UI, LINT
 
@@ -378,9 +378,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### T21: Hierarchy layout and semantic zoom
 **Acceptance criteria:**
-- [ ] The hierarchy toggle lays out the `acyclic` relation types (core and extension) top-down with a layered force. Concepts with several parents are placed sensibly. The layout is deterministic.
-- [ ] When zoomed out, only labels of high-degree, selected or neighbourhood concepts are shown. Zooming in reveals all of them.
-- [ ] Depth levels are computed in `graph-model.js` and tested via `page.evaluate` on a DAG with a diamond.
+- [x] The hierarchy toggle lays out the `acyclic` relation types (core and extension) top-down with a layered force. Concepts with several parents are placed sensibly. The layout is deterministic.
+- [x] When zoomed out, only labels of high-degree, selected or neighbourhood concepts are shown. Zooming in reveals all of them.
+- [x] Depth levels are computed in `graph-model.js` and tested via `page.evaluate` on a DAG with a diamond.
 
 **Verification:** UI, LINT
 
@@ -392,11 +392,11 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### T22: Scale and design checks
 **Acceptance criteria:**
-- [ ] A deterministic generator creates `tests/fixtures/large` (300 concepts, 600 relations, realistic clustering). The first render is under 2 s in Playwright, and selection and zoom stay responsive.
-- [ ] Token tests check:
+- [x] A deterministic generator creates `tests/fixtures/large` (300 concepts, 600 relations, realistic clustering). The first render is under 2 s in Playwright, and selection and zoom stay responsive.
+- [x] Token tests check:
   - WCAG contrast for every text/background pair (≥ 4.5:1) and for kind colours and boundaries (≥ 3:1), in both themes;
   - the kind palette stays distinguishable under protanopia, deuteranopia and tritanopia simulation (CIEDE2000 above a threshold).
-- [ ] A raw-literal lint fails on any colour, size or spacing literal in `app.css` or the JS outside `tokens.css`. `prefers-reduced-motion` sets durations to 0, and dark mode follows `prefers-color-scheme` (Playwright emulation).
+- [x] A raw-literal lint fails on any colour, size or spacing literal in `app.css` or the JS outside `tokens.css`. `prefers-reduced-motion` sets durations to 0, and dark mode follows `prefers-color-scheme` (Playwright emulation).
 
 **Verification:** PYTEST (`tests/test_design_tokens.py`), UI
 
@@ -407,13 +407,13 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Scope:** M
 
 ### Checkpoint 4: View complete (human review)
-- [ ] UI fully green (all Playwright interaction tests in the spec).
-- [ ] **Manual design review with you** against the five principles:
+- [x] UI fully green (all Playwright interaction tests in the spec).
+- [x] **Manual design review with you** against the five principles:
   - both themes;
   - 1280×720 and a large monitor;
   - reduced motion and colour-blind simulation;
   - the sample project and the 300-concept "structure, not a hairball" check.
-- [ ] Success criteria 6, 7, 7a and 8 pass.
+- [x] Success criteria 6, 7, 7a and 8 pass.
 
 ---
 
