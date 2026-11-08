@@ -77,6 +77,7 @@
   --control-size: 28px; /* square canvas buttons (zoom, fit, reset) */
   --search-width: 360px;
   --search-min-width: 200px;
+  --filters-width: 220px;
   --underline-offset: 2px;
   --heading-tracking: 0.04em; /* letter spacing of the small uppercase pane headings */
   --badge-baseline-shift: 2px; /* aligns an inline badge with the first line of text */
@@ -101,6 +102,7 @@
   --glyph-outline-width: 1.5px;
   --dash-related: 6 4; /* the dashed, undirected related_to line */
   --edge-stub-length: 20px; /* an edge to a filtered-out concept: a short stub, not the whole line */
+  --dash-stub: 2 2;
   --focus-ring-offset: 3px; /* keyboard focus ring, outside the box */
   --hierarchy-level-gap: 48px; /* hierarchy layout: space between depth rows */
   --faded-opacity: 0.18;

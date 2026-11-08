@@ -336,9 +336,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### T18: Filters and list view
 **Acceptance criteria:**
-- [ ] Kind, status and relation-type filters apply to the graph and the list alike. Edges to hidden concepts are drawn as stubs.
-- [ ] The list tab is a sortable table of all visible concepts. Its selection is shared with the graph and the detail pane.
-- [ ] The list and detail views give complete non-visual access to everything in the graph: an accessibility smoke check of roles and labels.
+- [x] Kind, status and relation-type filters apply to the graph and the list alike. Edges to hidden concepts are drawn as stubs.
+- [x] The list tab is a sortable table of all visible concepts. Its selection is shared with the graph and the detail pane.
+- [x] The list and detail views give complete non-visual access to everything in the graph: an accessibility smoke check of roles and labels.
 
 **Verification:** UI, LINT
 

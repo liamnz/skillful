@@ -132,7 +132,7 @@ def focused(page) -> str | None:
 
 def test_tab_enters_the_graph_and_enter_selects(sample_page: Path, open_page) -> None:
     page = open_page(sample_page).page
-    page.locator(".hops button").last.focus()
+    page.locator(".filters-button").focus()  # the last toolbar control before the graph
     page.keyboard.press("Tab")
     first = focused(page)
     assert first is not None

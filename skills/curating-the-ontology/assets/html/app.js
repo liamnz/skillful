@@ -52,7 +52,11 @@
     hops: 1,
     overlay: "none",
     trail: [], // concepts visited before the selected one, oldest first (breadcrumbs)
+    tab: "graph",
+    filters: { kinds: new Set(), statuses: new Set(), types: new Set() }, // what is hidden
+    sort: { key: "name", dir: "asc" }, // list view
   };
+  const refreshers = []; // panels that redraw on every state change (list, health, vocabulary)
 
   // --- Layout --------------------------------------------------------------------------
 
@@ -86,7 +90,25 @@
   searchResults.hidden = true;
   searchBox.append(searchInput, searchKey, searchResults);
 
-  toolbar.append(brand, searchBox, el("div", "counts", summary), spacer);
+  const tabs = el("nav", "tabs");
+  tabs.setAttribute("role", "tablist");
+  tabs.setAttribute("aria-label", "Views");
+  const tabButtons = new Map();
+  function addTab(id, label, panel) {
+    const button = el("button", "tab", label);
+    button.type = "button";
+    button.id = `tab-${id}`;
+    button.setAttribute("role", "tab");
+    button.setAttribute("aria-controls", panel.id);
+    button.addEventListener("click", () => setState({ tab: id }));
+    tabs.append(button);
+    tabButtons.set(id, { button, panel });
+    panel.setAttribute("role", "tabpanel");
+    panel.setAttribute("aria-labelledby", button.id);
+    return button;
+  }
+
+  toolbar.append(brand, tabs, searchBox, el("div", "counts", summary), spacer);
 
   // A segmented control: one button per option, the current one pressed.
   function segmented(label, options, current, onPick, describe = String) {
@@ -115,6 +137,67 @@
   hopsControl.classList.add("hops");
   toolbar.append(hopsControl);
 
+  // Filters: kind, status and relation type. Checked means shown.
+  const filterButton = el("button", "button filters-button", "Filters");
+  filterButton.type = "button";
+  filterButton.setAttribute("aria-expanded", "false");
+  filterButton.setAttribute("aria-controls", "filters-panel");
+  const filterPanel = el("div", "filters-panel");
+  filterPanel.id = "filters-panel";
+  filterPanel.hidden = true;
+  filterPanel.setAttribute("role", "dialog");
+  filterPanel.setAttribute("aria-label", "Filters");
+  const filterWrap = el("div", "filters");
+  filterWrap.append(filterButton, filterPanel);
+  toolbar.append(filterWrap);
+  filterButton.addEventListener("click", () => {
+    filterPanel.hidden = !filterPanel.hidden;
+    filterButton.setAttribute("aria-expanded", String(!filterPanel.hidden));
+  });
+  document.addEventListener("click", (event) => {
+    if (!filterPanel.hidden && !filterWrap.contains(event.target)) {
+      filterPanel.hidden = true;
+      filterButton.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  const kindsInUse = [...new Set(data.concepts.map((c) => c.kind))].sort(
+    (a, b) => (encodingOf(a).slot === "fallback" ? 99 : encodingOf(a).slot) - (encodingOf(b).slot === "fallback" ? 99 : encodingOf(b).slot) || a.localeCompare(b),
+  );
+  const typesInUse = [...new Set(model.edges.map((e) => e.type))].sort();
+  const filterGroups = [
+    ["kinds", "Kind", kindsInUse, (k) => [OntologyPane.kindIcon(encodingOf(k), false), ` ${k}`]],
+    ["statuses", "Status", ["defined", "proposed", "deprecated"], (v) => [v]],
+    ["types", "Relation type", typesInUse, (t) => [t.replace(/_/g, " ")]],
+  ];
+  const filterInputs = [];
+  for (const [key, legend, values, label] of filterGroups) {
+    const fieldset = el("fieldset");
+    fieldset.append(el("legend", "", legend));
+    for (const value of values) {
+      const row = el("label", "check");
+      const box = el("input");
+      box.type = "checkbox";
+      box.dataset.group = key;
+      box.value = value;
+      box.addEventListener("change", () => {
+        const next = new Set(state.filters[key]);
+        if (box.checked) next.delete(value);
+        else next.add(value);
+        setState({ filters: { ...state.filters, [key]: next } });
+      });
+      row.append(box, ...label(value));
+      fieldset.append(row);
+      filterInputs.push(box);
+    }
+    filterPanel.append(fieldset);
+  }
+  const showAll = el("button", "button", "Show all");
+  showAll.type = "button";
+  showAll.addEventListener("click", () =>
+    setState({ filters: { kinds: new Set(), statuses: new Set(), types: new Set() } }),
+  );
+  filterPanel.append(showAll);
   const workspace = el("div", "workspace");
   const canvas = el("main", "canvas");
   const svg = document.createElementNS(SVG_NS, "svg");
@@ -140,7 +223,15 @@
   const pane = el("aside", "pane");
   pane.setAttribute("aria-labelledby", "pane-title");
   pane.hidden = true;
-  workspace.append(canvas, pane);
+  canvas.id = "panel-graph";
+  const listPanel = el("section", "list-panel");
+  listPanel.id = "panel-list";
+  listPanel.hidden = true; // hidden before the graph is laid out, so the first fit sees the whole canvas
+  const main = el("div", "main");
+  main.append(canvas, listPanel);
+  workspace.append(main, pane);
+  addTab("graph", "Graph", canvas);
+  addTab("list", "List", listPanel);
 
   const app = document.getElementById("app");
   app.className = "app";
@@ -212,7 +303,7 @@
     const positions = view.positions();
     const [x0, y0] = positions[fromId];
     let best = null;
-    for (const id of adjacency.get(fromId) || []) {
+    for (const id of visibleAdjacency.get(fromId) || []) {
       const [x, y] = positions[id];
       const distance = Math.hypot(x - x0, y - y0) || 1;
       const cos = ((x - x0) * dx + (y - y0) * dy) / distance;
@@ -238,7 +329,7 @@
       setState({ selected: null });
     } else if (event.key === "Tab") {
       const anchor = state.selected || id;
-      const ring = [anchor, ...[...(adjacency.get(anchor) || [])].sort(byName)];
+      const ring = [anchor, ...[...(visibleAdjacency.get(anchor) || [])].sort(byName)];
       const at = ring.indexOf(id);
       const next = at + (event.shiftKey ? -1 : 1);
       if (at !== -1 && next >= 0 && next < ring.length) {
@@ -434,24 +525,146 @@
     crumbs.append(current);
   }
 
-  function refresh(previous) {
-    hopsControl.sync(state.hops);
-    const near = state.selected ? G.neighbourhood(adjacency, state.selected, state.hops) : null;
-    view.update({ selected: state.selected, near });
-    renderCrumbs();
+  // What the filters leave visible: hidden concepts, hidden relation types, and the edges
+  // (and adjacency) between visible concepts.
+  let visibleAdjacency = adjacency;
+  function visibility() {
+    const { kinds, statuses, types } = state.filters;
+    const hidden = new Set(model.nodes.filter((n) => kinds.has(n.kind) || statuses.has(n.status)).map((n) => n.id));
+    const edges = model.edges.filter((e) => !types.has(e.type) && !hidden.has(e.source) && !hidden.has(e.target));
+    return { hidden, types, edges, nodes: model.nodes.filter((n) => !hidden.has(n.id)) };
+  }
 
+  function syncFilters(visible) {
+    for (const box of filterInputs) box.checked = !state.filters[box.dataset.group].has(box.value);
+    const active = state.filters.kinds.size + state.filters.statuses.size + state.filters.types.size;
+    filterButton.textContent = active ? `Filters · ${active}` : "Filters";
+    filterButton.classList.toggle("active", Boolean(active));
+    filterButton.title = active ? `${visible.nodes.length} of ${model.nodes.length} concepts shown` : "";
+  }
+
+  function syncTabs() {
+    for (const [id, { button, panel }] of tabButtons) {
+      const on = id === state.tab;
+      button.setAttribute("aria-selected", String(on));
+      button.tabIndex = on ? 0 : -1;
+      panel.hidden = !on;
+    }
+  }
+
+  function refresh(previous) {
+    const visible = visibility();
+    if (state.selected && visible.hidden.has(state.selected)) state.selected = null;
+    visibleAdjacency = G.adjacency(visible.nodes, visible.edges);
+    hopsControl.sync(state.hops);
+    syncFilters(visible);
+    syncTabs();
+    const near = state.selected ? G.neighbourhood(visibleAdjacency, state.selected, state.hops) : null;
+    view.update({ selected: state.selected, near, hidden: visible.hidden, hiddenEdges: visible.types });
+    renderCrumbs();
+    for (const redraw of refreshers) redraw(visible, previous);
+
+    const onGraph = state.tab === "graph";
     const paneChanged = state.selected !== previous.selected;
     if (paneChanged) {
       pane.hidden = !state.selected;
       workspace.classList.toggle("with-pane", Boolean(state.selected));
       OntologyPane.render(pane, conceptsById.get(state.selected), paneContext);
       pane.scrollTop = 0;
-      if (state.selected) {
-        view.centreOn(state.selected);
-        view.setTabStop(state.selected);
-      }
+    }
+    if (state.selected && onGraph && (paneChanged || previous.tab !== "graph")) {
+      view.centreOn(state.selected);
+      view.setTabStop(state.selected);
     }
   }
+
+  // --- List view: a sortable table of the visible concepts -----------------------------
+
+  const LIST_COLUMNS = [
+    { key: "name", label: "Name", value: (c) => c.name.toLowerCase() },
+    { key: "kind", label: "Kind", value: (c) => c.kind },
+    { key: "status", label: "Status", value: (c) => c.status },
+    { key: "relations", label: "Relations", value: (c) => degreeOf(c.id), numeric: true },
+    { key: "findings", label: "Findings", value: (c) => (findingsByConcept.get(c.id) || []).length, numeric: true },
+    { key: "definition", label: "Definition", value: (c) => (c.definition ? G.firstSentence(c.definition).toLowerCase() : "") },
+  ];
+  let visibleDegree = new Map();
+  const degreeOf = (id) => visibleDegree.get(id) || 0;
+
+  function renderList(visible) {
+    visibleDegree = new Map(visible.nodes.map((n) => [n.id, 0]));
+    for (const e of visible.edges) {
+      visibleDegree.set(e.source, visibleDegree.get(e.source) + 1);
+      visibleDegree.set(e.target, visibleDegree.get(e.target) + 1);
+    }
+    const column = LIST_COLUMNS.find((c) => c.key === state.sort.key) || LIST_COLUMNS[0];
+    const direction = state.sort.dir === "desc" ? -1 : 1;
+    const rows = visible.nodes
+      .map((n) => conceptsById.get(n.id))
+      .sort((a, b) => {
+        const x = column.value(a);
+        const y = column.value(b);
+        const order = column.numeric ? x - y : String(x).localeCompare(String(y));
+        return order * direction || a.name.localeCompare(b.name) || (a.id < b.id ? -1 : 1);
+      });
+
+    const table = el("table", "concept-table");
+    const caption = el("caption", "", `${count(rows.length, "concept", "concepts")}${rows.length < model.nodes.length ? ` of ${model.nodes.length} (filtered)` : ""}`);
+    const head = el("thead");
+    const headRow = el("tr");
+    for (const c of LIST_COLUMNS) {
+      const th = el("th");
+      th.scope = "col";
+      if (c.numeric) th.className = "num";
+      const sorted = c.key === column.key;
+      th.setAttribute("aria-sort", sorted ? (direction === 1 ? "ascending" : "descending") : "none");
+      const button = el("button", "sort", c.label);
+      button.type = "button";
+      button.addEventListener("click", () =>
+        setState({ sort: { key: c.key, dir: sorted && direction === 1 ? "desc" : "asc" } }),
+      );
+      th.append(button);
+      headRow.append(th);
+    }
+    head.append(headRow);
+    const body = el("tbody");
+    for (const c of rows) {
+      const tr = el("tr");
+      tr.dataset.id = c.id;
+      if (c.id === state.selected) tr.setAttribute("aria-selected", "true");
+      const nameCell = el("th");
+      nameCell.scope = "row";
+      const link = el("a", "concept-link", c.name);
+      link.href = `#${encodeURIComponent(c.id)}`;
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        setState({ selected: c.id });
+      });
+      nameCell.append(OntologyPane.kindIcon(encodingOf(c.kind), c.status === "proposed"), " ", link);
+      const findings = findingsByConcept.get(c.id) || [];
+      const findingCell = el("td", "num");
+      if (findings.length) {
+        const worst = worstFinding.get(c.id);
+        findingCell.append(OntologyPane.badgeIcon(worst), ` ${findings.length}`);
+        findingCell.setAttribute("aria-label", `${findings.length} (worst: ${worst === "warn" ? "warning" : worst})`);
+      }
+      tr.append(
+        nameCell,
+        el("td", "", c.kind),
+        el("td", "", c.status),
+        el("td", "num", String(degreeOf(c.id))),
+        findingCell,
+        el("td", c.definition ? "definition-cell" : "definition-cell faint", c.definition ? G.firstSentence(c.definition) : "Needs a definition"),
+      );
+      tr.addEventListener("click", (event) => {
+        if (!event.target.closest("a")) setState({ selected: c.id });
+      });
+      body.append(tr);
+    }
+    table.append(caption, head, body);
+    listPanel.replaceChildren(table);
+  }
+  refreshers.push(renderList);
 
   refresh({ selected: null });
   if (location.hash) restoreFromUrl();
@@ -463,6 +676,8 @@
     state,
     setState,
     view,
+    addTab,
+    refreshers,
     d3Loaded: typeof d3 === "object" && typeof d3.forceSimulation === "function",
     positions: view.positions,
     ready: true,
