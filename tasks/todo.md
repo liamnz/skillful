@@ -322,9 +322,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### T17: Search with redirects
 **Acceptance criteria:**
-- [ ] `/` focuses search. Search matches names, discouraged terms and definition text. Arrow keys and Enter select a result, which moves the graph's focus to it.
-- [ ] A discouraged term shows as a redirect ("'active user' → use **Active customer**"), ranked separately from direct matches.
-- [ ] Results are ordered deterministically (exact name, then prefix, then term redirect, then definition text).
+- [x] `/` focuses search. Search matches names, discouraged terms and definition text. Arrow keys and Enter select a result, which moves the graph's focus to it.
+- [x] A discouraged term shows as a redirect ("'active user' → use **Active customer**"), ranked separately from direct matches.
+- [x] Results are ordered deterministically (exact name, then prefix, then term redirect, then definition text).
 
 **Verification:** UI, LINT
 

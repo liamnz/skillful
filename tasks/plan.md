@@ -99,7 +99,7 @@ T1 skeleton ──► T2 schemas+loader+validate ──┬─► T3 init ──�
 ### Phase 4: HTML features (JS track)
 - [x] T15: Selection, neighbourhood focus, hover preview, detail pane
 - [x] T16: Navigation: pan/zoom/fit/pin, breadcrumbs, URL deep links, keyboard
-- [ ] T17: Search with redirects
+- [x] T17: Search with redirects
 - [ ] T18: Filters and list view
 - [ ] T19: Finding badges, Health/Mud/Drift overlays, Health panel
 - [ ] T20: Vocabulary panel, legend definitions, extension encodings

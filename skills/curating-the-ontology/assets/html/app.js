@@ -64,7 +64,29 @@
   const brand = el("div", "brand", data.ontology.name);
   brand.append(el("span", "", "ontology"));
   const spacer = el("div", "spacer");
-  toolbar.append(brand, el("div", "counts", summary), spacer);
+
+  // Search: names, discouraged terms (shown as redirects) and definition text.
+  const searchBox = el("div", "search");
+  const searchInput = el("input");
+  searchInput.type = "search";
+  searchInput.placeholder = "Search concepts and terms";
+  searchInput.setAttribute("aria-label", "Search concepts and terms");
+  searchInput.setAttribute("role", "combobox");
+  searchInput.setAttribute("aria-autocomplete", "list");
+  searchInput.setAttribute("aria-expanded", "false");
+  searchInput.setAttribute("aria-controls", "search-results");
+  searchInput.autocomplete = "off";
+  searchInput.spellcheck = false;
+  const searchKey = el("kbd", "", "/");
+  searchKey.setAttribute("aria-hidden", "true");
+  const searchResults = el("ul", "search-results");
+  searchResults.id = "search-results";
+  searchResults.setAttribute("role", "listbox");
+  searchResults.setAttribute("aria-label", "Search results");
+  searchResults.hidden = true;
+  searchBox.append(searchInput, searchKey, searchResults);
+
+  toolbar.append(brand, searchBox, el("div", "counts", summary), spacer);
 
   // A segmented control: one button per option, the current one pressed.
   function segmented(label, options, current, onPick, describe = String) {
@@ -228,6 +250,95 @@
   svg.addEventListener("focusin", (event) => {
     const node = event.target.closest && event.target.closest(".node");
     if (node) view.setTabStop(node.dataset.id);
+  });
+
+  // --- Search ------------------------------------------------------------------------
+
+  let results = [];
+  let active = -1;
+
+  function showResults() {
+    results = G.search(data.concepts, searchInput.value);
+    active = results.length ? 0 : -1;
+    searchResults.replaceChildren();
+    for (const [i, r] of results.entries()) {
+      const li = el("li", `result ${r.rank}`);
+      li.id = `search-result-${i}`;
+      li.setAttribute("role", "option");
+      li.dataset.id = r.id;
+      li.dataset.rank = r.rank;
+      const concept = conceptsById.get(r.id);
+      if (r.rank === "redirect") {
+        li.append(el("span", "muted", `'${r.term}' →`), " use ", el("strong", "", r.name));
+      } else {
+        li.append(OntologyPane.kindIcon(encodingOf(concept.kind), concept.status === "proposed"), " ", r.name);
+        if (concept.status !== "defined") li.append(el("span", "faint", ` · ${concept.status}`));
+        if (r.rank === "definition") li.append(el("span", "faint", " · in definition"));
+      }
+      li.addEventListener("mousedown", (event) => {
+        event.preventDefault(); // keep focus in the input until the choice is made
+        choose(i);
+      });
+      searchResults.append(li);
+    }
+    if (searchInput.value.trim() && !results.length) {
+      const none = el("li", "none", "No matching concepts");
+      none.setAttribute("aria-disabled", "true");
+      searchResults.append(none);
+    }
+    searchResults.hidden = !searchInput.value.trim();
+    searchInput.setAttribute("aria-expanded", String(!searchResults.hidden));
+    markActive();
+  }
+
+  function markActive() {
+    for (const [i, li] of [...searchResults.querySelectorAll(".result")].entries()) {
+      li.setAttribute("aria-selected", String(i === active));
+    }
+    if (active >= 0) searchInput.setAttribute("aria-activedescendant", `search-result-${active}`);
+    else searchInput.removeAttribute("aria-activedescendant");
+  }
+
+  function closeResults() {
+    searchResults.hidden = true;
+    searchInput.setAttribute("aria-expanded", "false");
+  }
+
+  function choose(i) {
+    const r = results[i];
+    if (!r) return;
+    closeResults();
+    searchInput.value = "";
+    setState({ selected: r.id });
+    view.focusNode(r.id); // the graph now has focus, at the chosen concept
+  }
+
+  searchInput.addEventListener("input", showResults);
+  searchInput.addEventListener("focus", () => searchInput.value.trim() && showResults());
+  searchInput.addEventListener("blur", closeResults);
+  searchInput.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      if (!results.length) return;
+      active = (active + (event.key === "ArrowDown" ? 1 : -1) + results.length) % results.length;
+      markActive();
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      choose(Math.max(active, 0));
+    } else if (event.key === "Escape") {
+      searchInput.value = "";
+      closeResults();
+    }
+  });
+
+  // "/" focuses search from anywhere except a text field.
+  document.addEventListener("keydown", (event) => {
+    const typing = event.target.closest && event.target.closest("input, textarea, select, [contenteditable]");
+    if (event.key === "/" && !typing && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+    }
   });
 
   // --- URL: #<concept-id>?hops=2&overlay=health ---------------------------------------

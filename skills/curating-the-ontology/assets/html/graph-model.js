@@ -253,7 +253,52 @@
     return { verb: `${words} ${many ? "many" : "one"}`, many };
   }
 
+  // --- Search -------------------------------------------------------------------------
+
+  const RANKS = ["exact", "prefix", "redirect", "definition"];
+
+  function normalise(text) {
+    return (text || "").toLowerCase().replace(/\s+/g, " ").trim();
+  }
+
+  // True if `text` starts with `q`, or any word in it does.
+  function startsWord(text, q) {
+    return text.startsWith(q) || text.split(/[\s\-_/]+/).some((word) => word.startsWith(q));
+  }
+
+  // Search results, best first, each concept at most once at its best rank:
+  //   exact     the name equals the query;
+  //   prefix    the name, or a word in it, starts with the query;
+  //   redirect  a discouraged term matches: shown as "'term' -> use Name", never as an equal match;
+  //   definition the definition (or, failing all else, the name) contains the query.
+  // Ties are broken by name, then id, so the order is deterministic.
+  function search(concepts, query, limit = 10) {
+    const q = normalise(query);
+    if (!q) return [];
+    const results = [];
+    for (const c of concepts) {
+      const name = normalise(c.name);
+      let hit = null;
+      if (name === q) hit = { rank: "exact" };
+      else if (startsWord(name, q)) hit = { rank: "prefix" };
+      else {
+        const term = (c.discouraged_terms || []).find((t) => startsWord(normalise(t.term), q));
+        if (term) hit = { rank: "redirect", term: term.term };
+        else if (normalise(c.definition).includes(q) || name.includes(q)) hit = { rank: "definition" };
+      }
+      if (hit) results.push({ id: c.id, name: c.name, ...hit });
+    }
+    results.sort(
+      (a, b) =>
+        RANKS.indexOf(a.rank) - RANKS.indexOf(b.rank) ||
+        a.name.localeCompare(b.name) ||
+        (a.id < b.id ? -1 : a.id > b.id ? 1 : 0),
+    );
+    return results.slice(0, limit);
+  }
+
   root.OntologyGraph = {
+    search,
     hash,
     random,
     seedPosition,

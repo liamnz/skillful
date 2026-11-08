@@ -75,6 +75,8 @@
   --pane-width: 400px;
   --preview-width: 300px; /* hover preview card */
   --control-size: 28px; /* square canvas buttons (zoom, fit, reset) */
+  --search-width: 360px;
+  --search-min-width: 200px;
   --underline-offset: 2px;
   --heading-tracking: 0.04em; /* letter spacing of the small uppercase pane headings */
   --badge-baseline-shift: 2px; /* aligns an inline badge with the first line of text */
