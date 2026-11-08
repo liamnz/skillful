@@ -1,0 +1,2 @@
+# Normalise line endings so fixtures, golden files and builds are byte-identical on every OS.
+* text=auto eol=lf

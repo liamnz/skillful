@@ -1,0 +1,7 @@
+# Dev-only lint/format config for this repo. Not part of the shipped skill.
+target-version = "py311"
+line-length = 120
+extend-exclude = ["*.md"]  # docs are prose; never reformat code samples in them
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
