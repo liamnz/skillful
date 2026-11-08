@@ -44,6 +44,7 @@ FALLBACK_KIND_ENCODING = {"slot": "fallback", "shape": "circle"}  # kinds beyond
 EXTENSION_RELATION_ENCODING = {"line": "solid", "arrow": "filled"}
 
 _PLACEHOLDER = re.compile(r"\{\{([A-Z_]+)\}\}")
+APP_SCRIPTS = ("graph-model.js", "graph-view.js", "app.js")  # in load order
 
 
 def _vocabulary(ontology: Ontology) -> dict[str, list[dict[str, Any]]]:
@@ -133,7 +134,7 @@ def render(data: dict[str, Any]) -> str:
         "APP_CSS": (HTML_DIR / "app.css").read_text(encoding="utf-8").strip(),
         "DATA_JSON": _json_for_script(data),
         "VENDOR_JS": _vendor_js(),
-        "APP_JS": (HTML_DIR / "app.js").read_text(encoding="utf-8").strip(),
+        "APP_JS": "\n\n".join((HTML_DIR / name).read_text(encoding="utf-8").strip() for name in APP_SCRIPTS),
     }
     page = _PLACEHOLDER.sub(lambda m: values[m.group(1)], template)  # one pass: inserted text is never re-scanned
     return page.replace("\r\n", "\n")

@@ -83,7 +83,7 @@ T1 skeleton ──► T2 schemas+loader+validate ──┬─► T3 init ──�
 - [x] T6: Sample project (`examples/sample-project`)
 - [x] T7: Design tokens and static mockup. **Human gate: approved 2026-11-08** after review rounds: labelled edges, boxed concepts, schema-worded pane headings, no mini-graph, Hops control, symbol badges.
 - [x] T8: Vendor D3 and the build pipeline (`build`, `--check`, W108, data contract). D3 pinned to the 2021–22 releases: the 3 Nov 2026 patch releases were skipped as too new to trust yet (source unchanged; tooling-only).
-- [ ] T9: Deterministic graph render (force layout, kind/status/relation encoding)
+- [x] T9: Deterministic graph render (force layout, kind/status/relation encoding)
 
 **Checkpoint 2:** W106 behaves as specified in temp repos. The sample project's graph renders from `file://` the way the approved mockup shows it. Review it together.
 

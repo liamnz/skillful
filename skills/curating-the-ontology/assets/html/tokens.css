@@ -83,6 +83,16 @@
   --edge-width: 1px;
   --edge-width-focus: 1.5px;
   --edge-label-halo: 5px; /* wide enough to break the edge line under its label */
+  --edge-hit-width: 10px; /* invisible stroke that makes a thin edge easy to hover */
+  --edge-clearance: 2px; /* space between an edge's end and the box it meets */
+  --edge-min-length: 56px; /* layout: an edge's length beyond the two boxes' half-widths */
+  --node-spacing: 16px; /* layout: the least space between two boxes */
+  --arrow-size: 7px; /* filled arrowhead */
+  --arrow-hollow-size: 9px; /* hollow arrowhead (is_a), larger so its outline reads */
+  --dash-proposed: 3 2; /* box outline of a proposed concept */
+  --dash-proposed-glyph: 2 1.5; /* hollow kind glyph of a proposed concept */
+  --glyph-outline-width: 1.5px;
+  --dash-related: 6 4; /* the dashed, undirected related_to line */
   --faded-opacity: 0.18;
   --deprecated-opacity: 0.45;
 
