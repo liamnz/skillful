@@ -1,0 +1,12 @@
+id: average-order-value
+name: Average order value
+kind: metric
+status: defined
+definition: >
+  The mean order amount across all paid orders placed within a chosen
+  reporting period.
+relations:
+  - {type: measures, target: order}
+implemented_in:
+  - path: models/metrics/revenue.sql
+    symbol: average_order_value

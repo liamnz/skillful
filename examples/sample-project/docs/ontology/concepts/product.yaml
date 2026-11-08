@@ -1,0 +1,12 @@
+id: product
+name: Product
+kind: entity
+status: defined
+definition: >
+  An item the shop sells, identified by its SKU, such as a bag of beans
+  or a grinder.
+relations:
+  - {type: has, target: order-line, cardinality: "1:N"}
+implemented_in:
+  - path: models/marts/dim_product.sql
+    symbol: product_id

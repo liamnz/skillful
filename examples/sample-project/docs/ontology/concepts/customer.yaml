@@ -1,0 +1,20 @@
+id: customer
+name: Customer
+kind: entity
+status: defined
+definition: >
+  A person or business that has created an account with the shop and
+  accepted the terms of service, whether or not they have bought anything.
+discouraged_terms:
+  - {term: client, note: "Finance and the old CRM say 'client'"}
+  - {term: shopper, note: "Marketing copy"}
+examples:
+  - "Someone who signed up yesterday and has not ordered yet"
+non_examples:
+  - "A visitor who browsed the shop without creating an account"
+relations:
+  - {type: has, target: order, cardinality: "1:N"}
+  - {type: has, target: subscription, cardinality: "1:N"}
+implemented_in:
+  - path: models/marts/dim_customer.sql
+    symbol: customer_id

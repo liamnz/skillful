@@ -1,0 +1,13 @@
+id: churned-account
+name: Churned account
+kind: entity
+status: proposed
+definition: ""  # HUMAN-AUTHORED: write it in your own words, then set status: defined
+relations:
+  - {type: is_a, target: customer}
+implemented_in:
+  - path: models/marts/fct_churn.sql
+    symbol: is_churned
+proposal:  # AGENT-AUTHORED; remove once the concept is defined
+  rationale: "Introduced as is_churned in models/marts/fct_churn.sql this sprint."
+  suggested_definition: "A customer whose most recent subscription ended more than 60 days ago."

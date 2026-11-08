@@ -1,0 +1,12 @@
+id: customer-region
+name: Customer region
+kind: attribute
+status: defined
+definition: >
+  The sales region a customer is assigned to, derived from the country of
+  their billing address.
+relations:
+  - {type: attribute_of, target: customer}
+implemented_in:
+  - path: models/marts/dim_customer.sql
+    symbol: region

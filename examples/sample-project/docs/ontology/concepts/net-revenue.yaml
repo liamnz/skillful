@@ -1,0 +1,13 @@
+id: net-revenue
+name: Net revenue
+kind: metric
+status: defined
+definition: >
+  Gross revenue for a period minus the value of refunds issued in that
+  same period.
+relations:
+  - {type: measures, target: order}
+  - {type: derived_from, target: gross-revenue}
+implemented_in:
+  - path: models/metrics/revenue.sql
+    symbol: net_revenue

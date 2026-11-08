@@ -1,0 +1,36 @@
+schema_version: 1
+name: Acme Analytics
+description: Domain concepts for the Acme online shop and its coffee subscriptions.
+
+extensions:
+  relation_types:
+    has:
+      status: defined
+      definition: >
+        The source entity is associated with instances of the target over
+        time, and each target instance belongs to exactly one source.
+      inverse: belongs_to
+      from: [entity]
+      to: [entity, event]
+    measures:
+      status: defined
+      definition: >
+        The source metric is computed from instances of the target and
+        summarises some aspect of them for reporting.
+      inverse: measured_by
+      from: [metric]
+      to: [entity, event]
+    derived_from:
+      status: proposed
+      definition: ""
+      inverse: source_of
+      acyclic: true
+      proposal:
+        rationale: >-
+          Net revenue is computed from gross revenue; neither measures nor is_a
+          describes one metric being calculated from another.
+
+settings:
+  stale_proposal_days: 30
+  min_definition_words: 8
+  drift_context_lines: 3

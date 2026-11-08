@@ -1,0 +1,12 @@
+id: subscription-status
+name: Subscription status
+kind: attribute
+status: defined
+definition: >
+  Where a subscription is in its lifecycle: active, paused or cancelled,
+  as recorded by the billing system.
+relations:
+  - {type: attribute_of, target: subscription}
+implemented_in:
+  - path: models/marts/fct_subscriptions.sql
+    symbol: subscription_status

@@ -1,0 +1,12 @@
+id: plan-price
+name: Plan price
+kind: attribute
+status: defined
+definition: >
+  What a subscriber is charged for one billing interval of a subscription
+  plan, before any promotional discount.
+relations:
+  - {type: attribute_of, target: subscription-plan}
+implemented_in:
+  - path: models/marts/dim_plan.sql
+    symbol: plan_price

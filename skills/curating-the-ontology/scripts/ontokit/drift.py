@@ -80,6 +80,16 @@ def check_drift(ontology: Ontology, ctx: Context) -> Iterator[Finding]:
             ctx.note("Drift and staleness checks skipped: not inside a git repository with at least one commit.")
         return
     distance = ontology.settings.drift_context_lines
+    uncommitted: list[str] = []
+    yield from _check_concepts(ontology, git, distance, uncommitted)
+    if uncommitted:
+        ctx.note(
+            f"Drift check skipped for {len(uncommitted)} concept(s) whose file has never been committed, "
+            f"so there is no baseline yet: {', '.join(uncommitted)}."
+        )
+
+
+def _check_concepts(ontology: Ontology, git: Git, distance: int, uncommitted: list[str]) -> Iterator[Finding]:
     for concept in ontology.concepts.values():
         if concept.status == "proposed" or not concept.implemented_in:
             continue
@@ -88,10 +98,8 @@ def check_drift(ontology: Ontology, ctx: Context) -> Iterator[Finding]:
             if i205 is not None:
                 yield i205
             if base is None:
-                ctx.note(
-                    f"Drift check skipped for '{concept.id}': its concept file has never been committed, "
-                    "so there is no baseline yet."
-                )
+                if concept.id not in uncommitted:
+                    uncommitted.append(concept.id)
                 continue
             if changed_near_symbol(git, base, impl, distance):
                 since = "its last review" if impl.reviewed_at and i205 is None else "the concept was last edited"

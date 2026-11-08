@@ -118,12 +118,12 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** A small dbt-style repo with a populated ontology. It is used by the mockup, by manual review and by the Cursor evals.
 
 **Acceptance criteria:**
-- [ ] About 15–25 concepts covering all four core kinds, plus:
+- [x] About 15–25 concepts covering all four core kinds, plus:
   - two defined extensions (e.g. `has`, `measures`) and one proposed extension;
   - at least one each of: a cardinality, a discouraged term, a `proposed` concept with a suggestion, `related_to`, an open question;
   - SQL models referenced by `implemented_in`.
-- [ ] Definitions are written as a human would write them. They are clearly sample content, but realistic enough to exercise the critique scenarios: one definition deliberately contradicts its SQL, for eval (d).
-- [ ] `validate` runs on it. Its findings are the deliberate ones only, listed in the project's README.
+- [x] Definitions are written as a human would write them. They are clearly sample content, but realistic enough to exercise the critique scenarios: one definition deliberately contradicts its SQL, for eval (d).
+- [x] `validate` runs on it. Its findings are the deliberate ones only, listed in the project's README and in `expected-findings.yaml` (the test fails on anything else).
 
 **Verification:** PYTEST (a smoke test that validates the sample and compares its findings to the expected list). Manually: you skim the definitions.
 

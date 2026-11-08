@@ -1,0 +1,15 @@
+id: order
+name: Order
+kind: entity
+status: defined
+definition: >
+  A customer's request to buy one or more products at agreed prices,
+  created at checkout and paid for in a single payment.
+discouraged_terms:
+  - {term: basket, note: "The web team's word before checkout"}
+relations:
+  - {type: has, target: order-placed, cardinality: "1:1"}
+  - {type: has, target: refund-issued, cardinality: "1:N"}
+implemented_in:
+  - path: models/marts/fct_orders.sql
+    symbol: order_id

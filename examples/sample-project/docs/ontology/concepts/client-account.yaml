@@ -1,0 +1,11 @@
+id: client-account
+name: Client account
+kind: entity
+status: deprecated
+definition: >
+  A company record in the old CRM, used for invoicing before customer
+  accounts were introduced in the shop.
+replaced_by: customer
+implemented_in:
+  - path: models/legacy/dim_client.sql
+    symbol: client_id

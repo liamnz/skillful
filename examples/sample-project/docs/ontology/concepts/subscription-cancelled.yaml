@@ -1,0 +1,10 @@
+id: subscription-cancelled
+name: Subscription cancelled
+kind: event
+status: defined
+definition: >
+  The moment a customer or the shop ends a subscription, after which no
+  further deliveries are charged.
+implemented_in:
+  - path: models/marts/fct_subscriptions.sql
+    symbol: cancelled_at

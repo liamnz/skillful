@@ -1,0 +1,10 @@
+id: subscription-plan
+name: Subscription plan
+kind: entity
+status: defined
+definition: >
+  A named offer that fixes what a subscriber receives, how often it is
+  delivered and what it costs per billing interval.
+implemented_in:
+  - path: models/marts/dim_plan.sql
+    symbol: plan_id

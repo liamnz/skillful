@@ -1,0 +1,15 @@
+id: monthly-recurring-revenue
+name: Monthly recurring revenue
+kind: metric
+status: defined
+definition: >
+  The total plan price of all active subscriptions, normalised to one
+  month, as a measure of predictable income.
+discouraged_terms:
+  - {term: MRR, note: "Fine in charts; spell it out in definitions and code"}
+  - {term: run rate, note: "Finance sometimes means something broader"}
+relations:
+  - {type: measures, target: subscription}
+implemented_in:
+  - path: models/metrics/mrr.sql
+    symbol: monthly_recurring_revenue

@@ -80,7 +80,7 @@ T1 skeleton ──► T2 schemas+loader+validate ──┬─► T3 init ──�
 
 ### Phase 2: Risk first (drift, build pipeline, design gate)
 - [x] T5: Git layer, W106 drift, `review`, I205
-- [ ] T6: Sample project (`examples/sample-project`)
+- [x] T6: Sample project (`examples/sample-project`)
 - [ ] T7: Design tokens and static mockup. **Human gate: explicit approval.**
 - [ ] T8: Vendor D3 and the build pipeline (`build`, `--check`, W108, data contract)
 - [ ] T9: Deterministic graph render (force layout, kind/status/relation encoding)
