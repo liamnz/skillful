@@ -218,8 +218,11 @@ def build_parser() -> Parser:
     return parser
 
 
-# Command path (e.g. "vocab new kind") -> handler. Later tasks register real handlers.
-HANDLERS: dict[str, Handler] = {}
+def _handlers() -> dict[str, Handler]:
+    """Command path (e.g. "vocab new kind") -> handler, imported lazily to keep --help fast."""
+    from . import validate
+
+    return {"validate": validate.run}
 
 
 def _command_path(args: argparse.Namespace) -> str:
@@ -262,4 +265,4 @@ def main(argv: list[str] | None = None) -> int:
         _help_for(parser, path).print_help(sys.stderr)
         return EXIT_USAGE
 
-    return HANDLERS.get(path, _not_implemented)(args)
+    return _handlers().get(path, _not_implemented)(args)

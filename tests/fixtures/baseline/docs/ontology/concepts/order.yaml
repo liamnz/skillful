@@ -1,0 +1,11 @@
+id: order
+name: Order
+kind: entity
+status: defined
+definition: >
+  A request from a customer to buy one or more products at agreed prices.
+relations:
+  - {type: placed_by, target: customer, cardinality: "N:1"}
+implemented_in:
+  - path: models/fct_orders.sql
+    symbol: order_id

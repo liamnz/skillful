@@ -1,0 +1,12 @@
+id: order-line
+name: Order line
+kind: entity
+status: defined
+definition: >
+  A single product and quantity within an order, priced at the time of
+  purchase.
+relations:
+  - {type: part_of, target: order, cardinality: "N:1"}
+implemented_in:
+  - path: models/fct_orders.sql
+    symbol: order_line_id

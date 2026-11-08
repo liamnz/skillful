@@ -39,15 +39,15 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Define the record contracts and load an ontology into an immutable model. Ship `validate` with the first three checks, `--json` output, sorted findings and exit codes 0, 1 and 2.
 
 **Acceptance criteria:**
-- [ ] `concept.schema.json` and `manifest.schema.json` (2020-12) cover every spec field, including the `cardinality` enum, `implemented_in.reviewed_at`, `proposal` and `replaced_by`. `core-vocabulary.yaml` holds the four kinds and four relations, with definitions, inverses, acyclicity, `from`/`to` and fixed encodings.
-- [ ] The valid baseline fixture produces zero findings and exit `0`. The E001, E002 and E003 fixtures each produce exactly that code and exit `1`.
-- [ ] `validate --json` prints findings to stdout sorted by (severity, concept, code). Human-readable output and diagnostics go to stderr.
+- [x] `concept.schema.json` and `manifest.schema.json` (2020-12) cover every spec field, including the `cardinality` enum, `implemented_in.reviewed_at`, `proposal` and `replaced_by`. `core-vocabulary.yaml` holds the four kinds and four relations, with definitions, inverses, acyclicity, `from`/`to` and fixed encodings.
+- [x] The valid baseline fixture produces zero findings and exit `0`. The E001, E002 and E003 fixtures each produce exactly that code and exit `1`.
+- [x] `validate --json` prints findings to stdout sorted by (severity, concept, code). The human-readable report also goes to stdout (it is the command's result); the summary line and diagnostics go to stderr.
 
 **Verification:** PYTEST (`tests/test_validate.py`), LINT
 
 **Dependencies:** T1
 
-**Files:** `SK/assets/schemas/{concept.schema.json,manifest.schema.json,core-vocabulary.yaml}`, `SK/scripts/ontokit/{io,schema,checks}.py`, `tests/test_validate.py`, `tests/fixtures/{baseline,e001,e002,e003}/`
+**Files:** `SK/assets/schemas/{concept.schema.json,manifest.schema.json,core-vocabulary.yaml}`, `SK/scripts/ontokit/{io,schema,checks}.py`, `tests/test_validate.py`, `tests/conftest.py`, `tests/fixtures/baseline/`, `tests/fixtures/cases/{e001,e002,e003}/` (cases are overlays copied onto the baseline)
 
 **Scope:** M
 

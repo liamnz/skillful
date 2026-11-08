@@ -4,14 +4,10 @@ from __future__ import annotations
 
 import re
 import shutil
-import subprocess
 from pathlib import Path
 
 import pytest
-
-REPO = Path(__file__).resolve().parents[1]
-SKILL_DIR = REPO / "skills" / "curating-the-ontology"
-ONTO = SKILL_DIR / "scripts" / "onto.py"
+from conftest import ONTO, REPO, SKILL_DIR, run_onto
 
 SUBCOMMANDS = [
     ["init"],
@@ -28,16 +24,8 @@ SUBCOMMANDS = [
 ]
 
 
-def run(args: list[str], script: Path = ONTO, cwd: Path = REPO) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        ["uv", "run", "--quiet", "--script", str(script), *args],
-        cwd=cwd,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        stdin=subprocess.DEVNULL,
-        timeout=120,
-    )
+def run(args: list[str], script: Path = ONTO, cwd: Path = REPO):
+    return run_onto(args, cwd=cwd, script=script)
 
 
 def skill_version() -> str:

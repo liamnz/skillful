@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "curating-the-ontology/manifest.schema.json",
+  "title": "Ontology manifest",
+  "description": "docs/ontology/ontology.yaml: ontology metadata, vocabulary extensions and settings. The core vocabulary is built in and cannot be declared here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "name"],
+  "properties": {
+    "schema_version": {
+      "description": "Version of the record schemas this ontology uses.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "name": { "type": "string", "minLength": 1 },
+    "description": { "type": "string" },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kinds": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/vocabularyId" },
+          "additionalProperties": { "$ref": "#/$defs/kindExtension" }
+        },
+        "relation_types": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/vocabularyId" },
+          "additionalProperties": { "$ref": "#/$defs/relationExtension" }
+        }
+      }
+    },
+    "settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stale_proposal_days": { "type": "integer", "minimum": 1 },
+        "min_definition_words": { "type": "integer", "minimum": 0 },
+        "drift_context_lines": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "$defs": {
+    "vocabularyId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "status": { "enum": ["proposed", "defined", "deprecated"] },
+    "proposal": {
+      "description": "AGENT-AUTHORED. Present only while status is proposed.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rationale": { "type": "string" }
+      }
+    },
+    "kindExtension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "$ref": "#/$defs/status" },
+        "definition": {
+          "description": "HUMAN-AUTHORED.",
+          "type": "string"
+        },
+        "proposal": { "$ref": "#/$defs/proposal" }
+      }
+    },
+    "relationExtension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "inverse"],
+      "properties": {
+        "status": { "$ref": "#/$defs/status" },
+        "definition": {
+          "description": "HUMAN-AUTHORED.",
+          "type": "string"
+        },
+        "inverse": {
+          "description": "Label for the relation read from target to source.",
+          "$ref": "#/$defs/vocabularyId"
+        },
+        "acyclic": { "type": "boolean" },
+        "from": {
+          "description": "Allowed source kinds (core or extension).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/vocabularyId" }
+        },
+        "to": {
+          "description": "Allowed target kinds (core or extension).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/vocabularyId" }
+        },
+        "proposal": { "$ref": "#/$defs/proposal" }
+      }
+    }
+  }
+}

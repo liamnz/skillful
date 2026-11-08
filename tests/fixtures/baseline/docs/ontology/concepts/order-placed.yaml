@@ -1,0 +1,9 @@
+id: order-placed
+name: Order placed
+kind: event
+status: defined
+definition: >
+  The moment a customer confirms checkout and the purchase becomes binding
+  on both parties.
+relations:
+  - {type: placed_by, target: customer, cardinality: "N:1"}

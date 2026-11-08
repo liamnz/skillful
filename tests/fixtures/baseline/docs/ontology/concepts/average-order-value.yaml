@@ -1,0 +1,9 @@
+id: average-order-value
+name: Average order value
+kind: metric
+status: defined
+definition: >
+  The mean order amount across all orders placed within a chosen reporting
+  period.
+relations:
+  - {type: measures, target: order}

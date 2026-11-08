@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "curating-the-ontology/concept.schema.json",
+  "title": "Concept record",
+  "description": "One domain concept, stored as docs/ontology/concepts/<id>.yaml. Fields marked HUMAN-AUTHORED are written by people; the agent never writes them on its own authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "kind", "status"],
+  "properties": {
+    "id": {
+      "description": "Stable kebab-case identifier; must equal the filename stem.",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "name": {
+      "description": "The one canonical term for the concept.",
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "description": "A core kind or a declared kind extension.",
+      "$ref": "#/$defs/vocabularyId"
+    },
+    "status": {
+      "enum": ["proposed", "defined", "deprecated"]
+    },
+    "definition": {
+      "description": "HUMAN-AUTHORED. May be empty only while status is proposed.",
+      "type": "string"
+    },
+    "discouraged_terms": {
+      "description": "Variants to recognise and redirect to the canonical name, never to use.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["term"],
+        "properties": {
+          "term": { "type": "string", "minLength": 1 },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "examples": { "$ref": "#/$defs/stringList" },
+    "non_examples": { "$ref": "#/$defs/stringList" },
+    "rules": { "$ref": "#/$defs/stringList" },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "target"],
+        "properties": {
+          "type": {
+            "description": "A core relation type or a declared relation-type extension.",
+            "$ref": "#/$defs/vocabularyId"
+          },
+          "target": {
+            "description": "Id of the target concept.",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "cardinality": {
+            "description": "Optional, read source:target.",
+            "enum": ["1:1", "1:N", "N:1", "N:M"]
+          }
+        }
+      }
+    },
+    "implemented_in": {
+      "description": "Where the concept lives in code; drives drift checks.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path"],
+        "properties": {
+          "path": {
+            "description": "Repo-relative path with forward slashes.",
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?![A-Za-z]:)(?!/)[^\\\\]+$"
+          },
+          "symbol": { "type": "string", "minLength": 1 },
+          "reviewed_at": {
+            "description": "Commit at which a human last confirmed the definition matches this code. Set by `review`.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{7,64}$"
+          }
+        }
+      }
+    },
+    "open_questions": { "$ref": "#/$defs/stringList" },
+    "proposal": {
+      "description": "AGENT-AUTHORED. Present only while status is proposed.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rationale": { "type": "string" },
+        "suggested_definition": { "type": "string" }
+      }
+    },
+    "replaced_by": {
+      "description": "Id of the concept that replaces this one, when deprecated by a rename or merge.",
+      "oneOf": [
+        { "type": "null" },
+        { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" }
+      ]
+    }
+  },
+  "$defs": {
+    "vocabularyId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "stringList": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
