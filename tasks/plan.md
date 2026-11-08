@@ -97,7 +97,7 @@ T1 skeleton ──► T2 schemas+loader+validate ──┬─► T3 init ──�
 **Checkpoint 3 (criteria met 2026-11-09; merge awaits review at Checkpoint 4):** every finding code has a fixture, and the baseline is clean. Success criteria 1–5a pass.
 
 ### Phase 4: HTML features (JS track)
-- [ ] T15: Selection, neighbourhood focus, hover preview, detail pane
+- [x] T15: Selection, neighbourhood focus, hover preview, detail pane
 - [ ] T16: Navigation: pan/zoom/fit/pin, breadcrumbs, URL deep links, keyboard
 - [ ] T17: Search with redirects
 - [ ] T18: Filters and list view

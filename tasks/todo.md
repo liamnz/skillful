@@ -286,15 +286,15 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** The main way to cut clutter, and the main reading surface.
 
 **Acceptance criteria:**
-- [ ] Selecting a concept centres it, highlights exactly its N-hop neighbourhood (Hops control, 1–3) and fades the rest. Hover, selected and neighbourhood states are each visually distinct. Hovering shows the name, kind and first sentence of the definition without changing the selection.
-- [ ] The detail pane shows:
+- [x] Selecting a concept centres it, highlights exactly its N-hop neighbourhood (Hops control, 1–3) and fades the rest. Hover, selected and neighbourhood states are each visually distinct. Hovering shows the name, kind and first sentence of the definition without changing the selection.
+- [x] The detail pane shows:
   - the definition, set in a readable measure;
   - examples and non-examples, rules and open questions;
   - incoming and outgoing relations as links using inverse labels, with cardinality sentences in both directions;
   - `implemented_in` entries with their review commit and date, or "never reviewed";
   - section headings named after the concept schema's fields (Incoming relations and Findings for the sections that aren't fields);
   - a clearly marked "needs a definition" for `proposed` concepts, and agent suggestions visually separate and labelled.
-- [ ] `graph-model.js` neighbourhood queries are tested via `page.evaluate`.
+- [x] `graph-model.js` neighbourhood queries are tested via `page.evaluate`.
 
 **Verification:** UI, LINT
 

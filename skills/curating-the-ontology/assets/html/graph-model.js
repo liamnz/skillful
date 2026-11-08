@@ -74,7 +74,38 @@
         });
       }
     }
-    return { nodes, edges };
+    return {
+      nodes,
+      edges,
+      kinds: new Map(data.vocabulary.kinds.map((k) => [k.id, k])),
+      relationTypes: new Map(data.vocabulary.relation_types.map((r) => [r.id, r])),
+    };
+  }
+
+  // Depth levels for the hierarchy layout. Edges of `acyclic` relation types (core is_a and
+  // part_of, plus extensions marked acyclic) point from child to parent, so a parent sits above
+  // its children. A concept's depth is the length of its longest path up to a root, which puts a
+  // concept with several parents below all of them. Concepts in no acyclic relation go on a row
+  // of their own below the rest. Cycles (E006) are cut off after `nodes.length` rounds.
+  function depthLevels(model) {
+    const acyclicTypes = new Set([...model.relationTypes.values()].filter((r) => r.acyclic).map((r) => r.id));
+    const edges = model.edges.filter((e) => acyclicTypes.has(e.type));
+    const inHierarchy = new Set(edges.flatMap((e) => [e.source, e.target]));
+    const depth = new Map(model.nodes.map((n) => [n.id, 0]));
+    for (let round = 0; round < model.nodes.length; round++) {
+      let changed = false;
+      for (const e of edges) {
+        const below = depth.get(e.target) + 1;
+        if (depth.get(e.source) < below) {
+          depth.set(e.source, below);
+          changed = true;
+        }
+      }
+      if (!changed) break;
+    }
+    const deepest = Math.max(0, ...[...inHierarchy].map((id) => depth.get(id)));
+    for (const n of model.nodes) if (!inHierarchy.has(n.id)) depth.set(n.id, inHierarchy.size ? deepest + 1 : 0);
+    return { depth, acyclicTypes };
   }
 
   // How far two centred boxes ({x, y, w, h}) overlap on each axis, including a gap.
@@ -163,12 +194,77 @@
     return at(0.5);
   }
 
+  // --- Graph queries ------------------------------------------------------------------
+
+  // Undirected adjacency: id -> sorted neighbour ids. `edges` may be a filtered subset.
+  function adjacency(nodes, edges) {
+    const out = new Map(nodes.map((n) => [n.id, new Set()]));
+    for (const e of edges) {
+      if (out.has(e.source) && out.has(e.target)) {
+        out.get(e.source).add(e.target);
+        out.get(e.target).add(e.source);
+      }
+    }
+    return new Map([...out].map(([id, set]) => [id, [...set].sort()]));
+  }
+
+  // Concepts up to `hops` relations away from `id`, following relations in either direction.
+  // Returns id -> distance (the concept itself is 0).
+  function neighbourhood(adj, id, hops) {
+    const distance = new Map([[id, 0]]);
+    let frontier = [id];
+    for (let d = 1; d <= hops && frontier.length; d++) {
+      const next = [];
+      for (const node of frontier) {
+        for (const other of adj.get(node) || []) {
+          if (!distance.has(other)) {
+            distance.set(other, d);
+            next.push(other);
+          }
+        }
+      }
+      frontier = next;
+    }
+    return distance;
+  }
+
+  // The first sentence of a definition, for previews.
+  function firstSentence(text) {
+    const trimmed = (text || "").trim().replace(/\s+/g, " ");
+    const match = trimmed.match(/^.*?[.!?](?=\s|$)/);
+    return match ? match[0] : trimmed;
+  }
+
+  // A plural for display only ("Order line" -> "Order lines"). Plain English rules on the last word.
+  function plural(name) {
+    if (/(s|x|z|ch|sh)$/i.test(name)) return `${name}es`;
+    if (/[^aeiou]y$/i.test(name)) return `${name.slice(0, -1)}ies`;
+    return `${name}s`;
+  }
+
+  // How a relation reads in prose. `cardinality` is read source:target ("1:N": one source, many
+  // targets). From the source, the target side counts; from the target (`incoming`), the source side.
+  function relationPhrase(label, cardinality, incoming) {
+    const words = label.replace(/_/g, " ");
+    if (!cardinality) return { verb: words, many: false };
+    const [sourceSide, targetSide] = cardinality.split(":");
+    const far = incoming ? sourceSide : targetSide;
+    const many = far !== "1";
+    return { verb: `${words} ${many ? "many" : "one"}`, many };
+  }
+
   root.OntologyGraph = {
     hash,
     random,
     seedPosition,
     edgeLabel,
     buildModel,
+    depthLevels,
+    adjacency,
+    neighbourhood,
+    firstSentence,
+    plural,
+    relationPhrase,
     forceBoxCollide,
     separate,
     exitPoint,

@@ -73,6 +73,10 @@
   /* Layout */
   --toolbar-height: 48px;
   --pane-width: 400px;
+  --preview-width: 300px; /* hover preview card */
+  --underline-offset: 2px;
+  --heading-tracking: 0.04em; /* letter spacing of the small uppercase pane headings */
+  --badge-baseline-shift: 2px; /* aligns an inline badge with the first line of text */
 
   /* Graph: each concept is a box enclosing its kind glyph and name */
   --node-height: 24px;
@@ -93,6 +97,9 @@
   --dash-proposed-glyph: 2 1.5; /* hollow kind glyph of a proposed concept */
   --glyph-outline-width: 1.5px;
   --dash-related: 6 4; /* the dashed, undirected related_to line */
+  --edge-stub-length: 20px; /* an edge to a filtered-out concept: a short stub, not the whole line */
+  --focus-ring-offset: 3px; /* keyboard focus ring, outside the box */
+  --hierarchy-level-gap: 48px; /* hierarchy layout: space between depth rows */
   --faded-opacity: 0.18;
   --deprecated-opacity: 0.45;
 

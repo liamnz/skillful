@@ -7,7 +7,7 @@ timestamps, sorted keys and records, LF line endings.
 
 Data contract (schemaVersion 1), embedded as <script type="application/json" id="ontology-data">:
   schemaVersion, skillVersion, inputHash
-  ontology:   {name, description, schema_version}
+  ontology:   {name, description, schema_version, path_to_project}
   vocabulary: {kinds: [...], relation_types: [...]}, core first, then extensions by id;
               each entry has id, core, status, definition, encoding (+ relation fields)
   concepts:   records as in the YAML (snake_case keys), sorted by id, plus `file`;
@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import os
 import re
 import sys
 from dataclasses import asdict
@@ -44,7 +45,7 @@ FALLBACK_KIND_ENCODING = {"slot": "fallback", "shape": "circle"}  # kinds beyond
 EXTENSION_RELATION_ENCODING = {"line": "solid", "arrow": "filled"}
 
 _PLACEHOLDER = re.compile(r"\{\{([A-Z_]+)\}\}")
-APP_SCRIPTS = ("graph-model.js", "graph-view.js", "app.js")  # in load order
+APP_SCRIPTS = ("graph-model.js", "graph-view.js", "pane.js", "app.js")  # in load order
 
 
 def _vocabulary(ontology: Ontology) -> dict[str, list[dict[str, Any]]]:
@@ -89,6 +90,12 @@ def _concept(concept: Concept, root: Path, git: Git | None) -> dict[str, Any]:
     return data
 
 
+def _path_to_project(root: Path) -> str:
+    """The relative URL prefix from the ontology folder to the project root (the working directory)."""
+    up = Path(os.path.relpath(Path.cwd().resolve(), root.resolve())).as_posix()
+    return "" if up == "." else up + "/"
+
+
 def contract(ontology: Ontology, findings: list[Finding], git: Git | None, inputs: str) -> dict[str, Any]:
     manifest = ontology.manifest
     return {
@@ -99,6 +106,8 @@ def contract(ontology: Ontology, findings: list[Finding], git: Git | None, input
             "name": manifest.name if manifest else ontology.root.name,
             "description": manifest.description if manifest else "",
             "schema_version": manifest.schema_version if manifest else None,
+            # From index.html's folder back to the project root, for implemented_in links.
+            "path_to_project": _path_to_project(ontology.root),
         },
         "vocabulary": _vocabulary(ontology),
         "concepts": [_concept(c, ontology.root, git) for c in ontology.concepts.values()],
