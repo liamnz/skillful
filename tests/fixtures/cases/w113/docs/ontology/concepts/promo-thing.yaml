@@ -1,0 +1,8 @@
+id: promo-thing
+name: Thing of kind promo
+kind: promo
+status: defined
+definition: >
+  A deliberately plain test concept that exists only to put one more kind into use.
+relations:
+  - {type: part_of, target: order}

@@ -1,0 +1,8 @@
+id: shopping-cart
+name: Shopping cart
+kind: entity
+status: defined
+definition: >
+  The products a shopper has chosen but not yet paid for during a visit.
+relations:
+  - {type: measures, target: order}

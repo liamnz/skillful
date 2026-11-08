@@ -230,9 +230,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Govern extensions like concepts. Covers `vocab new kind|relation` (comment-preserving insertion into `ontology.yaml`) and `vocab list` with usage counts.
 
 **Acceptance criteria:**
-- [ ] E005, E010, E011, E012, W110, W112, W113 and I203 each have a triggering fixture.
-- [ ] `vocab new` adds only `proposed` extensions with a rationale. It refuses core ids and duplicates (exit `3`), leaves the rest of `ontology.yaml` byte-identical, and supports `--dry-run`. `vocab list [--json]` shows core and extensions, with status, `from`/`to` and usage counts.
-- [ ] Success criterion 2a: uncommenting all the starter extensions in a fresh `init` manifest validates cleanly.
+- [x] E005, E010, E011, E012, W110, W112, W113 and I203 each have a triggering fixture.
+- [x] `vocab new` adds only `proposed` extensions with a rationale. It refuses core ids and duplicates (exit `3`), leaves the rest of `ontology.yaml` byte-identical, and supports `--dry-run`. `vocab list [--json]` shows core and extensions, with status, `from`/`to` and usage counts.
+- [x] Success criterion 2a: uncommenting all the starter extensions in a fresh `init` manifest validates cleanly.
 
 **Verification:** PYTEST (`tests/test_vocab.py`), LINT
 

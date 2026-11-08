@@ -1,0 +1,31 @@
+schema_version: 1
+name: Baseline
+description: A small, valid ontology used as the test baseline.
+
+extensions:
+  kinds:
+    rule:
+      status: defined
+      definition: ""
+  relation_types:
+    placed_by:
+      status: defined
+      definition: >
+        The source order or ordering event was initiated by the target
+        customer, who is responsible for paying for it.
+      inverse: places
+      from: [entity, event]
+      to: [entity]
+    measures:
+      status: defined
+      definition: >
+        The source metric is computed from instances of the target and
+        summarises some aspect of them.
+      inverse: measured_by
+      from: [metric]
+      to: [entity, event]
+
+settings:
+  stale_proposal_days: 30
+  min_definition_words: 8
+  drift_context_lines: 3

@@ -90,7 +90,7 @@ T1 skeleton ──► T2 schemas+loader+validate ──┬─► T3 init ──�
 ### Phase 3: Validator completion (Python track)
 - [x] T10: Relation checks (E004, E006, E013, E014, W104, W111, I204)
 - [x] T11: Term and definition checks (E007, E008, W101, W102, W103, W109, I201, I202)
-- [ ] T12: Vocabulary extensions: checks (E005, E010–E012, W110, W112, W113, I203) and the `vocab new`/`vocab list` commands
+- [x] T12: Vocabulary extensions: checks (E005, E010–E012, W110, W112, W113, I203) and the `vocab new`/`vocab list` commands
 - [ ] T13: Filesystem, staleness and `impact` (E009, W105, W107)
 - [ ] T14: CLI conventions hardening (`--strict`, `--limit`, golden JSON, exit codes, `schema_version`)
 
