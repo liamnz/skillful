@@ -408,12 +408,12 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### Checkpoint 4: View complete (human review)
 - [x] UI fully green (all Playwright interaction tests in the spec).
-- [ ] **Manual design review with you** against the five principles:
+- [x] **Manual design review with you** against the five principles:
   - both themes;
   - 1280×720 and a large monitor;
   - reduced motion and colour-blind simulation;
   - the sample project and the 300-concept "structure, not a hairball" check.
-- [ ] Success criteria 6, 7, 7a and 8 pass.
+- [x] Success criteria 6, 7, 7a and 8 pass.
 
 ---
 

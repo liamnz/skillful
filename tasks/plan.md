@@ -94,7 +94,7 @@ T1 skeleton ──► T2 schemas+loader+validate ──┬─► T3 init ──�
 - [x] T13: Filesystem, staleness and `impact` (E009, W105, W107)
 - [x] T14: CLI conventions hardening (`--strict`, `--limit`, golden JSON, exit codes, `schema_version`)
 
-**Checkpoint 3 (criteria met 2026-11-09; merge awaits review at Checkpoint 4):** every finding code has a fixture, and the baseline is clean. Success criteria 1–5a pass.
+**Checkpoint 3 (passed 2026-11-09):** every finding code has a fixture, and the baseline is clean. Success criteria 1–5a pass.
 
 ### Phase 4: HTML features (JS track)
 - [x] T15: Selection, neighbourhood focus, hover preview, detail pane
@@ -106,7 +106,7 @@ T1 skeleton ──► T2 schemas+loader+validate ──┬─► T3 init ──�
 - [x] T21: Hierarchy layout (layered force) and semantic zoom
 - [x] T22: Scale and design checks (300-concept fixture, performance, contrast, colour-blind, raw-literal lint)
 
-**Checkpoint 4 (human):** manual design review against the five principles:
+**Checkpoint 4 (passed 2026-11-09, after adding quick filter choices):** manual design review against the five principles:
 - both themes;
 - 1280×720 and a large monitor;
 - reduced motion and colour-blind simulation;
