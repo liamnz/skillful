@@ -1,0 +1,6 @@
+id: bad-record
+name: Bad record
+status: defined
+definition: >
+  A record that is missing its kind and carries a field the schema does not know.
+colour: blue

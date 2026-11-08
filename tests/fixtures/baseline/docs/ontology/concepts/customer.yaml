@@ -1,0 +1,13 @@
+id: customer
+name: Customer
+kind: entity
+status: defined
+definition: >
+  A person or business that has created an account and agreed to the
+  terms of service.
+discouraged_terms:
+  - {term: client, note: "Used by the sales team"}
+examples: ["A business that signed up last week but has not ordered yet"]
+implemented_in:
+  - path: models/dim_customer.sql
+    symbol: customer_id

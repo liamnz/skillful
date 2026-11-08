@@ -1,0 +1,12 @@
+id: active-customer
+name: Active customer
+kind: entity
+status: defined
+definition: >
+  A customer who has placed at least one paid order in the trailing
+  ninety days.
+relations:
+  - {type: is_a, target: customer}
+implemented_in:
+  - path: models/dim_customer.sql
+    symbol: is_active

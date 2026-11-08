@@ -1,0 +1,9 @@
+id: order-amount
+name: Order amount
+kind: attribute
+status: defined
+definition: >
+  The total price charged for an order after discounts and before any
+  refunds are applied.
+relations:
+  - {type: attribute_of, target: order}

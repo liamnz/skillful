@@ -1,0 +1,8 @@
+id: valued-customer
+name: Valued customer
+kind: entity
+status: defined
+definition: >
+  A customer whose lifetime spend places them in the top five percent of all customers.
+relations:
+  - {type: is_a, target: customer}

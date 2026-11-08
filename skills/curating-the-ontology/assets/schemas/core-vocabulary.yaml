@@ -1,0 +1,65 @@
+# Core vocabulary: identical in every project and not redefinable there.
+# The tooling relies on these meanings (hierarchy layout, cycle checks, kind
+# constraints) and on the fixed visual encodings below.
+# Changing this file affects every project's ontology: ask first (see SPEC Boundaries).
+
+kinds:
+  entity:
+    definition: >-
+      A thing the domain keeps track of over time, with an identity of its own
+      (e.g. Customer, Order).
+    encoding: {slot: 1, shape: circle}
+  event:
+    definition: >-
+      Something that happens at a point in time and is recorded
+      (e.g. Order placed, Subscription cancelled).
+    encoding: {slot: 2, shape: diamond}
+  attribute:
+    definition: >-
+      A property describing a single entity or event, with no identity of its own
+      (e.g. Customer region, Order amount).
+    encoding: {slot: 3, shape: square}
+  metric:
+    definition: >-
+      A quantity computed by aggregating over many instances of entities or events,
+      to assess something (e.g. Retention rate, Average order value). A numeric
+      property of a single instance is an attribute, not a metric.
+    encoding: {slot: 4, shape: triangle}
+
+relation_types:
+  is_a:
+    definition: >-
+      Source is a subtype of target: every instance of the source is an instance
+      of the target. Acyclic and transitive.
+    inverse: has_subtype
+    acyclic: true
+    symmetric: false
+    cardinality_allowed: false
+    encoding: {stroke: solid}
+  part_of:
+    definition: >-
+      Source is a component of target and makes no sense without it.
+    inverse: has_part
+    acyclic: true
+    symmetric: false
+    cardinality_allowed: true
+    encoding: {stroke: dashed}
+  attribute_of:
+    definition: >-
+      Source attribute describes instances of the target.
+    inverse: has_attribute
+    acyclic: false
+    symmetric: false
+    cardinality_allowed: false
+    from: [attribute]
+    to: [entity, event]
+    encoding: {stroke: dotted}
+  related_to:
+    definition: >-
+      Symmetric catch-all for a connection nobody has named precisely yet.
+      Allowed, but each use is an invitation to name the relationship.
+    inverse: related_to
+    acyclic: false
+    symmetric: true
+    cardinality_allowed: true   # only 1:1 or N:M, because it is symmetric (E013)
+    encoding: {stroke: long-dash}
