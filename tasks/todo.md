@@ -214,9 +214,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Checks for the one-term-per-concept rule and definition quality.
 
 **Acceptance criteria:**
-- [ ] E007, E008, W101 (uses `min_definition_words`), W102, W103, W109, I201 and I202 each have a triggering fixture and produce exactly their code.
-- [ ] Term matching is case-insensitive and whole-word, so "customer" doesn't match "customers_raw". This is documented in the check docstrings and tested with near-miss fixtures.
-- [ ] The baseline stays clean.
+- [x] E007, E008, W101 (uses `min_definition_words`), W102, W103, W109, I201 and I202 each have a triggering fixture and produce exactly their code.
+- [x] Term matching is case-insensitive and whole-word, so "customer" doesn't match "customers_raw". This is documented in the check docstrings and tested with near-miss fixtures.
+- [x] The baseline stays clean.
 
 **Verification:** PYTEST (`tests/test_checks_terms.py`), LINT
 

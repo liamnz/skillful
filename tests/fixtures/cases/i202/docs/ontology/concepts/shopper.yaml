@@ -1,0 +1,6 @@
+id: shopper
+name: Shopper
+kind: entity
+status: deprecated
+definition: >
+  A person browsing the store, whether or not they have created an account.

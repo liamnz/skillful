@@ -1,0 +1,7 @@
+id: subscriber
+name: Subscriber
+kind: entity
+status: defined
+definition: Someone with a paid plan.
+relations:
+  - {type: is_a, target: customer}

@@ -1,0 +1,7 @@
+id: prospect
+name: Prospect
+kind: entity
+status: defined
+definition: ""
+relations:
+  - {type: placed_by, target: customer}

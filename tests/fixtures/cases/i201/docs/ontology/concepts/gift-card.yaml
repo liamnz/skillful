@@ -1,0 +1,6 @@
+id: gift-card
+name: Gift card
+kind: entity
+status: defined
+definition: >
+  A prepaid balance that a shopper can spend on products instead of paying by card.
