@@ -1,0 +1,10 @@
+id: refund-reason
+name: Refund reason
+kind: attribute
+status: defined
+definition: >
+  Why a buyer asked for their money back, chosen from a fixed list at the time.
+relations:
+  - {type: attribute_of, target: order}
+implemented_in:
+  - path: models/fct_refunds.sql

@@ -1,0 +1,11 @@
+id: order-placed-at
+name: Order placement time
+kind: attribute
+status: defined
+definition: >
+  The moment, to the second, at which the buyer confirmed checkout for an order.
+relations:
+  - {type: attribute_of, target: order}
+implemented_in:
+  - path: models/fct_orders.sql
+    symbol: ordered_at

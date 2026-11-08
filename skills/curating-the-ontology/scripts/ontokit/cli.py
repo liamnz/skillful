@@ -44,11 +44,6 @@ def _command(subparsers: argparse._SubParsersAction, name: str, summary: str, ex
     )
 
 
-def _not_implemented(args: argparse.Namespace) -> int:
-    sys.stderr.write(f"Error: '{args.command_path}' is not implemented yet.\n")
-    return EXIT_USAGE
-
-
 def build_parser() -> Parser:
     # Accept --root after the subcommand too; SUPPRESS keeps the top-level default.
     root_opt = Parser(add_help=False)
@@ -220,7 +215,7 @@ def build_parser() -> Parser:
 
 def _handlers() -> dict[str, Handler]:
     """Command path (e.g. "vocab new kind") -> handler, imported lazily to keep --help fast."""
-    from . import build, init, new, review, validate, vocab
+    from . import build, impact, init, new, review, validate, vocab
 
     return {
         "init": init.run,
@@ -230,6 +225,7 @@ def _handlers() -> dict[str, Handler]:
         "vocab list": vocab.run_list,
         "review": review.run,
         "validate": validate.run,
+        "impact": impact.run,
         "build": build.run,
     }
 
@@ -274,4 +270,4 @@ def main(argv: list[str] | None = None) -> int:
         _help_for(parser, path).print_help(sys.stderr)
         return EXIT_USAGE
 
-    return _handlers().get(path, _not_implemented)(args)
+    return _handlers()[path](args)

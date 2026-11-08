@@ -246,9 +246,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** The remaining code-linked checks, and the `impact` command that drives end-of-task proposals.
 
 **Acceptance criteria:**
-- [ ] E009, W105 and W107 (using the git date and `stale_proposal_days`, for concepts and extensions alike) are tested, including the graceful skip outside git.
-- [ ] `impact [--base] [--json] [--limit]` lists changed files (committed since the merge-base with the default branch, plus uncommitted and untracked files), the concepts referencing each file, and unmapped changed files. When the default branch can't be determined, it exits `4` with advice to pass `--base`.
-- [ ] Deterministic ordering, with golden JSON for one temp-repo scenario.
+- [x] E009, W105 and W107 (using the git date and `stale_proposal_days`, for concepts and extensions alike) are tested, including the graceful skip outside git.
+- [x] `impact [--base] [--json] [--limit]` lists changed files (committed since the merge-base with the default branch, plus uncommitted and untracked files), the concepts referencing each file, and unmapped changed files. When the default branch can't be determined, it exits `4` with advice to pass `--base`.
+- [x] Deterministic ordering, with golden JSON for one temp-repo scenario.
 
 **Verification:** PYTEST (`tests/test_impact.py`, `tests/test_checks_files.py`), LINT
 

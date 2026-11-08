@@ -58,11 +58,17 @@ def project(tmp_path: Path) -> Callable[[str | None], Path]:
 
 
 def collect_findings(project: Path) -> list:
-    """Every finding for a project, in process and without git: fast, for check tests."""
+    """Every finding for a project, in process and without git: fast, for check tests.
+
+    Runs from the project root, as the CLI does, so implemented_in paths resolve.
+    """
+    from contextlib import chdir
+
     from ontokit.context import Context
     from ontokit.validate import collect
 
-    return collect(project / "docs" / "ontology", Context(git=None))
+    with chdir(project):
+        return collect(Path("docs/ontology"), Context(git=None))
 
 
 def codes_in(findings: list) -> set[str]:

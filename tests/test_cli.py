@@ -76,11 +76,21 @@ def test_no_command_prints_help_and_is_a_usage_error() -> None:
     assert "usage:" in result.stderr
 
 
-def test_unimplemented_command_says_so() -> None:
-    # Replaced command by command as later tasks implement them.
-    result = run(["impact"])
-    assert result.returncode == 2
-    assert "not implemented yet" in result.stderr
+def test_every_command_has_a_handler() -> None:
+    from ontokit import cli
+
+    leaves = {
+        "init",
+        "new",
+        "vocab new kind",
+        "vocab new relation",
+        "vocab list",
+        "review",
+        "validate",
+        "impact",
+        "build",
+    }
+    assert set(cli._handlers()) == leaves
 
 
 def test_runs_from_a_copy_in_a_nested_location(tmp_path: Path) -> None:
