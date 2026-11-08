@@ -186,9 +186,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Scope:** M
 
 ### Checkpoint 2: De-risked
-- [ ] W106 temp-repo tests green. `review` preserves file bytes.
-- [ ] The sample project's graph renders deterministically from `file://`.
-- [ ] **You look at the first real graph.** Any design drift from the mockup is fixed in tokens, not ad hoc.
+- [x] W106 temp-repo tests green. `review` preserves file bytes.
+- [x] The sample project's graph renders deterministically from `file://`.
+- [x] **You look at the first real graph.** Any design drift from the mockup is fixed in tokens, not ad hoc.
 
 ---
 
