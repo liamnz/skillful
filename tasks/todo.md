@@ -71,9 +71,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Create `status: proposed` concept stubs with an optional rationale, suggested definition and `implemented_in` entries.
 
 **Acceptance criteria:**
-- [ ] `new <id> --name --kind [--rationale] [--suggested-definition] [--implemented-in path[:symbol]]...` writes a schema-valid `proposed` record whose filename equals its id. The path/symbol split is on the *last* colon, and paths are stored repo-relative in POSIX form.
-- [ ] An existing id is refused with exit `3`. There is no way to set any other status. An invalid id or kind exits `2` with the actionable message format from the spec, listing the valid kinds.
-- [ ] `--dry-run` prints the record and writes nothing.
+- [x] `new <id> --name --kind [--rationale] [--suggested-definition] [--implemented-in path[:symbol]]...` writes a schema-valid `proposed` record whose filename equals its id. The path/symbol split is on the *last* colon, and paths are stored repo-relative in POSIX form.
+- [x] An existing id is refused with exit `3`. There is no way to set any other status. An invalid id or kind exits `2` with the actionable message format from the spec, listing the valid kinds.
+- [x] `--dry-run` prints the record and writes nothing.
 
 **Verification:** PYTEST (`tests/test_new.py`), LINT
 
@@ -84,8 +84,8 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Scope:** S
 
 ### Checkpoint 1: Foundation
-- [ ] `init → new → validate` round trip in a temp git repo (`tests/test_roundtrip.py`).
-- [ ] PYTEST and LINT green. Copying `SK/` elsewhere still works.
+- [x] `init → new → validate` round trip in a temp git repo (`tests/test_roundtrip.py`).
+- [x] PYTEST and LINT green. Copying `SK/` elsewhere still works.
 - [ ] Quick review with you of the CLI ergonomics (`--help` text, error messages).
 
 ---
