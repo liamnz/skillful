@@ -313,7 +313,7 @@ Deciding whether an unmapped file really introduces a domain concept is the agen
   - Each concept is drawn as a **box enclosing its name**, so the name is always attached to its concept and edges meet the box edge. The box holds a small kind glyph, then the name.
   - *Kind* is shown by the glyph's colour **and** shape, so colour is never the only cue.
   - *Status* is shown by the box outline: solid (`defined`), dashed with a hollow glyph (`proposed`, i.e. "needs a definition"), or faded (`deprecated`).
-  - Concepts with validator findings get a badge whose colour reflects severity.
+  - Concepts with validator findings get a badge whose **symbol** shows severity: × error, ! warning, i info. The severity colour reinforces the symbol but is never needed to read it, because eight kind colours make colour alone too easy to confuse.
   - Edges are directed (`related_to` is drawn undirected and dashed). **Relation type is shown by a text label on the edge** (the relation name, e.g. `is a`, `part of`), not by line pattern, because patterns become indistinguishable beyond three or four types. Every edge touching the selected concept is labelled; any other edge shows its label on hover; zooming in far enough labels all visible edges (see semantic zoom). The label includes the cardinality when one is recorded (e.g. `has · 1:N`). There are no crow's-foot or other cardinality marks, to keep the structure quiet. A legend of kinds, line styles and relation types is always visible, and hovering a legend entry shows its definition.
   - Core kinds have fixed encodings in every project, so the same kind looks the same everywhere. Kind extensions get colour/shape pairs from a fixed palette, assigned deterministically by sorted id so they don't change between builds. Beyond 8 kinds, the extra kinds share a neutral fallback encoding and W113 explains why.
 - **Focus and neighbourhood (main way to cut clutter).** Selecting a concept centres it, opens its detail pane, and highlights its neighbourhood (concepts up to N hops away, set by the **Hops** control: default 1, adjustable 1–3) while fading the rest. Hops follow relations in either direction. Only edges touching the selected concept are labelled; edges further out show their label on hover. People explore one neighbourhood at a time instead of the whole hairball.
@@ -390,7 +390,7 @@ Deciding whether an unmapped file really introduces a domain concept is the agen
    |---|---|---|
    | Kind | glyph colour **and** shape, inside the concept's box | box colour |
    | Status | box outline style: solid (`defined`), dashed (`proposed`), reduced opacity (`deprecated`) | colour |
-   | Severity | small badge using the semantic colour family | kind colours |
+   | Severity | symbol in a small round badge (× error, ! warning, i info), filled with the semantic colour as a second cue | kind colours, kind glyph shapes |
    | Relation type | text label on the edge (with cardinality, if recorded): on the selected concept's edges, on hover, and when zoomed in. Line style adds only a hollow arrowhead for `is_a` and a dashed, undirected line for `related_to` | colour, stroke pattern |
    | Focus | full contrast plus the accent outline; everything else fades | — |
 
@@ -422,7 +422,7 @@ All styling flows from CSS custom properties defined once in `assets/html/tokens
 
 - Each concept is a compact box (`--node-height`, `--radius-sm` corners, `--space-2` padding) filled with `--bg`, holding a `--node-glyph-size` kind glyph and the name in `--text-xs`. Box width follows the name.
 - At rest the outline is `--border` and the name `--text-muted`. In the focused neighbourhood they become `--text-muted` and `--text`. The selected box gets a `--node-selected-width` `--accent` outline and a semibold name.
-- Finding badges sit on the box's top-right corner.
+- Finding badges (`--badge-size`) sit on the box's top-right corner: a disc in `--error`, `--warn` or `--info` with its symbol drawn in `--bg`, so the symbol keeps ≥ 3:1 contrast in both themes. The same badge marks findings in the detail pane, the Health panel and the legend.
 - Edges are 1 px in `--border` at rest. Focused neighbourhood edges use `--text-muted` with visible arrowheads.
 - Edge labels are `--text-xs` in `--text-muted` (`--text` when hovered), centred on the edge with a wide `--bg` halo (`--edge-label-halo`) that breaks the line beneath them. They are placed to avoid concept boxes; when one would overlap a box, it moves along its edge.
 - Hover, selected and in-neighbourhood states are each visually distinct.

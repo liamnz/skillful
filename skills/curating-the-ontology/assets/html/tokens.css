@@ -78,6 +78,8 @@
   --node-height: 24px;
   --node-glyph-size: 9px; /* kind glyph inside the box; also the whole node when zoomed out */
   --node-selected-width: 2px; /* accent outline on the selected box */
+  --badge-size: 13px; /* finding badge disc on a box's top-right corner */
+  --badge-glyph-width: 1.6px; /* stroke of the badge's severity symbol (× ! i) */
   --edge-width: 1px;
   --edge-width-focus: 1.5px;
   --edge-label-halo: 5px; /* wide enough to break the edge line under its label */

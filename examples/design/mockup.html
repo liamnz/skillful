@@ -91,8 +91,10 @@
   .k5 { --k: var(--kind-5); }
   .shape { fill: var(--k); stroke: none; }
   .shape.proposed { fill: var(--bg); stroke: var(--k); stroke-width: 1.5; stroke-dasharray: 2 1.5; }
+  /* Finding badges: severity is read from the symbol (× error, ! warning, i info); colour only reinforces it. */
   .badge { stroke: var(--bg); stroke-width: 1.5; }
   .badge.error { fill: var(--error); } .badge.warn { fill: var(--warn); } .badge.info { fill: var(--info); }
+  .badge-glyph { fill: none; stroke: var(--bg); stroke-width: var(--badge-glyph-width); stroke-linecap: round; }
 
   /* ---- Detail pane ---- */
   .pane { border-left: var(--border-width) solid var(--border); background: var(--surface); overflow: auto; padding: var(--space-5) var(--space-5) var(--space-7); }
@@ -116,8 +118,7 @@
   .impl .when { font-size: var(--text-xs); color: var(--text-faint); font-variant-numeric: tabular-nums; }
   .mini { border: var(--border-width) solid var(--border); border-radius: var(--radius-md); background: var(--bg); }
   .finding { display: flex; gap: var(--space-2); align-items: baseline; font-size: var(--text-sm); }
-  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; transform: translateY(-1px); }
-  .dot.warn { background: var(--warn); } .dot.info { background: var(--info); } .dot.error { background: var(--error); }
+  .dot { display: inline-flex; flex: none; transform: translateY(2px); }
   .finding .code { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted); }
   .needs { border: var(--border-width) dashed var(--text-faint); border-radius: var(--radius-md); padding: var(--space-3); margin-top: var(--space-4);
     font-size: var(--text-sm); color: var(--text-muted); }
@@ -177,9 +178,7 @@
         <div class="row"><svg width="20" height="12"><rect class="box near proposed" x="0.5" y="0.5" width="19" height="11" rx="2"/></svg>proposed</div>
         <div class="row"><svg width="20" height="12"><rect class="box near deprecated" x="0.5" y="0.5" width="19" height="11" rx="2"/></svg>deprecated</div>
         <h4 style="margin-top: var(--space-2)">Findings</h4>
-        <div class="row"><svg width="10" height="10" viewBox="-5 -5 10 10"><circle class="badge error" r="3.5"/></svg>error
-          <svg width="10" height="10" viewBox="-5 -5 10 10"><circle class="badge warn" r="3.5"/></svg>warning
-          <svg width="10" height="10" viewBox="-5 -5 10 10"><circle class="badge info" r="3.5"/></svg>info</div>
+        <div class="row"><span data-badge="error"></span>error <span data-badge="warn"></span>warning <span data-badge="info"></span>info</div>
       </div>
     </div>
 
@@ -262,7 +261,7 @@
       <div class="id">active-customer</div>
       <h3>Findings</h3>
       <ul>
-        <li class="finding"><span class="dot warn"></span><span><span class="code">W106 · drift</span><br>models/marts/dim_customer.sql: code near 'is_active' changed since this concept file was last committed (3f9c2e1). Check that the definition still matches.</span></li>
+        <li class="finding"><span class="dot" data-badge="warn"></span><span><span class="code">W106 · drift</span><br>models/marts/dim_customer.sql: code near 'is_active' changed since this concept file was last committed (3f9c2e1). Check that the definition still matches.</span></li>
       </ul>
       <h3>Definition</h3>
       <p class="definition">A customer who has made at least one paid order in the trailing 90 days, regardless of whether they hold a subscription.</p>
@@ -378,6 +377,17 @@
     return boxes;
   }
 
+  // A finding badge centred on (0, 0): a severity-coloured disc holding the severity's symbol.
+  const BADGE_R = tok("--badge-size") / 2;
+  const SYMBOLS = {
+    error: "M-2.2,-2.2 L2.2,2.2 M2.2,-2.2 L-2.2,2.2", // ×
+    warn: "M0,-3 L0,0.6 M0,2.9 L0,3", // !
+    info: "M0,-3 L0,-2.9 M0,-0.6 L0,3", // i
+  };
+  function badge(severity) {
+    return `<circle class="badge ${severity}" r="${BADGE_R}"/><path class="badge-glyph" d="${SYMBOLS[severity]}"/>`;
+  }
+
   function nodeMarkup(id, b, label, kind, status, state, opts) {
     const shape = SHAPES[kind];
     const proposed = status === "proposed" ? "proposed" : "";
@@ -386,7 +396,7 @@
     out += `<g class="${shape.k}" transform="translate(${PAD + GLYPH / 2},${b.h / 2})">` +
       shape.el(GLYPH).replace(/^<(\w+)/, `<$1 class="shape ${proposed}"`) + "</g>";
     out += `<text class="label ${state}" x="${PAD + GLYPH + GAP}" y="${b.h / 2 + 4}">${label}</text>`;
-    if (BADGES[id] && opts.badges) out += `<circle class="badge ${BADGES[id]}" cx="${b.w - 1}" cy="1" r="3.5"/>`;
+    if (BADGES[id] && opts.badges) out += `<g transform="translate(${b.w - 2},1)">${badge(BADGES[id])}</g>`;
     return out + "</g>";
   }
 
@@ -414,6 +424,12 @@
     });
     svg.innerHTML = out + labels;
   }
+
+  // Badges outside the graph (legend, findings list).
+  const size = 2 * BADGE_R + 2;
+  document.querySelectorAll("[data-badge]").forEach((el) => {
+    el.innerHTML = `<svg width="${size}" height="${size}" viewBox="${-size / 2} ${-size / 2} ${size} ${size}" aria-hidden="true">${badge(el.dataset.badge)}</svg>`;
+  });
 
   draw(document.getElementById("graph"), N, E, { fade: true, edgeLabels: true, badges: true, hoverEdge: HOVER_EDGE });
 
