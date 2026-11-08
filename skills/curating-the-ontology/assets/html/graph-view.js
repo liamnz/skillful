@@ -362,18 +362,33 @@
       ];
     }
 
+    // A bottom-left corner of the canvas kept clear for an overlaid control (the legend):
+    // {width, height} in screen pixels.
+    const reserved = options.reserveCorner || (() => ({ width: 0, height: 0 }));
+
     // Fit the visible graph in the canvas, never enlarging past 1:1 so text keeps its size.
+    // With a reserved corner, the graph goes either above it or to its right, whichever
+    // allows the larger scale.
     function fit() {
       if (!nodes.length) return;
       const width = svgElement.clientWidth;
       const height = svgElement.clientHeight;
+      const corner = reserved();
       const [x0, y0, x1, y1] = bounds();
-      const k = Math.max(
-        MIN_ZOOM,
-        Math.min(1, (width - 2 * t.fitPad) / (x1 - x0 || 1), (height - 2 * t.fitPad) / (y1 - y0 || 1)),
-      );
+      const scaleFor = (w, h) =>
+        Math.max(MIN_ZOOM, Math.min(1, (w - 2 * t.fitPad) / (x1 - x0 || 1), (h - 2 * t.fitPad) / (y1 - y0 || 1)));
+      const areas = [
+        { left: 0, width, height }, // the whole canvas, when nothing is reserved
+        { left: 0, width, height: height - corner.height }, // above the corner
+        { left: corner.width, width: width - corner.width, height }, // right of the corner
+      ].filter((a, i) => (corner.width || corner.height ? i > 0 : i === 0) && a.width > 0 && a.height > 0);
+      const area = areas.reduce((best, a) => (scaleFor(a.width, a.height) > scaleFor(best.width, best.height) ? a : best));
+      const k = scaleFor(area.width, area.height);
       const transform = d3.zoomIdentity
-        .translate(round(width / 2 - (k * (x0 + x1)) / 2), round(height / 2 - (k * (y0 + y1)) / 2))
+        .translate(
+          round(area.left + area.width / 2 - (k * (x0 + x1)) / 2),
+          round(area.height / 2 - (k * (y0 + y1)) / 2),
+        )
         .scale(round(k * 1000) / 1000);
       svg.call(zoom.transform, transform);
     }

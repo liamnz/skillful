@@ -91,6 +91,10 @@
   --search-width: 360px;
   --search-min-width: 200px;
   --filters-width: 220px;
+  --legend-line-width: 28px; /* legend samples: a line style, a status box */
+  --legend-box-width: 20px;
+  --legend-sample-height: 12px;
+  --legend-types-width: 22ch;
   --underline-offset: 2px;
   --heading-tracking: 0.04em; /* letter spacing of the small uppercase pane headings */
   --badge-baseline-shift: 2px; /* aligns an inline badge with the first line of text */
@@ -631,6 +635,64 @@ th[aria-sort="descending"] .sort {
   color: var(--text-muted);
 }
 
+/* ---- Vocabulary panel ---- */
+.vocab-panel {
+  overflow: auto;
+  min-height: 0;
+  padding: var(--space-4) var(--space-5);
+}
+
+.vocab-section + .vocab-section {
+  margin-top: var(--space-6);
+}
+
+.vocab-section h2 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.vocab-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.vocab-table th,
+.vocab-table td {
+  text-align: left;
+  vertical-align: baseline;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.vocab-table thead th {
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  font-weight: var(--weight-semibold);
+}
+
+.vocab-table tbody th {
+  font-weight: var(--weight-regular);
+  white-space: nowrap;
+}
+
+.vocab-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.vocab-term {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: var(--underline-offset);
+  cursor: pointer;
+}
+
 .empty-note {
   color: var(--text-muted);
 }
@@ -915,6 +977,106 @@ svg.graph:active {
 .zoom button:hover {
   color: var(--text);
   background: var(--surface-raised);
+}
+
+/* ---- Legend (bottom left, always visible) ---- */
+.legend {
+  position: absolute;
+  left: var(--space-3);
+  bottom: var(--space-3);
+  display: grid;
+  grid-template-columns: auto auto auto;
+  gap: var(--space-2) var(--space-6);
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.legend h4 {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--text-faint);
+}
+
+.legend h4 + .row,
+.legend .row + h4 {
+  margin-top: 0;
+}
+
+.legend .row + h4 {
+  margin-top: var(--space-2);
+}
+
+.legend .row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  line-height: var(--line-height-tight);
+  padding: var(--border-width) 0;
+  cursor: help;
+}
+
+.legend .row.types {
+  display: block;
+  max-width: var(--legend-types-width);
+  color: var(--text-faint);
+  cursor: default;
+}
+
+.legend .type,
+.legend .badge-item {
+  cursor: help;
+}
+
+.legend .badges {
+  gap: var(--space-2);
+  cursor: default;
+}
+
+.badge-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.line-sample {
+  width: var(--legend-line-width);
+  height: var(--legend-sample-height);
+  flex: none;
+}
+
+.line-sample .edge {
+  stroke: var(--text-muted);
+}
+
+.status-sample {
+  width: var(--legend-box-width);
+  height: var(--legend-sample-height);
+  flex: none;
+}
+
+.status-sample .box {
+  stroke: var(--text-muted);
+}
+
+.status-sample.deprecated {
+  opacity: var(--deprecated-opacity);
+}
+
+.legend-tip {
+  position: absolute;
+  z-index: 2;
+  max-width: var(--preview-width);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  font-size: var(--text-sm);
+  pointer-events: none;
 }
 
 /* ---- Hover preview ---- */
@@ -2739,18 +2901,33 @@ THIS SOFTWARE.
       ];
     }
 
+    // A bottom-left corner of the canvas kept clear for an overlaid control (the legend):
+    // {width, height} in screen pixels.
+    const reserved = options.reserveCorner || (() => ({ width: 0, height: 0 }));
+
     // Fit the visible graph in the canvas, never enlarging past 1:1 so text keeps its size.
+    // With a reserved corner, the graph goes either above it or to its right, whichever
+    // allows the larger scale.
     function fit() {
       if (!nodes.length) return;
       const width = svgElement.clientWidth;
       const height = svgElement.clientHeight;
+      const corner = reserved();
       const [x0, y0, x1, y1] = bounds();
-      const k = Math.max(
-        MIN_ZOOM,
-        Math.min(1, (width - 2 * t.fitPad) / (x1 - x0 || 1), (height - 2 * t.fitPad) / (y1 - y0 || 1)),
-      );
+      const scaleFor = (w, h) =>
+        Math.max(MIN_ZOOM, Math.min(1, (w - 2 * t.fitPad) / (x1 - x0 || 1), (h - 2 * t.fitPad) / (y1 - y0 || 1)));
+      const areas = [
+        { left: 0, width, height }, // the whole canvas, when nothing is reserved
+        { left: 0, width, height: height - corner.height }, // above the corner
+        { left: corner.width, width: width - corner.width, height }, // right of the corner
+      ].filter((a, i) => (corner.width || corner.height ? i > 0 : i === 0) && a.width > 0 && a.height > 0);
+      const area = areas.reduce((best, a) => (scaleFor(a.width, a.height) > scaleFor(best.width, best.height) ? a : best));
+      const k = scaleFor(area.width, area.height);
       const transform = d3.zoomIdentity
-        .translate(round(width / 2 - (k * (x0 + x1)) / 2), round(height / 2 - (k * (y0 + y1)) / 2))
+        .translate(
+          round(area.left + area.width / 2 - (k * (x0 + x1)) / 2),
+          round(area.height / 2 - (k * (y0 + y1)) / 2),
+        )
         .scale(round(k * 1000) / 1000);
       svg.call(zoom.transform, transform);
     }
@@ -3429,6 +3606,11 @@ THIS SOFTWARE.
   const healthCount = el("span", "count", String(data.findings.length));
   healthCount.setAttribute("aria-label", count(data.findings.length, "finding", "findings"));
   healthTab.append(healthCount);
+  const vocabPanel = el("section", "vocab-panel");
+  vocabPanel.id = "panel-vocabulary";
+  vocabPanel.hidden = true;
+  main.append(vocabPanel);
+  addTab("vocabulary", "Vocabulary", vocabPanel);
 
   const app = document.getElementById("app");
   app.className = "app";
@@ -3438,6 +3620,13 @@ THIS SOFTWARE.
 
   const view = OntologyGraphView.render(svg, model, {
     findings: worstFinding,
+    // Fit-to-view keeps the graph clear of the legend in the canvas's bottom-left corner.
+    reserveCorner: () => {
+      const legendBox = canvas.querySelector(".legend");
+      if (!legendBox) return { width: 0, height: 0 };
+      const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--space-3"));
+      return { width: legendBox.offsetWidth + gap, height: legendBox.offsetHeight + gap };
+    },
     on: {
       select: (id) => setState({ selected: id }),
       hover: showPreview,
@@ -3935,6 +4124,209 @@ THIS SOFTWARE.
     }
   }
   renderHealth();
+
+  // --- Vocabulary: usage counts, the legend and the Vocabulary panel --------------------
+
+  const kindUsage = new Map();
+  for (const c of data.concepts) kindUsage.set(c.kind, (kindUsage.get(c.kind) || 0) + 1);
+  const typeUsage = new Map();
+  for (const c of data.concepts) for (const r of c.relations) typeUsage.set(r.type, (typeUsage.get(r.type) || 0) + 1);
+  const words = (id) => id.replace(/_/g, " ");
+  const oneLine = (text) => (text || "").replace(/\s+/g, " ").trim();
+  const allKinds = data.vocabulary.kinds.map((k) => k.id);
+  const allTypes = data.vocabulary.relation_types.map((r) => r.id);
+
+  // Show only one kind (or relation type) in the graph: the Vocabulary panel's click action.
+  function filterTo(group, id) {
+    const others = (group === "kinds" ? allKinds : allTypes).filter((x) => x !== id);
+    const filters = { kinds: new Set(), statuses: new Set(), types: new Set() };
+    filters[group] = new Set(others);
+    setState({ filters, tab: "graph", selected: null });
+  }
+
+  // Legend tooltips: the definition of whatever the pointer (or keyboard focus) is on.
+  const legendTip = el("div", "legend-tip");
+  legendTip.setAttribute("role", "tooltip");
+  legendTip.id = "legend-tip";
+  legendTip.hidden = true;
+
+  function explain(row, title, definition) {
+    row.tabIndex = 0;
+    row.dataset.definition = definition;
+    const show = () => {
+      legendTip.replaceChildren(el("div", "preview-name", title), el("div", "preview-text", definition));
+      legendTip.hidden = false;
+      const box = canvas.getBoundingClientRect();
+      const r = row.getBoundingClientRect();
+      const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--space-2"));
+      legendTip.style.left = `${r.left - box.left}px`;
+      legendTip.style.top = `${Math.max(gap, r.top - box.top - legendTip.offsetHeight - gap)}px`;
+      row.setAttribute("aria-describedby", legendTip.id);
+    };
+    const hide = () => {
+      legendTip.hidden = true;
+      row.removeAttribute("aria-describedby");
+    };
+    row.addEventListener("mouseenter", show);
+    row.addEventListener("focus", show);
+    row.addEventListener("mouseleave", hide);
+    row.addEventListener("blur", hide);
+  }
+
+  function lineSample(dash, arrow) {
+    const svgLine = document.createElementNS(SVG_NS, "svg");
+    svgLine.setAttribute("class", "line-sample");
+    svgLine.setAttribute("aria-hidden", "true");
+    svgLine.setAttribute("viewBox", "0 0 28 10");
+    const line = document.createElementNS(SVG_NS, "line");
+    line.setAttribute("x1", "1");
+    line.setAttribute("y1", "5");
+    line.setAttribute("x2", arrow ? "21" : "27");
+    line.setAttribute("y2", "5");
+    line.setAttribute("class", `edge ${dash ? "dashed" : "solid"}`);
+    svgLine.append(line);
+    if (arrow) {
+      const head = document.createElementNS(SVG_NS, "path");
+      head.setAttribute("d", "M21,1.5 L27,5 L21,8.5 Z");
+      head.setAttribute("class", arrow === "hollow" ? "arrow-hollow focus" : "arrow focus");
+      svgLine.append(head);
+    }
+    return svgLine;
+  }
+
+  function statusSample(status) {
+    const sample = document.createElementNS(SVG_NS, "svg");
+    sample.setAttribute("class", `status-sample ${status === "deprecated" ? "deprecated" : ""}`);
+    sample.setAttribute("aria-hidden", "true");
+    sample.setAttribute("viewBox", "0 0 20 12");
+    const rect = document.createElementNS(SVG_NS, "rect");
+    rect.setAttribute("x", "0.5");
+    rect.setAttribute("y", "0.5");
+    rect.setAttribute("width", "19");
+    rect.setAttribute("height", "11");
+    rect.setAttribute("rx", "2");
+    rect.setAttribute("class", `box ${status}`);
+    sample.append(rect);
+    return sample;
+  }
+
+  const STATUS_MEANING = {
+    defined: "A human has written and agreed the definition.",
+    proposed: "Needs a definition: proposed, usually by the agent, and not yet defined by a human.",
+    deprecated: "No longer to be used. Follow replaced_by to the concept that took its place.",
+  };
+  const SEVERITY_MEANING = {
+    error: "Error: the records are inconsistent and validate fails until it is fixed.",
+    warn: "Warning: worth fixing; validate --strict fails on it.",
+    info: "Info: a prompt to look, not a fault.",
+  };
+
+  const legend = el("aside", "legend");
+  legend.setAttribute("aria-label", "Legend");
+  {
+    const kindsCol = el("div");
+    kindsCol.append(el("h4", "", "Kinds"));
+    for (const k of data.vocabulary.kinds) {
+      const row = el("div", "row");
+      row.dataset.kind = k.id;
+      row.append(OntologyPane.kindIcon(k.encoding, false), words(k.id));
+      explain(row, words(k.id), oneLine(k.definition) || "No definition yet (proposed).");
+      kindsCol.append(row);
+    }
+    const relCol = el("div");
+    relCol.append(el("h4", "", "Relations"));
+    const styles = [
+      ["directed, labelled", null, "filled", "A named, directed relation. Its label shows the relation type (and cardinality, if recorded)."],
+      ["is a (subtype)", null, "hollow", oneLine((model.relationTypes.get("is_a") || {}).definition)],
+      ["related to (vague)", "dash", null, oneLine((model.relationTypes.get("related_to") || {}).definition)],
+    ];
+    for (const [label, dash, arrow, meaning] of styles) {
+      const row = el("div", "row");
+      row.append(lineSample(dash, arrow), label);
+      explain(row, label, meaning);
+      relCol.append(row);
+    }
+    const typesRow = el("div", "row types");
+    for (const [i, type] of data.vocabulary.relation_types.filter((r) => typeUsage.get(r.id)).entries()) {
+      if (i) typesRow.append(" · ");
+      const span = el("span", "type", words(type.id));
+      span.dataset.type = type.id;
+      explain(span, words(type.id), oneLine(type.definition) || "No definition yet (proposed).");
+      typesRow.append(span);
+    }
+    relCol.append(typesRow);
+    const statusCol = el("div");
+    statusCol.append(el("h4", "", "Status"));
+    for (const status of ["defined", "proposed", "deprecated"]) {
+      const row = el("div", "row");
+      row.dataset.status = status;
+      row.append(statusSample(status), status);
+      explain(row, status, STATUS_MEANING[status]);
+      statusCol.append(row);
+    }
+    statusCol.append(el("h4", "", "Findings"));
+    const badgeRow = el("div", "row badges");
+    for (const severity of ["error", "warn", "info"]) {
+      const item = el("span", "badge-item");
+      item.dataset.severity = severity;
+      item.append(OntologyPane.badgeIcon(severity), severity === "warn" ? "warning" : severity);
+      explain(item, severity === "warn" ? "warning" : severity, SEVERITY_MEANING[severity]);
+      badgeRow.append(item);
+    }
+    statusCol.append(badgeRow);
+    legend.append(kindsCol, relCol, statusCol);
+  }
+  canvas.append(legend, legendTip);
+  view.fit(); // again, now that the legend's space is known
+
+  function renderVocabulary() {
+    vocabPanel.replaceChildren();
+    const section = (title, entries, group, usage) => {
+      const wrap = el("section", "vocab-section");
+      wrap.append(el("h2", "", title));
+      const table = el("table", "vocab-table");
+      const head = el("tr");
+      for (const label of ["Term", "Status", "Used", group === "types" ? "From → to" : null, "Definition"]) {
+        if (label === null) continue;
+        const th = el("th", label === "Used" ? "num" : "", label);
+        th.scope = "col";
+        head.append(th);
+      }
+      const thead = el("thead");
+      thead.append(head);
+      const tbody = el("tbody");
+      for (const entry of entries) {
+        const tr = el("tr");
+        tr.dataset.id = entry.id;
+        const term = el("th");
+        term.scope = "row";
+        const button = el("button", "vocab-term", words(entry.id));
+        button.type = "button";
+        button.title = `Show only ${words(entry.id)} in the graph`;
+        button.addEventListener("click", () => filterTo(group, entry.id));
+        if (group === "kinds") term.append(OntologyPane.kindIcon(entry.encoding, entry.status === "proposed"), " ");
+        term.append(button);
+        if (group === "types" && entry.inverse) term.append(el("div", "faint", `inverse: ${words(entry.inverse)}`));
+        const used = usage.get(entry.id) || 0;
+        tr.append(term, el("td", "", entry.core ? "core" : entry.status), el("td", "num", String(used)));
+        if (group === "types") {
+          const from = (entry.from || []).join(", ") || "any";
+          const to = (entry.to || []).join(", ") || "any";
+          tr.append(el("td", "faint", entry.from || entry.to ? `${from} → ${to}` : "any"));
+        }
+        tr.append(el("td", entry.definition ? "definition-cell" : "definition-cell faint", oneLine(entry.definition) || "Needs a definition"));
+        tbody.append(tr);
+      }
+      table.append(thead, tbody);
+      wrap.append(table);
+      return wrap;
+    };
+    vocabPanel.append(
+      section("Kinds", data.vocabulary.kinds, "kinds", kindUsage),
+      section("Relation types", data.vocabulary.relation_types, "types", typeUsage),
+    );
+  }
+  renderVocabulary();
 
   refresh({ selected: null });
   if (location.hash) restoreFromUrl();

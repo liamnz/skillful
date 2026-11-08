@@ -364,9 +364,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### T20: Vocabulary panel, legend, extension encodings
 **Acceptance criteria:**
-- [ ] The legend is always visible. Hovering an entry shows its definition.
-- [ ] The Vocabulary panel lists core and extension kinds and relation types, with definition, status, `from`/`to` and usage counts. Clicking an entry filters the graph.
-- [ ] Extension kinds get slots 5–8 and the remaining shapes by sorted id, stable across builds. A ninth or later kind uses the neutral fallback.
+- [x] The legend is always visible. Hovering an entry shows its definition.
+- [x] The Vocabulary panel lists core and extension kinds and relation types, with definition, status, `from`/`to` and usage counts. Clicking an entry filters the graph.
+- [x] Extension kinds get slots 5–8 and the remaining shapes by sorted id, stable across builds. A ninth or later kind uses the neutral fallback.
 
 **Verification:** UI, LINT
 

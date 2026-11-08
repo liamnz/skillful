@@ -78,6 +78,10 @@
   --search-width: 360px;
   --search-min-width: 200px;
   --filters-width: 220px;
+  --legend-line-width: 28px; /* legend samples: a line style, a status box */
+  --legend-box-width: 20px;
+  --legend-sample-height: 12px;
+  --legend-types-width: 22ch;
   --underline-offset: 2px;
   --heading-tracking: 0.04em; /* letter spacing of the small uppercase pane headings */
   --badge-baseline-shift: 2px; /* aligns an inline badge with the first line of text */

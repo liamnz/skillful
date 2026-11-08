@@ -248,6 +248,11 @@
   const healthCount = el("span", "count", String(data.findings.length));
   healthCount.setAttribute("aria-label", count(data.findings.length, "finding", "findings"));
   healthTab.append(healthCount);
+  const vocabPanel = el("section", "vocab-panel");
+  vocabPanel.id = "panel-vocabulary";
+  vocabPanel.hidden = true;
+  main.append(vocabPanel);
+  addTab("vocabulary", "Vocabulary", vocabPanel);
 
   const app = document.getElementById("app");
   app.className = "app";
@@ -257,6 +262,13 @@
 
   const view = OntologyGraphView.render(svg, model, {
     findings: worstFinding,
+    // Fit-to-view keeps the graph clear of the legend in the canvas's bottom-left corner.
+    reserveCorner: () => {
+      const legendBox = canvas.querySelector(".legend");
+      if (!legendBox) return { width: 0, height: 0 };
+      const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--space-3"));
+      return { width: legendBox.offsetWidth + gap, height: legendBox.offsetHeight + gap };
+    },
     on: {
       select: (id) => setState({ selected: id }),
       hover: showPreview,
@@ -754,6 +766,209 @@
     }
   }
   renderHealth();
+
+  // --- Vocabulary: usage counts, the legend and the Vocabulary panel --------------------
+
+  const kindUsage = new Map();
+  for (const c of data.concepts) kindUsage.set(c.kind, (kindUsage.get(c.kind) || 0) + 1);
+  const typeUsage = new Map();
+  for (const c of data.concepts) for (const r of c.relations) typeUsage.set(r.type, (typeUsage.get(r.type) || 0) + 1);
+  const words = (id) => id.replace(/_/g, " ");
+  const oneLine = (text) => (text || "").replace(/\s+/g, " ").trim();
+  const allKinds = data.vocabulary.kinds.map((k) => k.id);
+  const allTypes = data.vocabulary.relation_types.map((r) => r.id);
+
+  // Show only one kind (or relation type) in the graph: the Vocabulary panel's click action.
+  function filterTo(group, id) {
+    const others = (group === "kinds" ? allKinds : allTypes).filter((x) => x !== id);
+    const filters = { kinds: new Set(), statuses: new Set(), types: new Set() };
+    filters[group] = new Set(others);
+    setState({ filters, tab: "graph", selected: null });
+  }
+
+  // Legend tooltips: the definition of whatever the pointer (or keyboard focus) is on.
+  const legendTip = el("div", "legend-tip");
+  legendTip.setAttribute("role", "tooltip");
+  legendTip.id = "legend-tip";
+  legendTip.hidden = true;
+
+  function explain(row, title, definition) {
+    row.tabIndex = 0;
+    row.dataset.definition = definition;
+    const show = () => {
+      legendTip.replaceChildren(el("div", "preview-name", title), el("div", "preview-text", definition));
+      legendTip.hidden = false;
+      const box = canvas.getBoundingClientRect();
+      const r = row.getBoundingClientRect();
+      const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--space-2"));
+      legendTip.style.left = `${r.left - box.left}px`;
+      legendTip.style.top = `${Math.max(gap, r.top - box.top - legendTip.offsetHeight - gap)}px`;
+      row.setAttribute("aria-describedby", legendTip.id);
+    };
+    const hide = () => {
+      legendTip.hidden = true;
+      row.removeAttribute("aria-describedby");
+    };
+    row.addEventListener("mouseenter", show);
+    row.addEventListener("focus", show);
+    row.addEventListener("mouseleave", hide);
+    row.addEventListener("blur", hide);
+  }
+
+  function lineSample(dash, arrow) {
+    const svgLine = document.createElementNS(SVG_NS, "svg");
+    svgLine.setAttribute("class", "line-sample");
+    svgLine.setAttribute("aria-hidden", "true");
+    svgLine.setAttribute("viewBox", "0 0 28 10");
+    const line = document.createElementNS(SVG_NS, "line");
+    line.setAttribute("x1", "1");
+    line.setAttribute("y1", "5");
+    line.setAttribute("x2", arrow ? "21" : "27");
+    line.setAttribute("y2", "5");
+    line.setAttribute("class", `edge ${dash ? "dashed" : "solid"}`);
+    svgLine.append(line);
+    if (arrow) {
+      const head = document.createElementNS(SVG_NS, "path");
+      head.setAttribute("d", "M21,1.5 L27,5 L21,8.5 Z");
+      head.setAttribute("class", arrow === "hollow" ? "arrow-hollow focus" : "arrow focus");
+      svgLine.append(head);
+    }
+    return svgLine;
+  }
+
+  function statusSample(status) {
+    const sample = document.createElementNS(SVG_NS, "svg");
+    sample.setAttribute("class", `status-sample ${status === "deprecated" ? "deprecated" : ""}`);
+    sample.setAttribute("aria-hidden", "true");
+    sample.setAttribute("viewBox", "0 0 20 12");
+    const rect = document.createElementNS(SVG_NS, "rect");
+    rect.setAttribute("x", "0.5");
+    rect.setAttribute("y", "0.5");
+    rect.setAttribute("width", "19");
+    rect.setAttribute("height", "11");
+    rect.setAttribute("rx", "2");
+    rect.setAttribute("class", `box ${status}`);
+    sample.append(rect);
+    return sample;
+  }
+
+  const STATUS_MEANING = {
+    defined: "A human has written and agreed the definition.",
+    proposed: "Needs a definition: proposed, usually by the agent, and not yet defined by a human.",
+    deprecated: "No longer to be used. Follow replaced_by to the concept that took its place.",
+  };
+  const SEVERITY_MEANING = {
+    error: "Error: the records are inconsistent and validate fails until it is fixed.",
+    warn: "Warning: worth fixing; validate --strict fails on it.",
+    info: "Info: a prompt to look, not a fault.",
+  };
+
+  const legend = el("aside", "legend");
+  legend.setAttribute("aria-label", "Legend");
+  {
+    const kindsCol = el("div");
+    kindsCol.append(el("h4", "", "Kinds"));
+    for (const k of data.vocabulary.kinds) {
+      const row = el("div", "row");
+      row.dataset.kind = k.id;
+      row.append(OntologyPane.kindIcon(k.encoding, false), words(k.id));
+      explain(row, words(k.id), oneLine(k.definition) || "No definition yet (proposed).");
+      kindsCol.append(row);
+    }
+    const relCol = el("div");
+    relCol.append(el("h4", "", "Relations"));
+    const styles = [
+      ["directed, labelled", null, "filled", "A named, directed relation. Its label shows the relation type (and cardinality, if recorded)."],
+      ["is a (subtype)", null, "hollow", oneLine((model.relationTypes.get("is_a") || {}).definition)],
+      ["related to (vague)", "dash", null, oneLine((model.relationTypes.get("related_to") || {}).definition)],
+    ];
+    for (const [label, dash, arrow, meaning] of styles) {
+      const row = el("div", "row");
+      row.append(lineSample(dash, arrow), label);
+      explain(row, label, meaning);
+      relCol.append(row);
+    }
+    const typesRow = el("div", "row types");
+    for (const [i, type] of data.vocabulary.relation_types.filter((r) => typeUsage.get(r.id)).entries()) {
+      if (i) typesRow.append(" · ");
+      const span = el("span", "type", words(type.id));
+      span.dataset.type = type.id;
+      explain(span, words(type.id), oneLine(type.definition) || "No definition yet (proposed).");
+      typesRow.append(span);
+    }
+    relCol.append(typesRow);
+    const statusCol = el("div");
+    statusCol.append(el("h4", "", "Status"));
+    for (const status of ["defined", "proposed", "deprecated"]) {
+      const row = el("div", "row");
+      row.dataset.status = status;
+      row.append(statusSample(status), status);
+      explain(row, status, STATUS_MEANING[status]);
+      statusCol.append(row);
+    }
+    statusCol.append(el("h4", "", "Findings"));
+    const badgeRow = el("div", "row badges");
+    for (const severity of ["error", "warn", "info"]) {
+      const item = el("span", "badge-item");
+      item.dataset.severity = severity;
+      item.append(OntologyPane.badgeIcon(severity), severity === "warn" ? "warning" : severity);
+      explain(item, severity === "warn" ? "warning" : severity, SEVERITY_MEANING[severity]);
+      badgeRow.append(item);
+    }
+    statusCol.append(badgeRow);
+    legend.append(kindsCol, relCol, statusCol);
+  }
+  canvas.append(legend, legendTip);
+  view.fit(); // again, now that the legend's space is known
+
+  function renderVocabulary() {
+    vocabPanel.replaceChildren();
+    const section = (title, entries, group, usage) => {
+      const wrap = el("section", "vocab-section");
+      wrap.append(el("h2", "", title));
+      const table = el("table", "vocab-table");
+      const head = el("tr");
+      for (const label of ["Term", "Status", "Used", group === "types" ? "From → to" : null, "Definition"]) {
+        if (label === null) continue;
+        const th = el("th", label === "Used" ? "num" : "", label);
+        th.scope = "col";
+        head.append(th);
+      }
+      const thead = el("thead");
+      thead.append(head);
+      const tbody = el("tbody");
+      for (const entry of entries) {
+        const tr = el("tr");
+        tr.dataset.id = entry.id;
+        const term = el("th");
+        term.scope = "row";
+        const button = el("button", "vocab-term", words(entry.id));
+        button.type = "button";
+        button.title = `Show only ${words(entry.id)} in the graph`;
+        button.addEventListener("click", () => filterTo(group, entry.id));
+        if (group === "kinds") term.append(OntologyPane.kindIcon(entry.encoding, entry.status === "proposed"), " ");
+        term.append(button);
+        if (group === "types" && entry.inverse) term.append(el("div", "faint", `inverse: ${words(entry.inverse)}`));
+        const used = usage.get(entry.id) || 0;
+        tr.append(term, el("td", "", entry.core ? "core" : entry.status), el("td", "num", String(used)));
+        if (group === "types") {
+          const from = (entry.from || []).join(", ") || "any";
+          const to = (entry.to || []).join(", ") || "any";
+          tr.append(el("td", "faint", entry.from || entry.to ? `${from} → ${to}` : "any"));
+        }
+        tr.append(el("td", entry.definition ? "definition-cell" : "definition-cell faint", oneLine(entry.definition) || "Needs a definition"));
+        tbody.append(tr);
+      }
+      table.append(thead, tbody);
+      wrap.append(table);
+      return wrap;
+    };
+    vocabPanel.append(
+      section("Kinds", data.vocabulary.kinds, "kinds", kindUsage),
+      section("Relation types", data.vocabulary.relation_types, "types", typeUsage),
+    );
+  }
+  renderVocabulary();
 
   refresh({ selected: null });
   if (location.hash) restoreFromUrl();
