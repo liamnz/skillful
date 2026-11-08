@@ -365,7 +365,8 @@ Deciding whether an unmapped file really introduces a domain concept is the agen
   - Text and graph elements meet WCAG AA contrast in both themes.
 - **Themes and sizes.** Light and dark themes follow `prefers-color-scheme`. It is designed for laptop and desktop screens (minimum viewport 1280×720) and scales up to large monitors. Phone and tablet layouts are out of scope.
 - **Performance.** Fixture ontology with 300 concepts and 600 relations: first render in under 2 s on a typical laptop, and pan, zoom and selection stay smooth.
-- **Freshness.** The build embeds a hash of the input records so `validate`/`build --check` can detect staleness.
+- **Freshness.** The build embeds a hash of the input records so `validate`/`build --check` can detect staleness. W108 fires only when `index.html` exists and is stale; a view that has never been built gets a note on stderr instead (and `build --check` exits 1).
+- **No network, enforced.** The page carries a Content-Security-Policy of `default-src 'none'` (inline styles and scripts only), so even a mistake in the view code cannot make a request.
 - **Friendly to being committed.**
   - The output is **byte-for-byte reproducible**: no timestamps, stable key and record ordering, pinned templates. Two people building from the same records always produce an identical file.
   - `init` offers, asking first, to add `docs/ontology/index.html -diff linguist-generated=true` to `.gitattributes`. Diffs and PR reviews then show the YAML changes, not the regenerated HTML.
@@ -406,7 +407,7 @@ All styling flows from CSS custom properties defined once in `assets/html/tokens
 - **Kind palette:** 8 slots (`--kind-1` … `--kind-8`).
   - Colour-blind-safe as a set (distinguishable under protanopia, deuteranopia and tritanopia simulation).
   - Each meets WCAG AA non-text contrast (≥ 3:1) against `--bg` in both themes.
-  - The four core kinds have **fixed slots and shapes**: `entity` → slot 1 + circle, `event` → slot 2 + diamond, `attribute` → slot 3 + square, `metric` → slot 4 + triangle. Slots 5–8 and the remaining `d3-shape` symbols are assigned to extension kinds by sorted id.
+  - The four core kinds have **fixed slots and shapes**: `entity` → slot 1 + circle, `event` → slot 2 + diamond, `attribute` → slot 3 + square, `metric` → slot 4 + triangle. Slots 5–8 are assigned to extension kinds by sorted id, with the shapes cross, star, wye and hexagon (shapes no core kind uses).
   - Kinds beyond 8 use a neutral fallback (see W113).
 - **Semantic colours:** `--accent` (focus/selection; one hue only, and not confused with any kind colour), `--error`, `--warn`, `--info`.
 - **Typography:**

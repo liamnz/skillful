@@ -225,4 +225,6 @@ def load(root: Path) -> tuple[Ontology, list[Finding]]:
             continue
         concepts[stem] = _concept_from(data, path)
 
+    # Sort by id, not filename: "customer-region.yaml" sorts before "customer.yaml".
+    concepts = dict(sorted(concepts.items()))
     return Ontology(root=root, core=core_vocabulary(), manifest=manifest, concepts=concepts), findings

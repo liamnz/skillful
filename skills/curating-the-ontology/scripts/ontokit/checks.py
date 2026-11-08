@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterable
 
-from . import drift
+from . import drift, staleness
 from .context import Context
 from .findings import Finding
 from .io import Ontology
@@ -18,6 +18,7 @@ Check = Callable[[Ontology, Context], Iterable[Finding]]
 
 CHECKS: list[Check] = [
     drift.check_drift,
+    staleness.check_staleness,
 ]
 
 

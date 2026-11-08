@@ -157,9 +157,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Pin and vendor the D3 modules, and implement `build` to produce a self-contained, byte-reproducible `index.html`. The page embeds the data contract (Decision 4) and a line-ending-insensitive `inputHash` (Decision 5). Adds `build --check` and W108. **Asks you before downloading.**
 
 **Acceptance criteria:**
-- [ ] `assets/vendor/` holds the official UMD builds of `d3-selection`, `d3-force`, `d3-zoom`, `d3-drag`, `d3-shape` and their dependencies, at exact versions. `MANIFEST.json` gives the module, version, source URL, SHA-256 and order, and `LICENSE-d3.txt` holds the licence. The ISC notice is emitted in the output.
-- [ ] `build` writes one `index.html` with all CSS, JS and data inline and no `http(s)://` in `src`/`href`/`@import`. Two builds in different directories and at different times are byte-identical. A CRLF copy of the inputs produces the same `inputHash`.
-- [ ] `build --check` exits `1` when the output is stale, and `validate` reports W108. `--dry-run` writes nothing. The placeholder page shows concept and relation counts from the embedded data.
+- [x] `assets/vendor/` holds the official UMD builds of `d3-selection`, `d3-force`, `d3-zoom`, `d3-drag`, `d3-shape` and their dependencies, at exact versions. `MANIFEST.json` gives the module, version, source URL, SHA-256 and order, and `LICENSE-d3.txt` holds the licence. The ISC notice is emitted in the output.
+- [x] `build` writes one `index.html` with all CSS, JS and data inline and no `http(s)://` in `src`/`href`/`@import`. Two builds in different directories and at different times are byte-identical. A CRLF copy of the inputs produces the same `inputHash`.
+- [x] `build --check` exits `1` when the output is stale, and `validate` reports W108. `--dry-run` writes nothing. The placeholder page shows concept and relation counts from the embedded data.
 
 **Verification:** PYTEST (`tests/test_build.py`: static checks, reproducibility, vendor integrity, W108). Manually: open the sample build from `file://`.
 

@@ -1,0 +1,42 @@
+/* View styles. Every value comes from tokens.css; no raw colours, sizes or spacing here. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--text-md);
+  line-height: var(--line-height);
+}
+
+/* Placeholder page (until the graph view lands). */
+.placeholder {
+  max-width: var(--measure);
+  margin: var(--space-8) auto;
+  padding: 0 var(--space-4);
+}
+
+.placeholder h1 {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
+.placeholder p {
+  margin: var(--space-2) 0 0;
+  color: var(--text-muted);
+}
+
+.placeholder .counts {
+  margin-top: var(--space-5);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}

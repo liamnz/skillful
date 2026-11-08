@@ -220,9 +220,15 @@ def build_parser() -> Parser:
 
 def _handlers() -> dict[str, Handler]:
     """Command path (e.g. "vocab new kind") -> handler, imported lazily to keep --help fast."""
-    from . import init, new, review, validate
+    from . import build, init, new, review, validate
 
-    return {"init": init.run, "new": new.run, "review": review.run, "validate": validate.run}
+    return {
+        "init": init.run,
+        "new": new.run,
+        "review": review.run,
+        "validate": validate.run,
+        "build": build.run,
+    }
 
 
 def _command_path(args: argparse.Namespace) -> str:
