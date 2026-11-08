@@ -118,7 +118,7 @@ Success criteria 6–8 pass.
 - [x] T23: `init --agents-md` / `--gitattributes`
 - [x] T24: `SKILL.md` body and `references/workflow.md`
 - [x] T25: `references/schema.md`, `vocabulary.md`, `gruber-criteria.md`
-- [ ] T26: Packaging, conformance and isolation tests
+- [x] T26: Packaging, conformance and isolation tests
 
 **Checkpoint 5:** the full automated suite is green. Success criterion 9 passes.
 

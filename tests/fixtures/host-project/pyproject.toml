@@ -1,0 +1,9 @@
+[project]
+name = "host-analytics"
+version = "0.3.0"
+description = "A host project with its own Python environment, for the isolation test."
+requires-python = ">=3.10"
+dependencies = ["requests==2.31.0"]
+
+[tool.uv]
+package = false

@@ -471,12 +471,12 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Prove the copy-anywhere, harness-neutral, spec-conformant and isolation guarantees. **Asks you before downloading `skills-ref`.**
 
 **Acceptance criteria:**
-- [ ] Copy tests: copy `SK/` into differently nested locations in a temp project and run every command from the project root. A static scan finds no references outside `SK/`.
-- [ ] Conformance tests:
+- [x] Copy tests: copy `SK/` into differently nested locations in a temp project and run every command from the project root. A static scan finds no references outside `SK/`.
+- [x] Conformance tests:
   - `skills-ref validate` (pinned version) passes;
   - `SKILL.md` lint passes: body under 500 lines, references relative, resolving and one level deep, nothing from the harness-term denylist;
   - vendor integrity passes.
-- [ ] Isolation test: running every command in a fixture project with its own `pyproject.toml`, `uv.lock` and `.venv` leaves them byte-identical.
+- [x] Isolation test: running every command in a fixture project with its own `pyproject.toml`, `uv.lock` and `.venv` leaves them byte-identical.
 
 **Verification:** PYTEST (`tests/test_packaging.py`, `tests/test_isolation.py`), LINT
 
