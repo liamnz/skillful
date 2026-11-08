@@ -454,10 +454,10 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### T25: Remaining references
 **Acceptance criteria:**
-- [ ] `schema.md` covers every concept and manifest field, with the authorship and one-term rules.
-- [ ] `vocabulary.md` covers the core meanings, when and how to extend the vocabulary, and how to challenge near-duplicates.
-- [ ] `gruber-criteria.md` gives the five criteria, each with good and bad definition examples, and the cardinality-versus-table-grain note under minimal encoding bias. Each finding code maps to its criterion.
-- [ ] References are one level deep and contain no onward links.
+- [x] `schema.md` covers every concept and manifest field, with the authorship and one-term rules.
+- [x] `vocabulary.md` covers the core meanings, when and how to extend the vocabulary, and how to challenge near-duplicates.
+- [x] `gruber-criteria.md` gives the five criteria, each with good and bad definition examples, and the cardinality-versus-table-grain note under minimal encoding bias. Each finding code maps to its criterion.
+- [x] References are one level deep and contain no onward links.
 
 **Verification:** Manually: read-through. Automated: the T26 lint.
 
