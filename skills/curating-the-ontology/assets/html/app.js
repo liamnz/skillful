@@ -192,8 +192,27 @@
   const filterInputs = [];
   for (const [key, legend, values, label] of filterGroups) {
     const fieldset = el("fieldset");
-    fieldset.append(el("legend", "", legend));
+    fieldset.dataset.group = key;
+    // Choose what you want rather than untick what you don't: All / None per group, and
+    // "only" on each row shows that value alone.
+    const head = el("legend", "filter-head");
+    const setHidden = (hidden) => setState({ filters: { ...state.filters, [key]: new Set(hidden) } });
+    const quick = (text, aria, hidden) => {
+      const b = el("button", "link-button", text);
+      b.type = "button";
+      b.setAttribute("aria-label", aria);
+      b.addEventListener("click", () => setHidden(hidden()));
+      return b;
+    };
+    const actions = el("span", "filter-actions");
+    actions.append(
+      quick("All", `Show every ${legend.toLowerCase()}`, () => []),
+      quick("None", `Hide every ${legend.toLowerCase()}`, () => values),
+    );
+    head.append(el("span", "", legend), actions);
+    fieldset.append(head);
     for (const value of values) {
+      const line = el("div", "filter-row");
       const row = el("label", "check");
       const box = el("input");
       box.type = "checkbox";
@@ -206,7 +225,13 @@
         setState({ filters: { ...state.filters, [key]: next } });
       });
       row.append(box, ...label(value));
-      fieldset.append(row);
+      const only = el("button", "link-button only", "only");
+      only.type = "button";
+      only.dataset.value = value;
+      only.setAttribute("aria-label", `Show only ${String(value).replace(/_/g, " ")}`);
+      only.addEventListener("click", () => setHidden(values.filter((v) => v !== value)));
+      line.append(row, only);
+      fieldset.append(line);
       filterInputs.push(box);
     }
     filterPanel.append(fieldset);

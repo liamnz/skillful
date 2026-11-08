@@ -120,3 +120,29 @@ def test_accessibility_smoke(sample_page: Path, open_page) -> None:
     for button in page.locator("button").all():
         if button.is_visible():
             assert (button.text_content() or "").strip() or button.get_attribute("aria-label")
+
+
+def test_only_shows_a_single_value(sample_page: Path, open_page) -> None:
+    page = open_page(sample_page).page
+    open_filters(page)
+    page.locator(".filters-panel .filter-row:has(input[value='has'])").hover()
+    page.get_by_role("button", name="Show only has").click()
+    shown = ids(page, ".edge-group:not(.hidden)")
+    assert shown and all("|has|" in e for e in shown)
+    checked = page.eval_on_selector_all(
+        ".filters-panel input[data-group='types']:checked", "els => els.map(e => e.value)"
+    )
+    assert checked == ["has"]
+
+
+def test_none_then_pick_a_few(sample_page: Path, open_page) -> None:
+    page = open_page(sample_page).page
+    open_filters(page)
+    page.get_by_role("button", name="Hide every kind").click()
+    assert len(ids(page, ".node.hidden")) == len(kinds(page))
+    toggle(page, "kinds", "event")
+    toggle(page, "kinds", "metric")
+    visible = set(kinds(page)) - set(ids(page, ".node.hidden"))
+    assert {kinds(page)[v] for v in visible} == {"event", "metric"}
+    page.get_by_role("button", name="Show every kind").click()
+    assert ids(page, ".node.hidden") == []
