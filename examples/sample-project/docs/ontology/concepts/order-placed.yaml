@@ -1,0 +1,10 @@
+id: order-placed
+name: Order placed
+kind: event
+status: defined
+definition: >
+  The moment checkout succeeds and the customer's payment is authorised,
+  making the order binding.
+implemented_in:
+  - path: models/marts/fct_orders.sql
+    symbol: placed_at

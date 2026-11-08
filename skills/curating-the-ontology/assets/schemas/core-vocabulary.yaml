@@ -35,7 +35,7 @@ relation_types:
     acyclic: true
     symmetric: false
     cardinality_allowed: false
-    encoding: {stroke: solid}
+    encoding: {line: solid, arrow: hollow}
   part_of:
     definition: >-
       Source is a component of target and makes no sense without it.
@@ -43,7 +43,7 @@ relation_types:
     acyclic: true
     symmetric: false
     cardinality_allowed: true
-    encoding: {stroke: dashed}
+    encoding: {line: solid, arrow: filled}
   attribute_of:
     definition: >-
       Source attribute describes instances of the target.
@@ -53,7 +53,7 @@ relation_types:
     cardinality_allowed: false
     from: [attribute]
     to: [entity, event]
-    encoding: {stroke: dotted}
+    encoding: {line: solid, arrow: filled}
   related_to:
     definition: >-
       Symmetric catch-all for a connection nobody has named precisely yet.
@@ -62,4 +62,4 @@ relation_types:
     acyclic: false
     symmetric: true
     cardinality_allowed: true   # only 1:1 or N:M, because it is symmetric (E013)
-    encoding: {stroke: long-dash}
+    encoding: {line: dashed, arrow: none}

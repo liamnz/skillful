@@ -79,13 +79,13 @@ T1 skeleton ──► T2 schemas+loader+validate ──┬─► T3 init ──�
 **Checkpoint 1 (passed 2026-11-08):** `init → new → validate` round trip works in a temp git repo. pytest and ruff are green.
 
 ### Phase 2: Risk first (drift, build pipeline, design gate)
-- [ ] T5: Git layer, W106 drift, `review`, I205
-- [ ] T6: Sample project (`examples/sample-project`)
-- [ ] T7: Design tokens and static mockup. **Human gate: explicit approval.**
-- [ ] T8: Vendor D3 and the build pipeline (`build`, `--check`, W108, data contract)
-- [ ] T9: Deterministic graph render (force layout, kind/status/relation encoding)
+- [x] T5: Git layer, W106 drift, `review`, I205
+- [x] T6: Sample project (`examples/sample-project`)
+- [x] T7: Design tokens and static mockup. **Human gate: approved 2026-11-08** after review rounds: labelled edges, boxed concepts, schema-worded pane headings, no mini-graph, Hops control, symbol badges.
+- [x] T8: Vendor D3 and the build pipeline (`build`, `--check`, W108, data contract). D3 pinned to the 2021–22 releases: the 3 Nov 2026 patch releases were skipped as too new to trust yet (source unchanged; tooling-only).
+- [x] T9: Deterministic graph render (force layout, kind/status/relation encoding)
 
-**Checkpoint 2:** W106 behaves as specified in temp repos. The sample project's graph renders from `file://` the way the approved mockup shows it. Review it together.
+**Checkpoint 2 (passed 2026-11-09):** W106 behaves as specified in temp repos. The sample project's graph renders from `file://` the way the approved mockup shows it. Review it together.
 
 ### Phase 3: Validator completion (Python track)
 - [ ] T10: Relation checks (E004, E006, E013, E014, W104, W111, I204)

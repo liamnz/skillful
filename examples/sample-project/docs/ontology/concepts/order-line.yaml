@@ -1,0 +1,12 @@
+id: order-line
+name: Order line
+kind: entity
+status: defined
+definition: >
+  One product and its quantity within an order, priced at the moment
+  the order was placed.
+relations:
+  - {type: part_of, target: order, cardinality: "N:1"}
+implemented_in:
+  - path: models/marts/fct_order_lines.sql
+    symbol: order_line_id

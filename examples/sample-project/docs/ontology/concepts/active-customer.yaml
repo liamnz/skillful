@@ -1,0 +1,20 @@
+id: active-customer
+name: Active customer
+kind: entity
+status: defined
+definition: >
+  A customer who has made at least one paid order in the trailing
+  90 days, regardless of whether they hold a subscription.
+examples:
+  - "A customer whose last paid order was 12 days ago"
+non_examples:
+  - "A customer on a free trial who has never paid for an order"
+rules:
+  - "Every active customer is a customer."
+relations:
+  - {type: is_a, target: customer}
+implemented_in:
+  - path: models/marts/dim_customer.sql
+    symbol: is_active
+open_questions:
+  - "Should an order that was later fully refunded still count?"

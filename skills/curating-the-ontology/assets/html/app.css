@@ -1,0 +1,157 @@
+/* View styles. Every value comes from tokens.css; no raw colours, sizes or spacing here. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--text-md);
+  line-height: var(--line-height);
+}
+
+/* ---- Frame: toolbar over the graph canvas ---- */
+.app {
+  display: grid;
+  grid-template-rows: var(--toolbar-height) 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: 0 var(--space-4);
+  border-bottom: var(--border-width) solid var(--border);
+  font-size: var(--text-sm);
+}
+
+.brand {
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.brand span {
+  margin-left: var(--space-1);
+  color: var(--text-faint);
+  font-weight: var(--weight-regular);
+}
+
+.counts {
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.canvas {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.canvas .empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  color: var(--text-muted);
+}
+
+/* ---- Graph ---- */
+svg.graph {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.edge {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: var(--edge-width);
+}
+
+.edge.dashed {
+  stroke-dasharray: var(--dash-related);
+}
+
+/* An invisible, wider stroke over each edge so a thin line is easy to hover. */
+.edge-hit {
+  stroke: transparent;
+  stroke-width: var(--edge-hit-width);
+}
+
+.arrow {
+  fill: var(--border);
+}
+
+.arrow-hollow {
+  fill: var(--bg);
+  stroke: var(--border);
+  stroke-width: var(--edge-width);
+}
+
+.edge-label {
+  visibility: hidden;
+  font-size: var(--text-xs);
+  fill: var(--text-muted);
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: var(--edge-label-halo);
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.edge-label.hover {
+  visibility: visible;
+  fill: var(--text);
+}
+
+.box {
+  fill: var(--bg);
+  stroke: var(--border);
+  stroke-width: var(--border-width);
+}
+
+.box.proposed {
+  stroke-dasharray: var(--dash-proposed);
+}
+
+.node.deprecated {
+  opacity: var(--deprecated-opacity);
+}
+
+.label {
+  font-size: var(--text-xs);
+  fill: var(--text-muted);
+}
+
+/* Kind glyph: colour and shape both encode the kind. Proposed concepts get a hollow glyph. */
+.glyph {
+  fill: var(--k);
+  stroke: none;
+}
+
+.glyph.proposed {
+  fill: var(--bg);
+  stroke: var(--k);
+  stroke-width: var(--glyph-outline-width);
+  stroke-dasharray: var(--dash-proposed-glyph);
+}
+
+.k1 { --k: var(--kind-1); }
+.k2 { --k: var(--kind-2); }
+.k3 { --k: var(--kind-3); }
+.k4 { --k: var(--kind-4); }
+.k5 { --k: var(--kind-5); }
+.k6 { --k: var(--kind-6); }
+.k7 { --k: var(--kind-7); }
+.k8 { --k: var(--kind-8); }
+.k-fallback { --k: var(--kind-fallback); }

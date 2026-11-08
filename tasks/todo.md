@@ -96,21 +96,21 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Build the only module that talks to git. Implement W106 exactly as specified and the `review` command, which records `reviewed_at` with a comment-preserving text edit (Decision 2).
 
 **Acceptance criteria:**
-- [ ] All six W106 cases from the spec pass in temp repos:
+- [x] All six W106 cases from the spec pass in temp repos:
   - an unrelated edit elsewhere in a shared file does not fire;
   - an edit near the symbol fires;
   - with no symbol, any change to the file fires;
   - `review` clears it;
   - an unrelated edit to the concept file doesn't clear it once `reviewed_at` exists;
   - an unreachable `reviewed_at` falls back to the concept file's last commit and reports I205.
-- [ ] Uncommitted changes count. `proposed` concepts are skipped. Outside git, or for uncommitted concept files, the check is skipped with an info notice and no crash. Paths work on Windows.
-- [ ] `review <id> [--path]` sets `reviewed_at` to HEAD only on the targeted entries, leaving every other byte of the file unchanged. It refuses an unknown id or path (exit `3`), exits `4` outside a git repo, and supports `--dry-run`.
+- [x] Uncommitted changes count. `proposed` concepts are skipped. Outside git, or for uncommitted concept files, the check is skipped with an info notice and no crash. Paths work on Windows.
+- [x] `review <id> [--path]` sets `reviewed_at` to HEAD only on the targeted entries, leaving every other byte of the file unchanged. It refuses an unknown id or path (exit `3`), exits `4` outside a git repo, and supports `--dry-run`.
 
 **Verification:** PYTEST (`tests/test_drift.py`, `tests/test_review.py`), LINT
 
 **Dependencies:** T2
 
-**Files:** `SK/scripts/ontokit/{gitinfo,drift,review}.py`, `SK/scripts/ontokit/cli.py`, `tests/test_drift.py`, `tests/test_review.py`
+**Files:** `SK/scripts/ontokit/{gitinfo,context,drift,review}.py`, `SK/scripts/ontokit/{checks,validate,cli}.py`, `tests/test_drift.py`, `tests/test_review.py`, `tests/conftest.py`
 
 **Scope:** M (highest-risk task; do it first in this phase)
 
@@ -118,12 +118,12 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** A small dbt-style repo with a populated ontology. It is used by the mockup, by manual review and by the Cursor evals.
 
 **Acceptance criteria:**
-- [ ] About 15–25 concepts covering all four core kinds, plus:
+- [x] About 15–25 concepts covering all four core kinds, plus:
   - two defined extensions (e.g. `has`, `measures`) and one proposed extension;
   - at least one each of: a cardinality, a discouraged term, a `proposed` concept with a suggestion, `related_to`, an open question;
   - SQL models referenced by `implemented_in`.
-- [ ] Definitions are written as a human would write them. They are clearly sample content, but realistic enough to exercise the critique scenarios: one definition deliberately contradicts its SQL, for eval (d).
-- [ ] `validate` runs on it. Its findings are the deliberate ones only, listed in the project's README.
+- [x] Definitions are written as a human would write them. They are clearly sample content, but realistic enough to exercise the critique scenarios: one definition deliberately contradicts its SQL, for eval (d).
+- [x] `validate` runs on it. Its findings are the deliberate ones only, listed in the project's README and in `expected-findings.yaml` (the test fails on anything else).
 
 **Verification:** PYTEST (a smoke test that validates the sample and compares its findings to the expected list). Manually: you skim the definitions.
 
@@ -137,13 +137,13 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Turn the Visual design section into `tokens.css` and a static, hand-laid-out mockup that uses sample-project data.
 
 **Acceptance criteria:**
-- [ ] `tokens.css` defines every token in the spec (neutrals, `--kind-1..8`, semantic colours, typography, spacing, radii, motion), with light and dark values and reduced-motion handling.
-- [ ] `examples/design/mockup.html` shows the following, in both themes (with a theme toggle) at 1280×720:
+- [x] `tokens.css` defines every token in the spec (neutrals, `--kind-1..8`, semantic colours, typography, spacing, radii, motion), with light and dark values and reduced-motion handling.
+- [x] `examples/design/mockup.html` shows the following, in both themes (with a theme toggle) at 1280×720:
   - the graph with one concept selected and its neighbourhood highlighted;
   - the detail pane, including a cardinality sentence and an agent-suggestion block;
   - the legend;
   - a finding badge.
-- [ ] **You explicitly approve the mockup.** Feedback is folded into `tokens.css` and the spec's Visual design section, and that spec change is committed.
+- [x] **You explicitly approve the mockup.** Feedback is folded into `tokens.css` and the spec's Visual design section, and that spec change is committed.
 
 **Verification:** Manually: review with you in the browser. Automated: the mockup uses no raw colour values outside `tokens.css` (grep).
 
@@ -157,9 +157,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Pin and vendor the D3 modules, and implement `build` to produce a self-contained, byte-reproducible `index.html`. The page embeds the data contract (Decision 4) and a line-ending-insensitive `inputHash` (Decision 5). Adds `build --check` and W108. **Asks you before downloading.**
 
 **Acceptance criteria:**
-- [ ] `assets/vendor/` holds the official UMD builds of `d3-selection`, `d3-force`, `d3-zoom`, `d3-drag`, `d3-shape` and their dependencies, at exact versions. `MANIFEST.json` gives the module, version, source URL, SHA-256 and order, and `LICENSE-d3.txt` holds the licence. The ISC notice is emitted in the output.
-- [ ] `build` writes one `index.html` with all CSS, JS and data inline and no `http(s)://` in `src`/`href`/`@import`. Two builds in different directories and at different times are byte-identical. A CRLF copy of the inputs produces the same `inputHash`.
-- [ ] `build --check` exits `1` when the output is stale, and `validate` reports W108. `--dry-run` writes nothing. The placeholder page shows concept and relation counts from the embedded data.
+- [x] `assets/vendor/` holds the official UMD builds of `d3-selection`, `d3-force`, `d3-zoom`, `d3-drag`, `d3-shape` and their dependencies, at exact versions. `MANIFEST.json` gives the module, version, source URL, SHA-256 and order, and `LICENSE-d3.txt` holds the licence. The ISC notice is emitted in the output.
+- [x] `build` writes one `index.html` with all CSS, JS and data inline and no `http(s)://` in `src`/`href`/`@import`. Two builds in different directories and at different times are byte-identical. A CRLF copy of the inputs produces the same `inputHash`.
+- [x] `build --check` exits `1` when the output is stale, and `validate` reports W108. `--dry-run` writes nothing. The placeholder page shows concept and relation counts from the embedded data.
 
 **Verification:** PYTEST (`tests/test_build.py`: static checks, reproducibility, vendor integrity, W108). Manually: open the sample build from `file://`.
 
@@ -170,12 +170,12 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Scope:** M
 
 ### T9: Deterministic graph render
-**Description:** The spine of the view: a seeded, fixed-tick force layout rendered once as SVG, with the kind (colour + shape), status (outline) and relation type (stroke pattern, arrowheads) encodings, plus labels with halos. Styled only via tokens, per the approved mockup. Sets up the Playwright harness. **Asks you before downloading Chromium.**
+**Description:** The spine of the view: a seeded, fixed-tick force layout rendered once as SVG, with each concept as a box enclosing its name, the kind (glyph colour + shape), status (box outline) and relation type (edge labels; hollow arrowhead for `is_a`, dashed undirected `related_to`) encodings, plus edge labels with halos. Styled only via tokens, per the approved mockup. Sets up the Playwright harness. **Asks you before downloading Chromium.**
 
 **Acceptance criteria:**
-- [ ] One node per concept and one edge per relation (`related_to` without an arrowhead). Core kinds use their fixed slots and shapes.
-- [ ] Two loads of the same build give identical node positions. There is no animated settling.
-- [ ] Loads from `file://` with the network blocked and zero console errors. The sample project visually matches the approved mockup's structure and style.
+- [x] One box per concept and one edge per relation (`related_to` without an arrowhead), with no two boxes overlapping. Core kinds use their fixed slots and glyph shapes.
+- [x] Two loads of the same build give identical node positions. There is no animated settling.
+- [x] Loads from `file://` with the network blocked and zero console errors. The sample project visually matches the approved mockup's structure and style.
 
 **Verification:** UI (`tests/test_html_ui.py` and `tests/conftest.py` with a build fixture and network blocking), PYTEST, LINT. Manually: compare with the mockup.
 
@@ -186,9 +186,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Scope:** M
 
 ### Checkpoint 2: De-risked
-- [ ] W106 temp-repo tests green. `review` preserves file bytes.
-- [ ] The sample project's graph renders deterministically from `file://`.
-- [ ] **You look at the first real graph.** Any design drift from the mockup is fixed in tokens, not ad hoc.
+- [x] W106 temp-repo tests green. `review` preserves file bytes.
+- [x] The sample project's graph renders deterministically from `file://`.
+- [x] **You look at the first real graph.** Any design drift from the mockup is fixed in tokens, not ad hoc.
 
 ---
 
@@ -286,13 +286,13 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** The main way to cut clutter, and the main reading surface.
 
 **Acceptance criteria:**
-- [ ] Selecting a concept centres it, highlights exactly its N-hop neighbourhood (depth 1–3 control) and fades the rest. Hover, selected and neighbourhood states are each visually distinct. Hovering shows the name, kind and first sentence of the definition without changing the selection.
+- [ ] Selecting a concept centres it, highlights exactly its N-hop neighbourhood (Hops control, 1–3) and fades the rest. Hover, selected and neighbourhood states are each visually distinct. Hovering shows the name, kind and first sentence of the definition without changing the selection.
 - [ ] The detail pane shows:
   - the definition, set in a readable measure;
   - examples and non-examples, rules and open questions;
   - incoming and outgoing relations as links using inverse labels, with cardinality sentences in both directions;
   - `implemented_in` entries with their review commit and date, or "never reviewed";
-  - the mini-graph;
+  - section headings named after the concept schema's fields (Incoming relations and Findings for the sections that aren't fields);
   - a clearly marked "needs a definition" for `proposed` concepts, and agent suggestions visually separate and labelled.
 - [ ] `graph-model.js` neighbourhood queries are tested via `page.evaluate`.
 
@@ -309,7 +309,7 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 **Acceptance criteria:**
 - [ ] Pan, zoom (wheel and trackpad), fit-to-view, drag-to-pin and reset layout. Clicking a related concept moves the focus, and breadcrumbs step back.
-- [ ] Deep links (`#id?depth=2&overlay=health`) restore the selection, depth and overlay on load and update as you navigate.
+- [ ] Deep links (`#id?hops=2&overlay=health`) restore the selection, hops and overlay on load and update as you navigate.
 - [ ] Tab and arrow keys move between connected concepts, and Enter selects, with a visible focus ring using `--accent`.
 
 **Verification:** UI, LINT

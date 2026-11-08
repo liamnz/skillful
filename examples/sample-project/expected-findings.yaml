@@ -1,0 +1,9 @@
+# Every finding `onto.py validate` may report for the sample project.
+# tests/test_sample_project.py fails if validate reports a finding not listed here.
+# Entries may also be listed before the check that produces them exists.
+
+allowed:
+  - {code: I204, concept: subscription, why: "related_to Subscription plan is deliberate"}
+  # Time-dependent: appear once the proposals are older than stale_proposal_days (by git date).
+  - {code: W107, concept: churned-account, why: "deliberately still proposed"}
+  - {code: W107, concept: null, why: "derived_from extension deliberately still proposed"}

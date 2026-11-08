@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ontology view mockup</title>
+<!-- The real tokens, so feedback lands in one place. -->
+<link rel="stylesheet" href="../../skills/curating-the-ontology/assets/html/tokens.css">
+<style>
+  /* Mockup-only styles. Every colour, size and spacing value comes from tokens.css. */
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--surface-raised);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: var(--text-md);
+    line-height: var(--line-height);
+    padding: var(--space-7);
+  }
+  .page-head { display: flex; align-items: baseline; gap: var(--space-4); margin-bottom: var(--space-4); max-width: 1280px; }
+  .page-head h1 { font-size: var(--text-lg); font-weight: var(--weight-semibold); margin: 0; }
+  .page-head p { margin: 0; color: var(--text-muted); font-size: var(--text-sm); flex: 1; }
+  .theme-switch { font: inherit; font-size: var(--text-sm); color: var(--text); background: var(--bg);
+    border: var(--border-width) solid var(--border); border-radius: var(--radius-sm); padding: var(--space-1) var(--space-3); cursor: pointer; }
+  .caption { color: var(--text-faint); font-size: var(--text-xs); margin: var(--space-2) 0 var(--space-6); max-width: 1280px; }
+
+  /* ---- App frame at the minimum supported viewport ---- */
+  .app { width: 1280px; height: 720px; background: var(--bg); border: var(--border-width) solid var(--border);
+    display: grid; grid-template-rows: var(--toolbar-height) 1fr; grid-template-columns: 1fr var(--pane-width); overflow: hidden; }
+
+  .toolbar { grid-column: 1 / -1; display: flex; align-items: center; gap: var(--space-4); padding: 0 var(--space-4);
+    border-bottom: var(--border-width) solid var(--border); background: var(--bg); font-size: var(--text-sm); }
+  .brand { font-weight: var(--weight-semibold); white-space: nowrap; }
+  .brand span { color: var(--text-faint); font-weight: var(--weight-regular); margin-left: var(--space-1); }
+  .tabs { display: flex; gap: var(--space-1); }
+  .tab { padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); color: var(--text-muted); }
+  .tab.active { color: var(--text); background: var(--surface-raised); }
+  .count { color: var(--text-faint); margin-left: var(--space-1); font-variant-numeric: tabular-nums; }
+  .search { flex: 1; max-width: 360px; display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-2);
+    border: var(--border-width) solid var(--border); border-radius: var(--radius-sm); color: var(--text-faint); background: var(--surface); }
+  .search { min-width: 200px; }
+  .search span { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .toolbar { gap: var(--space-3); }
+  kbd { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-faint); border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-sm); padding: 0 var(--space-1); background: var(--bg); }
+  .spacer { flex: 1; }
+  .control { display: flex; align-items: center; gap: var(--space-2); color: var(--text-faint); white-space: nowrap; }
+  .seg { display: inline-flex; border: var(--border-width) solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+  .seg span { padding: var(--space-1) var(--space-2); color: var(--text-muted); border-left: var(--border-width) solid var(--border); }
+  .seg span:first-child { border-left: 0; }
+  .seg span.on { color: var(--text); background: var(--surface-raised); font-weight: var(--weight-semibold); }
+  .button { padding: var(--space-1) var(--space-2); border: var(--border-width) solid var(--border); border-radius: var(--radius-sm); color: var(--text-muted); }
+
+  /* ---- Graph canvas ---- */
+  .canvas { position: relative; background: var(--bg); overflow: hidden; }
+  .canvas svg { display: block; }
+  .crumbs { position: absolute; top: var(--space-3); left: var(--space-4); font-size: var(--text-xs); color: var(--text-faint); }
+  .crumbs b { color: var(--text-muted); font-weight: var(--weight-semibold); }
+  .zoom { position: absolute; right: var(--space-3); bottom: var(--space-3); display: flex; flex-direction: column;
+    border: var(--border-width) solid var(--border); border-radius: var(--radius-sm); background: var(--bg); }
+  .zoom span { width: 28px; height: 28px; display: grid; place-items: center; color: var(--text-muted); font-size: var(--text-sm);
+    border-top: var(--border-width) solid var(--border); }
+  .zoom span:first-child { border-top: 0; }
+
+  .legend { position: absolute; left: var(--space-3); bottom: var(--space-3); background: var(--bg); border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-md); padding: var(--space-3); font-size: var(--text-xs); color: var(--text-muted);
+    display: grid; grid-template-columns: auto auto auto; gap: var(--space-2) var(--space-6); }
+  .legend h4 { margin: 0 0 var(--space-1); font-size: var(--text-xs); font-weight: var(--weight-semibold); color: var(--text-faint); }
+  .legend .row { display: flex; align-items: center; gap: var(--space-2); line-height: var(--line-height-tight); padding: 1px 0; }
+  .legend svg { flex: none; }
+  .legend .faint-row { color: var(--text-faint); max-width: 22ch; display: block; }
+
+  /* SVG graph styling */
+  .edge { fill: none; stroke: var(--border); stroke-width: var(--edge-width); }
+  .edge.focus { stroke: var(--text-muted); stroke-width: var(--edge-width-focus); }
+  .edge.faded, .node.faded { opacity: var(--faded-opacity); }
+  .edge-label { font-size: var(--text-xs); fill: var(--text-muted); paint-order: stroke; stroke: var(--bg); stroke-width: var(--edge-label-halo); stroke-linejoin: round; }
+  .edge-label.hover { fill: var(--text); }
+  .label { font-size: var(--text-xs); fill: var(--text-muted); }
+  .label.near { fill: var(--text); }
+  .label.selected { fill: var(--text); font-weight: var(--weight-semibold); }
+  .node.deprecated, .box.deprecated { opacity: var(--deprecated-opacity); }
+  .box { fill: var(--bg); stroke: var(--border); stroke-width: var(--border-width); }
+  .box.near { stroke: var(--text-muted); }
+  .box.selected { stroke: var(--accent); stroke-width: var(--node-selected-width); }
+  .box.proposed { stroke-dasharray: 3 2; }
+  .arrow { fill: var(--text-muted); }
+  .arrow-hollow { fill: var(--bg); stroke: var(--text-muted); stroke-width: 1; }
+  .k1 { --k: var(--kind-1); } .k2 { --k: var(--kind-2); } .k3 { --k: var(--kind-3); } .k4 { --k: var(--kind-4); }
+  .k5 { --k: var(--kind-5); }
+  .shape { fill: var(--k); stroke: none; }
+  .shape.proposed { fill: var(--bg); stroke: var(--k); stroke-width: 1.5; stroke-dasharray: 2 1.5; }
+  /* Finding badges: severity is read from the symbol (× error, ! warning, i info); colour only reinforces it. */
+  .badge { stroke: var(--bg); stroke-width: 1.5; }
+  .badge.error { fill: var(--error); } .badge.warn { fill: var(--warn); } .badge.info { fill: var(--info); }
+  .badge-glyph { fill: none; stroke: var(--bg); stroke-width: var(--badge-glyph-width); stroke-linecap: round; }
+
+  /* ---- Detail pane ---- */
+  .pane { border-left: var(--border-width) solid var(--border); background: var(--surface); overflow: auto; padding: var(--space-5) var(--space-5) var(--space-7); }
+  .pane .meta { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-muted); }
+  .pane h2 { font-size: var(--text-xl); font-weight: var(--weight-semibold); line-height: var(--line-height-tight); margin: var(--space-2) 0 0; }
+  /* Section headings use the concept file's field names (underscores read as spaces). */
+  .pane h3 { font-size: var(--text-xs); font-weight: var(--weight-semibold); color: var(--text-faint); margin: var(--space-5) 0 var(--space-1);
+    text-transform: uppercase; letter-spacing: 0.04em; }
+  .pane .id { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-faint); }
+  .pane p { margin: 0; }
+  .definition { font-size: var(--text-md); max-width: var(--measure); }
+  .pane ul { list-style: none; margin: 0; padding: 0; }
+  .pane li { padding: var(--space-1) 0; font-size: var(--text-sm); }
+  .pane .muted { color: var(--text-muted); }
+  .pane .faint { color: var(--text-faint); }
+  a { color: var(--text); text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 2px; }
+  .rel-label { color: var(--text-muted); }
+  .term { font-weight: var(--weight-semibold); }
+  code, .mono { font-family: var(--font-mono); font-size: var(--text-xs); }
+  .impl { display: grid; gap: var(--space-1); }
+  .impl .when { font-size: var(--text-xs); color: var(--text-faint); font-variant-numeric: tabular-nums; }
+  .mini { border: var(--border-width) solid var(--border); border-radius: var(--radius-md); background: var(--bg); }
+  .finding { display: flex; gap: var(--space-2); align-items: baseline; font-size: var(--text-sm); }
+  .dot { display: inline-flex; flex: none; transform: translateY(2px); }
+  .finding .code { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted); }
+  .needs { border: var(--border-width) dashed var(--text-faint); border-radius: var(--radius-md); padding: var(--space-3); margin-top: var(--space-4);
+    font-size: var(--text-sm); color: var(--text-muted); }
+  .needs strong { color: var(--text); }
+  .suggestion { margin-top: var(--space-3); border-left: 2px dashed var(--border); padding-left: var(--space-3); }
+  .suggestion .who { font-size: var(--text-xs); color: var(--text-faint); }
+  .suggestion p { font-style: italic; color: var(--text-muted); font-size: var(--text-sm); }
+
+  /* ---- Variants strip ---- */
+  .variants { display: grid; grid-template-columns: repeat(3, var(--pane-width)); gap: var(--space-6); margin-top: var(--space-6); align-items: start; }
+  .variant { border: var(--border-width) solid var(--border); background: var(--surface); }
+  .variant .pane { border-left: 0; }
+  .variant-title { font-size: var(--text-xs); color: var(--text-faint); padding: var(--space-2) var(--space-5); border-bottom: var(--border-width) solid var(--border); background: var(--bg); }
+  .variant.plain { background: var(--bg); padding: var(--space-5); }
+  .variant.plain .variant-title { margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) var(--space-4); }
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <h1>Ontology view: design mockup</h1>
+  <p>Static mockup for the T7 design gate. Data from <code>examples/sample-project</code>. Positions are hand-placed; the real view computes them. 1280×720 frame = the minimum supported viewport.</p>
+  <button class="theme-switch" id="theme" type="button">Switch to dark</button>
+</div>
+
+<div class="app" aria-label="Mockup of the ontology view">
+  <header class="toolbar">
+    <div class="brand">Acme Analytics<span>ontology</span></div>
+    <nav class="tabs"><span class="tab active">Graph</span><span class="tab">List</span><span class="tab">Health<span class="count">2</span></span><span class="tab">Vocabulary</span></nav>
+    <div class="search"><span>Search concepts and terms</span><kbd>/</kbd></div>
+    <div class="spacer"></div>
+    <div class="control">Hops <span class="seg"><span class="on">1</span><span>2</span><span>3</span></span></div>
+    <div class="control">Overlay <span class="seg"><span class="on">None</span><span>Health</span><span>Mud</span><span>Drift</span></span></div>
+    <div class="control"><span class="seg"><span class="on">Force</span><span>Hierarchy</span></span></div>
+    <span class="button">Filters</span>
+  </header>
+
+  <main class="canvas">
+    <svg id="graph" width="880" height="672" role="img" aria-label="Concept graph with Customer selected"></svg>
+    <div class="crumbs">Order › <b>Customer</b></div>
+
+    <div class="legend" aria-label="Legend">
+      <div>
+        <h4>Kinds</h4>
+        <div class="row"><svg width="12" height="12" viewBox="-6 -6 12 12" class="k1"><circle class="shape" r="4.5"/></svg>entity</div>
+        <div class="row"><svg width="12" height="12" viewBox="-6 -6 12 12" class="k2"><polygon class="shape" points="0,-5.5 5.5,0 0,5.5 -5.5,0"/></svg>event</div>
+        <div class="row"><svg width="12" height="12" viewBox="-6 -6 12 12" class="k3"><rect class="shape" x="-4" y="-4" width="8" height="8"/></svg>attribute</div>
+        <div class="row"><svg width="12" height="12" viewBox="-6 -6 12 12" class="k4"><polygon class="shape" points="0,-5 5,4.2 -5,4.2"/></svg>metric</div>
+      </div>
+      <div>
+        <h4>Relations</h4>
+        <div id="legend-relations"></div>
+      </div>
+      <div>
+        <h4>Status</h4>
+        <div class="row"><svg width="20" height="12"><rect class="box near" x="0.5" y="0.5" width="19" height="11" rx="2"/></svg>defined</div>
+        <div class="row"><svg width="20" height="12"><rect class="box near proposed" x="0.5" y="0.5" width="19" height="11" rx="2"/></svg>proposed</div>
+        <div class="row"><svg width="20" height="12"><rect class="box near deprecated" x="0.5" y="0.5" width="19" height="11" rx="2"/></svg>deprecated</div>
+        <h4 style="margin-top: var(--space-2)">Findings</h4>
+        <div class="row"><span data-badge="error"></span>error <span data-badge="warn"></span>warning <span data-badge="info"></span>info</div>
+      </div>
+    </div>
+
+    <div class="zoom" aria-hidden="true"><span>+</span><span>−</span><span>⤢</span></div>
+  </main>
+
+  <aside class="pane" aria-label="Concept details">
+    <div class="meta"><svg width="12" height="12" viewBox="-6 -6 12 12" class="k1"><circle class="shape" r="4.5"/></svg>entity · defined</div>
+    <h2>Customer</h2>
+    <div class="id">customer</div>
+
+    <h3>Definition</h3>
+    <p class="definition">A person or business that has created an account with the shop and accepted the terms of service, whether or not they have bought anything.</p>
+
+    <h3>Discouraged terms</h3>
+    <ul>
+      <li><span class="term">client</span> <span class="muted">— Finance and the old CRM say 'client'</span></li>
+      <li><span class="term">shopper</span> <span class="muted">— Marketing copy</span></li>
+    </ul>
+
+    <h3>Examples</h3>
+    <ul><li>Someone who signed up yesterday and has not ordered yet</li></ul>
+    <h3>Non examples</h3>
+    <ul><li class="muted">A visitor who browsed the shop without creating an account</li></ul>
+
+    <h3>Relations</h3>
+    <ul>
+      <li>Customer <span class="rel-label">has many</span> <a href="#">Orders</a></li>
+      <li>Customer <span class="rel-label">has many</span> <a href="#">Subscriptions</a></li>
+    </ul>
+
+    <h3>Implemented in</h3>
+    <div class="impl">
+      <div><code>models/marts/dim_customer.sql</code> <span class="faint">·</span> <code>customer_id</code></div>
+      <div class="when">Never reviewed</div>
+    </div>
+
+    <h3>Incoming relations</h3>
+    <ul>
+      <li><span class="rel-label">has subtype</span> <a href="#">Active customer</a></li>
+      <li><span class="rel-label">has subtype</span> <a href="#">Churned account</a> <span class="faint">(proposed)</span></li>
+      <li><span class="rel-label">has attribute</span> <a href="#">Customer region</a></li>
+      <li><span class="rel-label">measured by</span> <a href="#">Retention rate</a></li>
+    </ul>
+  </aside>
+</div>
+<p class="caption">Customer is selected: its 1-hop neighbourhood is at full contrast and everything else fades. Each concept is a box enclosing its name, with its kind glyph (colour and shape) inside. Every edge touching Customer is labelled with its relation name (and cardinality, where recorded); the hovered Customer → Order label is at full contrast. Faded edges show their label on hover. Badges: a warning on Active customer (illustrative drift) and an info finding on Subscription (<code>related_to</code>).</p>
+
+<div class="variants">
+  <section class="variant" aria-label="Detail pane for a proposed concept">
+    <div class="variant-title">Detail pane: proposed concept, with an agent suggestion</div>
+    <div class="pane">
+      <div class="meta"><svg width="12" height="12" viewBox="-6 -6 12 12" class="k1"><circle class="shape proposed" r="4.2"/></svg>entity · proposed</div>
+      <h2>Churned account</h2>
+      <div class="id">churned-account</div>
+      <h3>Definition</h3>
+      <div class="needs" style="margin-top: 0"><strong>Needs a definition.</strong> Nobody has defined this concept yet. Write it in your own words in <code>concepts/churned-account.yaml</code>, then set <code>status: defined</code>.</div>
+      <h3>Relations</h3>
+      <ul><li>Churned account <span class="rel-label">is a</span> <a href="#">Customer</a></li></ul>
+      <h3>Implemented in</h3>
+      <div class="impl">
+        <div><code>models/marts/fct_churn.sql</code> <span class="faint">·</span> <code>is_churned</code></div>
+        <div class="when">Never reviewed</div>
+      </div>
+      <h3>Proposal</h3>
+      <div class="suggestion">
+        <div class="who">Suggested definition · written by the agent, not a definition</div>
+        <p>A customer whose most recent subscription ended more than 60 days ago.</p>
+        <div class="who" style="margin-top: var(--space-2)">Rationale</div>
+        <p class="muted" style="font-style: normal">Introduced as is_churned in models/marts/fct_churn.sql this sprint.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="variant" aria-label="Detail pane with findings">
+    <div class="variant-title">Detail pane: a concept with findings</div>
+    <div class="pane">
+      <div class="meta"><svg width="12" height="12" viewBox="-6 -6 12 12" class="k1"><circle class="shape" r="4.5"/></svg>entity · defined</div>
+      <h2>Active customer</h2>
+      <div class="id">active-customer</div>
+      <h3>Findings</h3>
+      <ul>
+        <li class="finding"><span class="dot" data-badge="warn"></span><span><span class="code">W106 · drift</span><br>models/marts/dim_customer.sql: code near 'is_active' changed since this concept file was last committed (3f9c2e1). Check that the definition still matches.</span></li>
+      </ul>
+      <h3>Definition</h3>
+      <p class="definition">A customer who has made at least one paid order in the trailing 90 days, regardless of whether they hold a subscription.</p>
+      <h3>Open questions</h3>
+      <ul><li>Should an order that was later fully refunded still count?</li></ul>
+    </div>
+  </section>
+
+  <section class="variant plain" aria-label="Hover preview and search redirect">
+    <div class="variant-title">Hover preview and redirecting search</div>
+    <div style="border: var(--border-width) solid var(--border); border-radius: var(--radius-md); padding: var(--space-3); max-width: 300px; background: var(--bg);">
+      <div class="meta" style="display:flex; gap: var(--space-2); align-items:center; font-size: var(--text-xs); color: var(--text-muted)"><svg width="12" height="12" viewBox="-6 -6 12 12" class="k4"><polygon class="shape" points="0,-5 5,4.2 -5,4.2"/></svg>metric</div>
+      <div style="font-weight: var(--weight-semibold); margin-top: var(--space-1)">Retention rate</div>
+      <div style="font-size: var(--text-sm); color: var(--text-muted)">The share of customers in a signup cohort who are still active customers in a later month.</div>
+    </div>
+    <div style="margin-top: var(--space-5); border: var(--border-width) solid var(--border); border-radius: var(--radius-md); background: var(--bg); max-width: 300px; font-size: var(--text-sm)">
+      <div style="padding: var(--space-2) var(--space-3); border-bottom: var(--border-width) solid var(--border)">client<span style="color: var(--text-faint)">|</span></div>
+      <div style="padding: var(--space-2) var(--space-3); background: var(--surface-raised)"><span style="color: var(--text-muted)">'client' →</span> use <strong>Customer</strong></div>
+      <div style="padding: var(--space-2) var(--space-3); color: var(--text-muted)">Client account <span style="color: var(--text-faint)">· deprecated</span></div>
+    </div>
+    <div style="margin-top: var(--space-5); font-size: var(--text-xs); color: var(--text-faint)">Zoomed out: boxes collapse to their kind glyph; the selected concept keeps its box</div>
+    <svg id="overview" class="mini" width="300" height="215" style="margin-top: var(--space-1)" role="img" aria-label="Zoomed-out graph"></svg>
+  </section>
+</div>
+
+<script>
+  // Mockup only: draws the hand-placed sample graph and toggles the theme.
+  // Sizes come from tokens.css so the mockup carries no raw style values of its own.
+  const tok = (name) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name));
+  const H = tok("--node-height"), PAD = tok("--space-2"), GLYPH = tok("--node-glyph-size"), GAP = tok("--space-2");
+  const RADIUS = tok("--radius-sm");
+
+  // Kind glyphs, drawn about g px across.
+  const SHAPES = {
+    entity: { k: "k1", el: (g) => `<circle r="${g / 2}"/>` },
+    event: { k: "k2", el: (g) => `<polygon points="0,${-g / 2 - 1} ${g / 2 + 1},0 0,${g / 2 + 1} ${-g / 2 - 1},0"/>` },
+    attribute: { k: "k3", el: (g) => `<rect x="${-g / 2 + 0.5}" y="${-g / 2 + 0.5}" width="${g - 1}" height="${g - 1}"/>` },
+    metric: { k: "k4", el: (g) => `<polygon points="0,${-g / 2 - 0.5} ${g / 2 + 0.5},${g / 2 - 0.5} ${-g / 2 - 0.5},${g / 2 - 0.5}"/>` },
+  };
+  // Relation type is read from the edge label. Line style carries only what a label can't show at a
+  // glance: is_a gets a hollow arrowhead, related_to is dashed and undirected, all others are solid.
+  const DASH = { related_to: "6 4" };
+  const RELATIONS = ["is_a", "part_of", "attribute_of", "related_to", "derived_from", "has", "measures"];
+  // Box centres, hand-placed for the mockup.
+  const N = {
+    "customer": [330, 335, "Customer", "entity"],
+    "active-customer": [165, 245, "Active customer", "entity"],
+    "churned-account": [150, 420, "Churned account", "entity", "proposed"],
+    "client-account": [105, 480, "Client account", "entity", "deprecated"],
+    "customer-region": [290, 500, "Customer region", "attribute"],
+    "retention-rate": [455, 455, "Retention rate", "metric"],
+    "order": [600, 335, "Order", "entity"],
+    "order-line": [745, 420, "Order line", "entity"],
+    "product": [790, 520, "Product", "entity"],
+    "order-amount": [775, 270, "Order amount", "attribute"],
+    "order-placed": [785, 345, "Order placed", "event"],
+    "refund-issued": [745, 195, "Refund issued", "event"],
+    "gross-revenue": [570, 585, "Gross revenue", "metric"],
+    "net-revenue": [740, 625, "Net revenue", "metric"],
+    "average-order-value": [610, 480, "Average order value", "metric"],
+    "subscription": [420, 175, "Subscription", "entity"],
+    "subscription-plan": [205, 120, "Subscription plan", "entity"],
+    "plan-price": [105, 45, "Plan price", "attribute"],
+    "subscription-status": [620, 60, "Subscription status", "attribute"],
+    "subscription-started": [620, 120, "Subscription started", "event"],
+    "subscription-cancelled": [400, 55, "Subscription cancelled", "event"],
+    "monthly-recurring-revenue": [560, 245, "Monthly recurring revenue", "metric"],
+  };
+  const E = [
+    ["active-customer", "is_a", "customer"], ["churned-account", "is_a", "customer"],
+    ["customer", "has", "order", "1:N"], ["customer", "has", "subscription", "1:N"],
+    ["customer-region", "attribute_of", "customer"], ["retention-rate", "measures", "customer"],
+    ["order-line", "part_of", "order", "N:1"], ["product", "has", "order-line", "1:N"],
+    ["order-amount", "attribute_of", "order"], ["order", "has", "order-placed", "1:1"],
+    ["order", "has", "refund-issued", "1:N"], ["gross-revenue", "measures", "order"],
+    ["net-revenue", "measures", "order"], ["net-revenue", "derived_from", "gross-revenue"],
+    ["average-order-value", "measures", "order"], ["subscription", "related_to", "subscription-plan"],
+    ["plan-price", "attribute_of", "subscription-plan"], ["subscription-status", "attribute_of", "subscription"],
+    ["subscription", "has", "subscription-started", "1:1"], ["subscription", "has", "subscription-cancelled", "1:1"],
+    ["monthly-recurring-revenue", "measures", "subscription"],
+  ];
+  const SELECTED = "customer";
+  const HOVER_EDGE = 2; // customer -> order
+  const BADGES = { "active-customer": "warn", "subscription": "info" };
+  const near = new Set([SELECTED]);
+  E.forEach(([s, , t]) => { if (s === SELECTED) near.add(t); if (t === SELECTED) near.add(s); });
+
+  function markers() {
+    return `<defs>
+      <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path class="arrow" d="M0,0 L8,4 L0,8 z"/></marker>
+      <marker id="hollow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+        <path class="arrow-hollow" d="M1,1 L9,5 L1,9 z"/></marker></defs>`;
+  }
+
+  // Where the line from a box's centre towards (tx, ty) leaves the box, plus a small gap.
+  function exit(b, tx, ty, gap) {
+    const dx = tx - b.x, dy = ty - b.y;
+    const t = Math.min((b.w / 2 + gap) / Math.abs(dx || 1e-9), (b.h / 2 + gap) / Math.abs(dy || 1e-9));
+    return [b.x + dx * t, b.y + dy * t];
+  }
+
+  function measure(svg, nodes) {
+    const probe = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    svg.appendChild(probe);
+    const boxes = {};
+    for (const [id, [x, y, label]] of Object.entries(nodes)) {
+      probe.setAttribute("class", id === SELECTED ? "label selected" : "label");
+      probe.textContent = label;
+      boxes[id] = { x, y, w: Math.ceil(probe.getComputedTextLength()) + PAD * 2 + GLYPH + GAP, h: H };
+    }
+    probe.remove();
+    return boxes;
+  }
+
+  // A finding badge centred on (0, 0): a severity-coloured disc holding the severity's symbol.
+  const BADGE_R = tok("--badge-size") / 2;
+  const SYMBOLS = {
+    error: "M-2.2,-2.2 L2.2,2.2 M2.2,-2.2 L-2.2,2.2", // ×
+    warn: "M0,-3 L0,0.6 M0,2.9 L0,3", // !
+    info: "M0,-3 L0,-2.9 M0,-0.6 L0,3", // i
+  };
+  function badge(severity) {
+    return `<circle class="badge ${severity}" r="${BADGE_R}"/><path class="badge-glyph" d="${SYMBOLS[severity]}"/>`;
+  }
+
+  function nodeMarkup(id, b, label, kind, status, state, opts) {
+    const shape = SHAPES[kind];
+    const proposed = status === "proposed" ? "proposed" : "";
+    let out = `<g class="node ${opts.fade && !state ? "faded" : ""} ${status === "deprecated" ? "deprecated" : ""}" transform="translate(${b.x - b.w / 2},${b.y - b.h / 2})">`;
+    out += `<rect class="box ${state} ${proposed}" x="0.5" y="0.5" width="${b.w - 1}" height="${b.h - 1}" rx="${RADIUS}"/>`;
+    out += `<g class="${shape.k}" transform="translate(${PAD + GLYPH / 2},${b.h / 2})">` +
+      shape.el(GLYPH).replace(/^<(\w+)/, `<$1 class="shape ${proposed}"`) + "</g>";
+    out += `<text class="label ${state}" x="${PAD + GLYPH + GAP}" y="${b.h / 2 + 4}">${label}</text>`;
+    if (BADGES[id] && opts.badges) out += `<g transform="translate(${b.w - 2},1)">${badge(BADGES[id])}</g>`;
+    return out + "</g>";
+  }
+
+  function draw(svg, nodes, edges, opts) {
+    const boxes = measure(svg, nodes);
+    let out = markers();
+    let labels = "";
+    edges.forEach(([s, type, t, card], i) => {
+      const a = boxes[s], b = boxes[t];
+      const focus = s === SELECTED || t === SELECTED;
+      const [x1, y1] = exit(a, b.x, b.y, 1);
+      const [x2, y2] = exit(b, a.x, a.y, focus && type !== "related_to" ? 3 : 1);
+      const head = !focus || type === "related_to" ? "" : type === "is_a" ? 'marker-end="url(#hollow)"' : 'marker-end="url(#arrow)"';
+      out += `<line class="edge ${focus ? "focus" : opts.fade ? "faded" : ""}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
+        stroke-dasharray="${DASH[type] || ""}" ${head}/>`;
+      if (opts.edgeLabels && (focus || opts.hoverEdge === i)) {
+        const mx = (x1 + x2) / 2, my = (y1 + y2) / 2 + 4;
+        labels += `<text class="edge-label ${opts.hoverEdge === i ? "hover" : ""}" x="${mx}" y="${my}" text-anchor="middle">${type.replace(/_/g, " ")}${card ? " · " + card : ""}</text>`;
+      }
+    });
+    Object.entries(nodes).forEach(([id, [, , label, kind, status]]) => {
+      const isNear = !opts.fade || near.has(id);
+      const state = id === SELECTED ? "selected" : isNear ? "near" : "";
+      out += nodeMarkup(id, boxes[id], label, kind, status, state, opts);
+    });
+    svg.innerHTML = out + labels;
+  }
+
+  // Badges outside the graph (legend, findings list).
+  const size = 2 * BADGE_R + 2;
+  document.querySelectorAll("[data-badge]").forEach((el) => {
+    el.innerHTML = `<svg width="${size}" height="${size}" viewBox="${-size / 2} ${-size / 2} ${size} ${size}" aria-hidden="true">${badge(el.dataset.badge)}</svg>`;
+  });
+
+  draw(document.getElementById("graph"), N, E, { fade: true, edgeLabels: true, badges: true, hoverEdge: HOVER_EDGE });
+
+  // Zoomed-out overview: every concept as its kind glyph at one third scale; the selection keeps its box.
+  (function overview() {
+    const svg = document.getElementById("overview"), k = 0.33, ox = 8, oy = 0;
+    const at = (id) => [ox + N[id][0] * k, oy + N[id][1] * k];
+    let out = "";
+    E.forEach(([s, , t]) => {
+      const [x1, y1] = at(s), [x2, y2] = at(t);
+      out += `<line class="edge" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+    });
+    Object.entries(N).forEach(([id, [, , , kind, status]]) => {
+      if (id === SELECTED) return;
+      const [x, y] = at(id);
+      out += `<g class="node ${SHAPES[kind].k} ${status === "deprecated" ? "deprecated" : ""}" transform="translate(${x},${y})">` +
+        SHAPES[kind].el(GLYPH - 1).replace(/^<(\w+)/, `<$1 class="shape ${status === "proposed" ? "proposed" : ""}"`) + "</g>";
+    });
+    const [sx, sy] = at(SELECTED);
+    const boxes = measure(svg, { [SELECTED]: [sx, sy, N[SELECTED][2]] });
+    out += nodeMarkup(SELECTED, boxes[SELECTED], N[SELECTED][2], N[SELECTED][3], undefined, "selected", { fade: false });
+    svg.innerHTML = out;
+  })();
+
+  // Legend: the three line styles, then the relation types in use (hover shows each definition).
+  const line = (dash, head) => `<svg width="28" height="10">${markers()}<line class="edge focus" x1="1" y1="5" x2="24" y2="5"
+    stroke-dasharray="${dash}" ${head}/></svg>`;
+  document.getElementById("legend-relations").innerHTML =
+    `<div class="row">${line("", 'marker-end="url(#arrow)"')}directed, labelled</div>
+     <div class="row">${line("", 'marker-end="url(#hollow)"')}is a (subtype)</div>
+     <div class="row">${line("6 4", "")}related to (vague)</div>
+     <div class="row faint-row">${RELATIONS.map((r) => r.replace(/_/g, " ")).join(" · ")}</div>`;
+
+  const button = document.getElementById("theme");
+  button.addEventListener("click", () => {
+    const dark = document.documentElement.dataset.theme !== "dark";
+    document.documentElement.dataset.theme = dark ? "dark" : "light";
+    button.textContent = dark ? "Switch to light" : "Switch to dark";
+  });
+</script>
+</body>
+</html>

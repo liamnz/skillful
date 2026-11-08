@@ -1,0 +1,10 @@
+id: subscription-started
+name: Subscription started
+kind: event
+status: defined
+definition: >
+  The moment a customer's first payment on a plan succeeds and their
+  deliveries are scheduled.
+implemented_in:
+  - path: models/marts/fct_subscriptions.sql
+    symbol: started_at

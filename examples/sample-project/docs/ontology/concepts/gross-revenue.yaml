@@ -1,0 +1,12 @@
+id: gross-revenue
+name: Gross revenue
+kind: metric
+status: defined
+definition: >
+  The sum of order amounts for all paid orders in a period, before
+  refunds are taken off.
+relations:
+  - {type: measures, target: order}
+implemented_in:
+  - path: models/metrics/revenue.sql
+    symbol: gross_revenue

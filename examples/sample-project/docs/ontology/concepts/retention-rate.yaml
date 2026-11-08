@@ -1,0 +1,12 @@
+id: retention-rate
+name: Retention rate
+kind: metric
+status: defined
+definition: >
+  The share of customers in a signup cohort who are still active
+  customers in a later month.
+relations:
+  - {type: measures, target: customer}
+implemented_in:
+  - path: models/metrics/retention.sql
+    symbol: retention_rate

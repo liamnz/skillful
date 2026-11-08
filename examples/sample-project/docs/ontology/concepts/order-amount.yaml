@@ -1,0 +1,12 @@
+id: order-amount
+name: Order amount
+kind: attribute
+status: defined
+definition: >
+  The total charged for an order after discounts and before any refunds,
+  in the shop's currency.
+relations:
+  - {type: attribute_of, target: order}
+implemented_in:
+  - path: models/marts/fct_orders.sql
+    symbol: amount

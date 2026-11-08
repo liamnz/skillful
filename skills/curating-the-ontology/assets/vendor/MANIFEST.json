@@ -1,0 +1,113 @@
+{
+  "description": "Pinned official UMD builds of the D3 modules the view uses, concatenated in 'order' (dependency order) by `build`. Verified identical on jsDelivr and unpkg. Do not edit; to upgrade, download new files, update version, source and sha256, and run the tests.",
+  "license": {
+    "file": "LICENSE-d3.txt",
+    "spdx": "ISC"
+  },
+  "modules": [
+    {
+      "order": 1,
+      "module": "d3-dispatch",
+      "version": "3.0.1",
+      "file": "d3-dispatch.min.js",
+      "source": "https://cdn.jsdelivr.net/npm/d3-dispatch@3.0.1/dist/d3-dispatch.min.js",
+      "sha256": "94b3bbdb6b98dc1325a15762b051013e8253999b0e0436b27d1da17b952ba0af"
+    },
+    {
+      "order": 2,
+      "module": "d3-selection",
+      "version": "3.0.0",
+      "file": "d3-selection.min.js",
+      "source": "https://cdn.jsdelivr.net/npm/d3-selection@3.0.0/dist/d3-selection.min.js",
+      "sha256": "45daab9cf677901bcae102f3f23ca2930db3c0fb8ff9e3dbed087d9c4de921ca"
+    },
+    {
+      "order": 3,
+      "module": "d3-timer",
+      "version": "3.0.1",
+      "file": "d3-timer.min.js",
+      "source": "https://cdn.jsdelivr.net/npm/d3-timer@3.0.1/dist/d3-timer.min.js",
+      "sha256": "911ceda305f014b6b53ca68d5c896a9a387da120cfd56a421a2c60cca2fc9b36"
+    },
+    {
+      "order": 4,
+      "module": "d3-color",
+      "version": "3.1.0",
+      "file": "d3-color.min.js",
+      "source": "https://cdn.jsdelivr.net/npm/d3-color@3.1.0/dist/d3-color.min.js",
+      "sha256": "a12639010163230b8c130fbeb92a3a49bb5f6989a566d3664d759522db458489"
+    },
+    {
+      "order": 5,
+      "module": "d3-interpolate",
+      "version": "3.0.1",
+      "file": "d3-interpolate.min.js",
+      "source": "https://cdn.jsdelivr.net/npm/d3-interpolate@3.0.1/dist/d3-interpolate.min.js",
+      "sha256": "bfc321e4c3f3b3aadc88cfe15ccb5e443abfeadef8b75c65b41c33a4d78a98ae"
+    },
+    {
+      "order": 6,
+      "module": "d3-ease",
+      "version": "3.0.1",
+      "file": "d3-ease.min.js",
+      "source": "https://cdn.jsdelivr.net/npm/d3-ease@3.0.1/dist/d3-ease.min.js",
+      "sha256": "e60a1ed750a1ad138dd18e8d3f463238113cfbf7d89685a13d19bd4e048dc3ce"
+    },
+    {
+      "order": 7,
+      "module": "d3-transition",
+      "version": "3.0.1",
+      "file": "d3-transition.min.js",
+      "source": "https://cdn.jsdelivr.net/npm/d3-transition@3.0.1/dist/d3-transition.min.js",
+      "sha256": "c248d97f6c131af7f4a12a3ff1f2ed83f1cc6c0e17fc764a198b6ee452e6621b"
+    },
+    {
+      "order": 8,
+      "module": "d3-drag",
+      "version": "3.0.0",
+      "file": "d3-drag.min.js",
+      "source": "https://cdn.jsdelivr.net/npm/d3-drag@3.0.0/dist/d3-drag.min.js",
+      "sha256": "158499fa8cdeef459e2ab9d01af22babd003c423a212fb24088c0f838864012b"
+    },
+    {
+      "order": 9,
+      "module": "d3-zoom",
+      "version": "3.0.0",
+      "file": "d3-zoom.min.js",
+      "source": "https://cdn.jsdelivr.net/npm/d3-zoom@3.0.0/dist/d3-zoom.min.js",
+      "sha256": "4fdce9b830b78225c58e27258296084253c41a5eaf8cad9bd9ccfe3025daf1cf"
+    },
+    {
+      "order": 10,
+      "module": "d3-quadtree",
+      "version": "3.0.1",
+      "file": "d3-quadtree.min.js",
+      "source": "https://cdn.jsdelivr.net/npm/d3-quadtree@3.0.1/dist/d3-quadtree.min.js",
+      "sha256": "57e2ad12824ed82893ba447523f2a2fb9beeb9222aafb2c778a9f5b313348b0e"
+    },
+    {
+      "order": 11,
+      "module": "d3-force",
+      "version": "3.0.0",
+      "file": "d3-force.min.js",
+      "source": "https://cdn.jsdelivr.net/npm/d3-force@3.0.0/dist/d3-force.min.js",
+      "sha256": "1e07b473241328795d5ea9ad479a7bbabd765012fa2ef95633c83b69868dff6b"
+    },
+    {
+      "order": 12,
+      "module": "d3-path",
+      "version": "3.1.0",
+      "file": "d3-path.min.js",
+      "source": "https://cdn.jsdelivr.net/npm/d3-path@3.1.0/dist/d3-path.min.js",
+      "sha256": "28d70841c60f313c3e6411fe0831e539ed6cea51eaee951d62d88908c40619c2"
+    },
+    {
+      "order": 13,
+      "module": "d3-shape",
+      "version": "3.2.0",
+      "file": "d3-shape.min.js",
+      "source": "https://cdn.jsdelivr.net/npm/d3-shape@3.2.0/dist/d3-shape.min.js",
+      "sha256": "49236896e989f251dd36679ea4a879538e9ca2ece3a90a82740f953cac4a3fa5"
+    }
+  ]
+}

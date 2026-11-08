@@ -1,0 +1,160 @@
+/*
+ * Design tokens for the ontology view.
+ *
+ * The ONLY place raw colour, size, spacing and timing values may appear. Components
+ * (app.css, the JS) use these custom properties exclusively. Binding rules are in
+ * docs/SPEC.md "Visual design":
+ *   - colour is reserved for meaning: kind (graph + legend), severity (badges),
+ *     focus/selection (accent). All interface chrome is neutral grey;
+ *   - one encoding per dimension, never overloaded;
+ *   - no shadows, gradients or decorative motion.
+ *
+ * Theme: follows prefers-color-scheme; [data-theme="light"|"dark"] on <html> overrides it.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Neutrals: a 7-step ramp mapped to roles */
+  --bg: #ffffff;
+  --surface: #f6f7f8;
+  --surface-raised: #eceef1;
+  --border: #d8dce0;
+  --text-faint: #666e77;
+  --text-muted: #4a525b;
+  --text: #1c2024;
+
+  /* Kind palette. Core kinds have fixed slots and shapes:
+     entity 1 circle, event 2 diamond, attribute 3 square, metric 4 triangle.
+     Slots 5-8 go to extension kinds by sorted id. Warm red/amber are kept for severity. */
+  --kind-1: #16856d; /* teal green */
+  --kind-2: #7a4fd0; /* violet */
+  --kind-3: #c23a83; /* magenta */
+  --kind-4: #6a8417; /* olive */
+  --kind-5: #a35d24; /* brown */
+  --kind-6: #4c5f96; /* slate blue */
+  --kind-7: #11849a; /* cyan */
+  --kind-8: #86772a; /* khaki */
+  --kind-fallback: #7d858e; /* kinds beyond 8 (see W113) */
+
+  /* Semantic colours */
+  --accent: #2b67d6; /* focus and selection only */
+  --error: #cc3328;
+  --warn: #b06d00;
+  --info: #5f6b78;
+
+  /* Typography */
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 15px; /* body */
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --weight-regular: 400;
+  --weight-semibold: 600;
+  --line-height: 1.5;
+  --line-height-tight: 1.25;
+  --measure: 65ch; /* comfortable reading width for definitions */
+
+  /* Spacing (4 px base), borders and radii */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 48px;
+  --border-width: 1px;
+  --radius-sm: 3px;
+  --radius-md: 6px;
+
+  /* Layout */
+  --toolbar-height: 48px;
+  --pane-width: 400px;
+
+  /* Graph: each concept is a box enclosing its kind glyph and name */
+  --node-height: 24px;
+  --node-glyph-size: 9px; /* kind glyph inside the box; also the whole node when zoomed out */
+  --node-selected-width: 2px; /* accent outline on the selected box */
+  --badge-size: 13px; /* finding badge disc on a box's top-right corner */
+  --badge-glyph-width: 1.6px; /* stroke of the badge's severity symbol (× ! i) */
+  --edge-width: 1px;
+  --edge-width-focus: 1.5px;
+  --edge-label-halo: 5px; /* wide enough to break the edge line under its label */
+  --edge-hit-width: 10px; /* invisible stroke that makes a thin edge easy to hover */
+  --edge-clearance: 2px; /* space between an edge's end and the box it meets */
+  --edge-min-length: 56px; /* layout: an edge's length beyond the two boxes' half-widths */
+  --node-spacing: 16px; /* layout: the least space between two boxes */
+  --arrow-size: 7px; /* filled arrowhead */
+  --arrow-hollow-size: 9px; /* hollow arrowhead (is_a), larger so its outline reads */
+  --dash-proposed: 3 2; /* box outline of a proposed concept */
+  --dash-proposed-glyph: 2 1.5; /* hollow kind glyph of a proposed concept */
+  --glyph-outline-width: 1.5px;
+  --dash-related: 6 4; /* the dashed, undirected related_to line */
+  --faded-opacity: 0.18;
+  --deprecated-opacity: 0.45;
+
+  /* Motion: focus/fade and panel open/close only; the layout is never animated */
+  --duration-fast: 150ms;
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Dark theme values, applied by the OS preference unless the page forces light. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #14171a;
+    --surface: #1b1f23;
+    --surface-raised: #23282d;
+    --border: #343b42;
+    --text-faint: #8d959e;
+    --text-muted: #b2b9c0;
+    --text: #e7eaed;
+    --kind-1: #3cc3a1;
+    --kind-2: #a88cf2;
+    --kind-3: #f07ab8;
+    --kind-4: #a8c64a;
+    --kind-5: #e09a5c;
+    --kind-6: #8fa1dc;
+    --kind-7: #4cc7dc;
+    --kind-8: #cdbb63;
+    --kind-fallback: #8d959e;
+    --accent: #6fa3ff;
+    --error: #ff6d62;
+    --warn: #f0b23d;
+    --info: #9aa6b3;
+  }
+}
+
+/* The same dark values when the page forces dark. Keep in sync with the block above. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #14171a;
+  --surface: #1b1f23;
+  --surface-raised: #23282d;
+  --border: #343b42;
+  --text-faint: #8d959e;
+  --text-muted: #b2b9c0;
+  --text: #e7eaed;
+  --kind-1: #3cc3a1;
+  --kind-2: #a88cf2;
+  --kind-3: #f07ab8;
+  --kind-4: #a8c64a;
+  --kind-5: #e09a5c;
+  --kind-6: #8fa1dc;
+  --kind-7: #4cc7dc;
+  --kind-8: #cdbb63;
+  --kind-fallback: #8d959e;
+  --accent: #6fa3ff;
+  --error: #ff6d62;
+  --warn: #f0b23d;
+  --info: #9aa6b3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+  }
+}

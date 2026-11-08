@@ -276,6 +276,8 @@ W106 asks: *has code relevant to this concept changed since a human last confirm
    - *With a `symbol`:* the check runs `git diff <baseline>..HEAD` on the path, plus uncommitted changes. It fires only if a changed hunk has added or removed lines within `drift_context_lines` of a line that mentions the symbol, in either the old or the new version. Unrelated edits elsewhere in a shared file (e.g. a new column in a mart model) don't trigger it.
    - *Without a `symbol`:* any change to the file since the baseline counts.
 3. **Clearing it.** The only way to clear W106 is a deliberate review: `onto.py review <id>` sets `reviewed_at` to HEAD for that concept's entries (or a single `--path`). Editing the concept file for some other reason doesn't count as a review once `reviewed_at` exists, so nobody has to make fake edits to silence it. A review is recorded in git like any other change.
+   - `reviewed_at` stores the full commit id of HEAD.
+   - `review` refuses (exit 3) while a reviewed path has uncommitted changes. The review is recorded against a commit, so a review taken before committing would fire again as soon as the code is committed. Commit the code, then review.
 4. **Proposed concepts are skipped.** They have no confirmed definition to drift from yet.
 
 **Known limits, stated plainly.**
@@ -308,19 +310,21 @@ Deciding whether an unmapped file really introduces a domain concept is the agen
 ### Graph view
 
 - **Visual encoding.**
-  - *Kind* is shown by colour **and** shape, so colour is never the only cue.
-  - *Status* is shown as solid (`defined`), dashed or hollow (`proposed`, i.e. "needs a definition") or faded (`deprecated`).
-  - Concepts with validator findings get a badge whose colour reflects severity.
-  - Edges are directed (`related_to` is drawn undirected), styled by relation type and labelled on hover or focus. The label includes the cardinality when one is recorded (e.g. `has · 1:N`). There are no crow's-foot or other cardinality marks at rest, to keep the structure quiet. A legend of kinds and relation types is always visible, and hovering a legend entry shows its definition.
+  - Each concept is drawn as a **box enclosing its name**, so the name is always attached to its concept and edges meet the box edge. The box holds a small kind glyph, then the name.
+  - *Kind* is shown by the glyph's colour **and** shape, so colour is never the only cue.
+  - *Status* is shown by the box outline: solid (`defined`), dashed with a hollow glyph (`proposed`, i.e. "needs a definition"), or faded (`deprecated`).
+  - Concepts with validator findings get a badge whose **symbol** shows severity: × error, ! warning, i info. The severity colour reinforces the symbol but is never needed to read it, because eight kind colours make colour alone too easy to confuse.
+  - Edges are directed (`related_to` is drawn undirected and dashed). **Relation type is shown by a text label on the edge** (the relation name, e.g. `is a`, `part of`), not by line pattern, because patterns become indistinguishable beyond three or four types. Every edge touching the selected concept is labelled; any other edge shows its label on hover; zooming in far enough labels all visible edges (see semantic zoom). The label includes the cardinality when one is recorded (e.g. `has · 1:N`). There are no crow's-foot or other cardinality marks, to keep the structure quiet. A legend of kinds, line styles and relation types is always visible, and hovering a legend entry shows its definition.
   - Core kinds have fixed encodings in every project, so the same kind looks the same everywhere. Kind extensions get colour/shape pairs from a fixed palette, assigned deterministically by sorted id so they don't change between builds. Beyond 8 kinds, the extra kinds share a neutral fallback encoding and W113 explains why.
-- **Focus and neighbourhood (main way to cut clutter).** Selecting a concept centres it, opens its detail pane, and highlights its neighbourhood (concepts up to N hops away; default 1, adjustable 1–3) while fading the rest. People explore one neighbourhood at a time instead of the whole hairball.
+- **Focus and neighbourhood (main way to cut clutter).** Selecting a concept centres it, opens its detail pane, and highlights its neighbourhood (concepts up to N hops away, set by the **Hops** control: default 1, adjustable 1–3) while fading the rest. Hops follow relations in either direction. Only edges touching the selected concept are labelled; edges further out show their label on hover. People explore one neighbourhood at a time instead of the whole hairball.
 - **Exploration.** Pan, zoom and fit-to-view. Drag a concept to pin it in place, and reset the layout. Clicking a related concept moves the focus there, and breadcrumbs let you step back.
 - **Hover preview.** Hovering shows the concept's name, kind and the first sentence of its definition, without changing the selection.
-- **Semantic zoom.** When zoomed out, only labels of high-degree or selected concepts are shown; zooming in reveals all labels. The graph stays readable at about 300 concepts.
+- **Semantic zoom.** When zoomed out, boxes collapse to their kind glyph, except for the selected concept and high-degree concepts, which keep their boxes. Zooming in restores all boxes, and further in, all edge labels. The graph stays readable at about 300 concepts.
 - **Deterministic layout; stability as a best effort.**
   - **Guaranteed:** the same ontology always produces the same layout. Positions are seeded from concept ids and the layout runs a fixed number of iterations.
   - **Best effort:** across edits, id-seeding tends to keep familiar concepts roughly where they were, so a small addition usually only nudges its neighbours. This helps people's spatial memory of the domain survive rebuilds.
   - **Not guaranteed:** larger changes are allowed to reshape the picture. When the model genuinely evolves, the layout *should* reflect it. `build` does not carry positions over from previous builds.
+- **Boxes never overlap.** The layout's collision force uses each box's measured width and height (not a circle radius), and boxes sit inside the canvas.
 - **Hierarchy option.** A toggle lays out `acyclic` relation types (core `is_a` and `part_of`, plus any extension marked `acyclic`) as a top-down hierarchy instead of a force layout.
 - **Overlays** (toggleable):
   - *Health:* highlights concepts with findings, grouped by Gruber criterion.
@@ -335,8 +339,9 @@ Deciding whether an unmapped file really introduces a domain concept is the agen
 
 ### Concept detail pane
 
-- Shows the definition, examples, non-examples, rules, open questions, and incoming and outgoing relations as clickable links (inverse labels from the manifest). Where a cardinality is recorded, the relation reads as a sentence: "Customer **has many** Orders" on Customer. On the target concept it uses the inverse label with the cardinality flipped, e.g. "Order **belongs to one** Customer" when the inverse label is `belongs_to`.
-- Includes a small embedded neighbourhood mini-graph.
+- **Section names match the concept file.** Each section that shows a stored field is headed by that field's name from the concept schema, with underscores read as spaces (Definition, Discouraged terms, Examples, Non examples, Rules, Relations, Implemented in, Open questions, Proposal), in the file's order. Fields absent from the file are omitted, except an empty definition, which shows "Needs a definition". Sections that are not fields of the file have their own names: Incoming relations (relations other concepts state about this one) and Findings (from `validate`).
+- Shows the definition, examples, non-examples, rules, open questions, and its relations and incoming relations as clickable links (inverse labels from the manifest). Where a cardinality is recorded, the relation reads as a sentence: "Customer **has many** Orders" on Customer. On the target concept it uses the inverse label with the cardinality flipped, e.g. "Order **belongs to one** Customer" when the inverse label is `belongs_to`.
+- No neighbourhood mini-graph: the main graph already shows the selected concept's neighbourhood beside the pane.
 - `implemented_in` paths are shown as relative links, each with its last-reviewed commit and date, or "never reviewed".
 - **Honest about mud.** `proposed` concepts are visibly marked as needing a definition. Agent suggestions are visually separate and labelled as such. The concept's validator findings are listed with their codes and criteria.
 
@@ -352,7 +357,7 @@ Deciding whether an unmapped file really introduces a domain concept is the agen
 ### Cross-cutting requirements
 
 - **Self-contained.** A single file with the records embedded as JSON and all CSS, JS and vendored libraries inline. No network access, no external fonts, and it works from `file://`.
-- **Navigation state in the URL.** Deep links via `#<concept-id>`, optionally with view state (e.g. `#active-customer?depth=2&overlay=health`), so people can share links to specific views.
+- **Navigation state in the URL.** Deep links via `#<concept-id>`, optionally with view state (e.g. `#active-customer?hops=2&overlay=health`), so people can share links to specific views.
 - **Accessibility.**
   - The list and detail views give complete, non-visual access to everything in the graph.
   - In the graph, concepts are keyboard-reachable: Tab and arrow keys move between connected concepts, and Enter selects.
@@ -360,7 +365,8 @@ Deciding whether an unmapped file really introduces a domain concept is the agen
   - Text and graph elements meet WCAG AA contrast in both themes.
 - **Themes and sizes.** Light and dark themes follow `prefers-color-scheme`. It is designed for laptop and desktop screens (minimum viewport 1280×720) and scales up to large monitors. Phone and tablet layouts are out of scope.
 - **Performance.** Fixture ontology with 300 concepts and 600 relations: first render in under 2 s on a typical laptop, and pan, zoom and selection stay smooth.
-- **Freshness.** The build embeds a hash of the input records so `validate`/`build --check` can detect staleness.
+- **Freshness.** The build embeds a hash of the input records so `validate`/`build --check` can detect staleness. W108 fires only when `index.html` exists and is stale; a view that has never been built gets a note on stderr instead (and `build --check` exits 1).
+- **No network, enforced.** The page carries a Content-Security-Policy of `default-src 'none'` (inline styles and scripts only), so even a mistake in the view code cannot make a request.
 - **Friendly to being committed.**
   - The output is **byte-for-byte reproducible**: no timestamps, stable key and record ordering, pinned templates. Two people building from the same records always produce an identical file.
   - `init` offers, asking first, to add `docs/ontology/index.html -diff linguist-generated=true` to `.gitattributes`. Diffs and PR reviews then show the YAML changes, not the regenerated HTML.
@@ -383,10 +389,10 @@ Deciding whether an unmapped file really introduces a domain concept is the agen
 
    | Dimension | Encoding | Not encoded by |
    |---|---|---|
-   | Kind | colour **and** shape | — |
-   | Status | outline style: solid (`defined`), dashed (`proposed`), reduced opacity (`deprecated`) | colour |
-   | Severity | small badge using the semantic colour family | kind colours |
-   | Relation type | edge stroke pattern (solid, dashed, dotted, …) plus arrowheads; label (with cardinality, if recorded) on hover/focus | colour |
+   | Kind | glyph colour **and** shape, inside the concept's box | box colour |
+   | Status | box outline style: solid (`defined`), dashed (`proposed`), reduced opacity (`deprecated`) | colour |
+   | Severity | symbol in a small round badge (× error, ! warning, i info), filled with the semantic colour as a second cue | kind colours, kind glyph shapes |
+   | Relation type | text label on the edge (with cardinality, if recorded): on the selected concept's edges, on hover, and when zoomed in. Line style adds only a hollow arrowhead for `is_a` and a dashed, undirected line for `related_to` | colour, stroke pattern |
    | Focus | full contrast plus the accent outline; everything else fades | — |
 
    Nobody should have to wonder whether "orange" means *metric* or *warning*. The kind palette and semantic palette are chosen so they don't clash.
@@ -401,7 +407,7 @@ All styling flows from CSS custom properties defined once in `assets/html/tokens
 - **Kind palette:** 8 slots (`--kind-1` … `--kind-8`).
   - Colour-blind-safe as a set (distinguishable under protanopia, deuteranopia and tritanopia simulation).
   - Each meets WCAG AA non-text contrast (≥ 3:1) against `--bg` in both themes.
-  - The four core kinds have **fixed slots and shapes**: `entity` → slot 1 + circle, `event` → slot 2 + diamond, `attribute` → slot 3 + square, `metric` → slot 4 + triangle. Slots 5–8 and the remaining `d3-shape` symbols are assigned to extension kinds by sorted id.
+  - The four core kinds have **fixed slots and shapes**: `entity` → slot 1 + circle, `event` → slot 2 + diamond, `attribute` → slot 3 + square, `metric` → slot 4 + triangle. Slots 5–8 are assigned to extension kinds by sorted id, with the shapes cross, star, wye and hexagon (shapes no core kind uses).
   - Kinds beyond 8 use a neutral fallback (see W113).
 - **Semantic colours:** `--accent` (focus/selection; one hue only, and not confused with any kind colour), `--error`, `--warn`, `--info`.
 - **Typography:**
@@ -415,9 +421,11 @@ All styling flows from CSS custom properties defined once in `assets/html/tokens
 
 ### Graph style
 
-- Nodes are small (a radius comparable to the label's cap height), so structure shows before detail.
-- Labels sit beside nodes in `--text-muted`. They become `--text` when focused or in the neighbourhood. Each label has a `--bg`-coloured halo (stroke under the text) so it stays readable over edges.
-- Edges are 1 px in `--border` at rest. Focused neighbourhood edges use `--text-muted` with visible arrowheads, and their relation label appears on hover or focus.
+- Each concept is a compact box (`--node-height`, `--radius-sm` corners, `--space-2` padding) filled with `--bg`, holding a `--node-glyph-size` kind glyph and the name in `--text-xs`. Box width follows the name.
+- At rest the outline is `--border` and the name `--text-muted`. In the focused neighbourhood they become `--text-muted` and `--text`. The selected box gets a `--node-selected-width` `--accent` outline and a semibold name.
+- Finding badges (`--badge-size`) sit on the box's top-right corner: a disc in `--error`, `--warn` or `--info` with its symbol drawn in `--bg`, so the symbol keeps ≥ 3:1 contrast in both themes. The same badge marks findings in the detail pane, the Health panel and the legend.
+- Edges are 1 px in `--border` at rest. Focused neighbourhood edges use `--text-muted` with visible arrowheads.
+- Edge labels are `--text-xs` in `--text-muted` (`--text` when hovered), centred on the edge with a wide `--bg` halo (`--edge-label-halo`) that breaks the line beneath them. They are placed to avoid concept boxes; when one would overlap a box, it moves along its edge.
 - Hover, selected and in-neighbourhood states are each visually distinct.
 - The canvas has no background grid or other chart junk. Pan and zoom controls are small, neutral and out of the way.
 - **Legibility check at scale:** with the 300-concept fixture zoomed to fit, the graph must read as a structure (clusters and hubs visible), not a hairball. Semantic zoom and focus are the means of getting there.
@@ -598,7 +606,7 @@ def check_encoding_bias(concept: Concept) -> list[Finding]:
   - The graph renders one node per visible concept and one edge per visible relation.
   - Selecting a concept highlights exactly its N-hop neighbourhood and opens the detail pane.
   - Filters and overlays change what is visible or highlighted as specified.
-  - Deep links restore the selection, depth and overlay.
+  - Deep links restore the selection, hops and overlay.
   - Searching a discouraged term shows the redirect and focuses the canonical concept.
   - Keyboard navigation moves between connected concepts.
   - An edge with a recorded cardinality shows it in its hover label, and the detail pane renders it as a sentence in both directions. Edges without one show no cardinality.
@@ -673,7 +681,7 @@ def check_encoding_bias(concept: Concept) -> list[Finding]:
 5a. W106 fires only for changes near a concept's symbol (or anywhere in the file when there's no symbol) since its last review. `review` clears it, and nothing else does once `reviewed_at` exists.
 6. `build` produces a single `index.html` that makes no network requests and works from `file://`. `build --check` detects stale output. Builds are byte-for-byte reproducible.
 7. The page opens on an interactive relationship graph that supports:
-   - neighbourhood focus at depths 1–3;
+   - neighbourhood focus at 1–3 hops;
    - pan, zoom and pinning;
    - the hierarchy toggle;
    - the Health, Mud and Drift overlays;

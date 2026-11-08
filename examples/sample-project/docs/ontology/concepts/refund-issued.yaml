@@ -1,0 +1,10 @@
+id: refund-issued
+name: Refund issued
+kind: event
+status: defined
+definition: >
+  The moment money from a paid order is returned to the customer, for
+  part of the order or all of it.
+implemented_in:
+  - path: models/marts/fct_refunds.sql
+    symbol: issued_at
