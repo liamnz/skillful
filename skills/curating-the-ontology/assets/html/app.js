@@ -8,6 +8,8 @@
   const G = OntologyGraph;
   const SVG_NS = "http://www.w3.org/2000/svg";
   const HOPS = [1, 2, 3];
+  const OVERLAYS = ["none", "health", "mud", "drift"];
+  const CRUMBS = 5; // breadcrumbs shown at most
 
   function el(tag, className, text) {
     const node = document.createElement(tag);
@@ -48,6 +50,8 @@
   const state = {
     selected: null,
     hops: 1,
+    overlay: "none",
+    trail: [], // concepts visited before the selected one, oldest first (breadcrumbs)
   };
 
   // --- Layout --------------------------------------------------------------------------
@@ -93,12 +97,19 @@
   const canvas = el("main", "canvas");
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("class", "graph");
+  svg.setAttribute("tabindex", "-1"); // the concepts inside are the tab stops, not the canvas
   svg.setAttribute("role", "group");
   svg.setAttribute("aria-label", `Concept graph of ${data.ontology.name}: ${summary}`);
   canvas.append(svg);
   if (!data.concepts.length) {
     canvas.append(el("p", "empty", "No concepts yet. Add one with 'onto.py new', then build again."));
   }
+  const crumbs = el("nav", "crumbs");
+  crumbs.setAttribute("aria-label", "Breadcrumbs");
+  const zoomControls = el("div", "zoom");
+  zoomControls.setAttribute("role", "group");
+  zoomControls.setAttribute("aria-label", "Zoom");
+  canvas.append(crumbs, zoomControls);
   const preview = el("div", "preview");
   preview.setAttribute("role", "tooltip");
   preview.hidden = true;
@@ -143,6 +154,124 @@
     preview.style.top = `${Math.max(gap, top)}px`;
   }
 
+  // Zoom controls: small, neutral, out of the way.
+  for (const [symbol, label, action] of [
+    ["+", "Zoom in", () => view.zoomBy(1.25)],
+    ["−", "Zoom out", () => view.zoomBy(0.8)],
+    ["⤢", "Fit to view", () => view.fit()],
+    ["↺", "Reset layout (unpin dragged concepts)", () => view.resetLayout()],
+  ]) {
+    const button = el("button", "", symbol);
+    button.type = "button";
+    button.title = label;
+    button.setAttribute("aria-label", label);
+    button.addEventListener("click", action);
+    zoomControls.append(button);
+  }
+
+  // --- Keyboard ------------------------------------------------------------------------
+  // Tab enters the graph at one concept. Arrow keys move to the connected concept that lies
+  // most nearly in that direction; Tab and Shift+Tab step through the concepts connected to
+  // the selected one (then leave the graph as usual); Enter or Space selects; Escape clears.
+
+  const DIRECTIONS = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] };
+
+  function focusConcept(id) {
+    view.setTabStop(id);
+    view.ensureVisible(id);
+    view.focusNode(id);
+  }
+
+  function byName(a, b) {
+    return nodesById.get(a).name.localeCompare(nodesById.get(b).name);
+  }
+
+  function towards(fromId, [dx, dy]) {
+    const positions = view.positions();
+    const [x0, y0] = positions[fromId];
+    let best = null;
+    for (const id of adjacency.get(fromId) || []) {
+      const [x, y] = positions[id];
+      const distance = Math.hypot(x - x0, y - y0) || 1;
+      const cos = ((x - x0) * dx + (y - y0) * dy) / distance;
+      if (cos < 0.3) continue; // more than about 70 degrees off the arrow's direction
+      const score = distance / cos;
+      if (!best || score < best.score) best = { id, score };
+    }
+    return best && best.id;
+  }
+
+  svg.addEventListener("keydown", (event) => {
+    const node = event.target.closest && event.target.closest(".node");
+    if (!node) return;
+    const id = node.dataset.id;
+    if (event.key in DIRECTIONS) {
+      event.preventDefault();
+      const next = towards(id, DIRECTIONS[event.key]);
+      if (next) focusConcept(next);
+    } else if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      setState({ selected: id });
+    } else if (event.key === "Escape") {
+      setState({ selected: null });
+    } else if (event.key === "Tab") {
+      const anchor = state.selected || id;
+      const ring = [anchor, ...[...(adjacency.get(anchor) || [])].sort(byName)];
+      const at = ring.indexOf(id);
+      const next = at + (event.shiftKey ? -1 : 1);
+      if (at !== -1 && next >= 0 && next < ring.length) {
+        event.preventDefault();
+        focusConcept(ring[next]);
+      }
+    }
+  });
+  svg.addEventListener("focusin", (event) => {
+    const node = event.target.closest && event.target.closest(".node");
+    if (node) view.setTabStop(node.dataset.id);
+  });
+
+  // --- URL: #<concept-id>?hops=2&overlay=health ---------------------------------------
+
+  function parseHash(hash) {
+    const text = hash.replace(/^#/, "");
+    const [idPart, query = ""] = text.split("?");
+    const params = new URLSearchParams(query);
+    const patch = { selected: idPart ? decodeURIComponent(idPart) : null };
+    const hops = Number(params.get("hops"));
+    patch.hops = HOPS.includes(hops) ? hops : 1;
+    patch.overlay = OVERLAYS.includes(params.get("overlay")) ? params.get("overlay") : "none";
+    return patch;
+  }
+
+  function hashFor(s) {
+    const params = new URLSearchParams();
+    if (s.hops !== 1) params.set("hops", s.hops);
+    if (s.overlay !== "none") params.set("overlay", s.overlay);
+    const query = params.toString();
+    const id = s.selected ? encodeURIComponent(s.selected) : "";
+    return id || query ? `#${id}${query ? `?${query}` : ""}` : "";
+  }
+
+  function syncUrl(previous) {
+    const hash = hashFor(state);
+    if (hash === location.hash || (!hash && !location.hash)) return;
+    const url = `${location.pathname}${location.search}${hash || "#"}`;
+    try {
+      if (state.selected !== previous.selected) history.pushState(null, "", url);
+      else history.replaceState(null, "", url);
+    } catch {
+      // Some browsers restrict the History API on file:// pages; the view still works.
+    }
+  }
+
+  function restoreFromUrl() {
+    const patch = parseHash(location.hash);
+    if (patch.selected && !nodesById.has(patch.selected)) patch.selected = null;
+    setState({ ...patch, trail: [] }, { fromUrl: true });
+  }
+  window.addEventListener("popstate", restoreFromUrl);
+  window.addEventListener("hashchange", restoreFromUrl);
+
   // --- Rendering state -----------------------------------------------------------------
 
   const paneContext = {
@@ -155,17 +284,50 @@
     select: (id) => setState({ selected: id }),
   };
 
-  function setState(patch) {
+  // Selecting a new concept from another records a breadcrumb; going back to one trims the trail.
+  function nextTrail(previous, patch) {
+    if (patch.trail) return patch.trail;
+    const next = patch.selected;
+    if (next === undefined || next === previous.selected) return previous.trail;
+    if (!next) return [];
+    const back = previous.trail.indexOf(next);
+    if (back !== -1) return previous.trail.slice(0, back);
+    return previous.selected ? [...previous.trail, previous.selected].slice(-(CRUMBS - 1)) : [];
+  }
+
+  function setState(patch, options = {}) {
     const previous = { ...state };
-    Object.assign(state, patch);
+    const trail = nextTrail(previous, patch);
+    Object.assign(state, patch, { trail });
     if (state.selected && !nodesById.has(state.selected)) state.selected = null;
     refresh(previous);
+    if (!options.fromUrl) syncUrl(previous);
+  }
+
+  function renderCrumbs() {
+    crumbs.replaceChildren();
+    crumbs.hidden = !state.selected;
+    if (!state.selected) return;
+    for (const id of state.trail) {
+      const a = el("a", "", nodesById.get(id).name);
+      a.href = `#${encodeURIComponent(id)}`;
+      a.dataset.id = id;
+      a.addEventListener("click", (event) => {
+        event.preventDefault();
+        setState({ selected: id });
+      });
+      crumbs.append(a, el("span", "sep", " › "));
+    }
+    const current = el("b", "", nodesById.get(state.selected).name);
+    current.setAttribute("aria-current", "page");
+    crumbs.append(current);
   }
 
   function refresh(previous) {
     hopsControl.sync(state.hops);
     const near = state.selected ? G.neighbourhood(adjacency, state.selected, state.hops) : null;
     view.update({ selected: state.selected, near });
+    renderCrumbs();
 
     const paneChanged = state.selected !== previous.selected;
     if (paneChanged) {
@@ -173,11 +335,15 @@
       workspace.classList.toggle("with-pane", Boolean(state.selected));
       OntologyPane.render(pane, conceptsById.get(state.selected), paneContext);
       pane.scrollTop = 0;
-      if (state.selected) view.centreOn(state.selected);
+      if (state.selected) {
+        view.centreOn(state.selected);
+        view.setTabStop(state.selected);
+      }
     }
   }
 
   refresh({ selected: null });
+  if (location.hash) restoreFromUrl();
 
   // Exposed for tests and for debugging in the browser console.
   window.ontologyView = {

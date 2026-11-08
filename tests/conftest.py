@@ -172,11 +172,11 @@ class Loaded:
 def open_page(browser: Browser) -> Iterator[Callable[..., Loaded]]:
     contexts = []
 
-    def opener(path: Path, viewport: dict[str, int] = VIEWPORT) -> Loaded:
+    def opener(path: Path, viewport: dict[str, int] = VIEWPORT, hash: str = "") -> Loaded:
         context = browser.new_context(viewport=viewport, offline=True)
         contexts.append(context)
         loaded = Loaded(context.new_page())
-        loaded.page.goto(path.as_uri())
+        loaded.page.goto(path.as_uri() + hash)
         loaded.page.wait_for_function("window.ontologyView && window.ontologyView.ready")
         return loaded
 

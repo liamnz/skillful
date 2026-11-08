@@ -308,9 +308,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Exploration controls and shareable views.
 
 **Acceptance criteria:**
-- [ ] Pan, zoom (wheel and trackpad), fit-to-view, drag-to-pin and reset layout. Clicking a related concept moves the focus, and breadcrumbs step back.
-- [ ] Deep links (`#id?hops=2&overlay=health`) restore the selection, hops and overlay on load and update as you navigate.
-- [ ] Tab and arrow keys move between connected concepts, and Enter selects, with a visible focus ring using `--accent`.
+- [x] Pan, zoom (wheel and trackpad), fit-to-view, drag-to-pin and reset layout. Clicking a related concept moves the focus, and breadcrumbs step back.
+- [x] Deep links (`#id?hops=2&overlay=health`) restore the selection, hops and overlay on load and update as you navigate.
+- [x] Tab and arrow keys move between connected concepts, and Enter selects, with a visible focus ring using `--accent`.
 
 **Verification:** UI, LINT
 

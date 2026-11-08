@@ -388,6 +388,18 @@
       svg.call(zoom.transform, transform);
     }
 
+    // Pan just enough to bring a concept into view (used when the keyboard moves focus).
+    function ensureVisible(id) {
+      const n = byId.get(id);
+      if (!n) return;
+      const transform = d3.zoomTransform(svgElement);
+      const [x, y] = transform.apply([n.x, n.y]);
+      const margin = t.fitPad + n.w * transform.k;
+      if (x < margin || y < margin || x > svgElement.clientWidth - margin || y > svgElement.clientHeight - margin) {
+        centreOn(id);
+      }
+    }
+
     function zoomBy(factor) {
       svg.call(zoom.scaleBy, factor);
     }
@@ -536,6 +548,7 @@
       update,
       fit,
       centreOn,
+      ensureVisible,
       zoomBy,
       resetLayout,
       setLayout,

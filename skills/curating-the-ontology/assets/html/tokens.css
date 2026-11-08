@@ -74,6 +74,7 @@
   --toolbar-height: 48px;
   --pane-width: 400px;
   --preview-width: 300px; /* hover preview card */
+  --control-size: 28px; /* square canvas buttons (zoom, fit, reset) */
   --underline-offset: 2px;
   --heading-tracking: 0.04em; /* letter spacing of the small uppercase pane headings */
   --badge-baseline-shift: 2px; /* aligns an inline badge with the first line of text */

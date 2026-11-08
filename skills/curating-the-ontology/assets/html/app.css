@@ -338,6 +338,59 @@ svg.graph:active {
   stroke-linecap: round;
 }
 
+/* ---- Canvas overlays: breadcrumbs (top left) and zoom controls (bottom right) ---- */
+.crumbs {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  background: var(--bg);
+}
+
+.crumbs a {
+  color: var(--text-faint);
+}
+
+.crumbs b {
+  color: var(--text-muted);
+  font-weight: var(--weight-semibold);
+}
+
+.zoom {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.zoom button {
+  width: var(--control-size);
+  height: var(--control-size);
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-top: var(--border-width) solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.zoom button:first-child {
+  border-top: 0;
+}
+
+.zoom button:hover {
+  color: var(--text);
+  background: var(--surface-raised);
+}
+
 /* ---- Hover preview ---- */
 .preview {
   position: absolute;
