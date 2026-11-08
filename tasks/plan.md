@@ -115,7 +115,7 @@ T1 skeleton ──► T2 schemas+loader+validate ──┬─► T3 init ──�
 Success criteria 6–8 pass.
 
 ### Phase 5: Skill packaging
-- [ ] T23: `init --agents-md` / `--gitattributes`
+- [x] T23: `init --agents-md` / `--gitattributes`
 - [ ] T24: `SKILL.md` body and `references/workflow.md`
 - [ ] T25: `references/schema.md`, `vocabulary.md`, `gruber-criteria.md`
 - [ ] T26: Packaging, conformance and isolation tests

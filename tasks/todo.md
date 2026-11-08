@@ -421,9 +421,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### T23: `init --agents-md` / `--gitattributes`
 **Acceptance criteria:**
-- [ ] `--agents-md` inserts the templated section between marker comments, creating `AGENTS.md` if needed. Re-running updates it in place without duplicating it, and leaves the rest of the file byte-identical.
-- [ ] `--gitattributes` adds `docs/ontology/index.html -diff linguist-generated=true` once, idempotently. The `--no-*` flags and the absence of a flag change nothing.
-- [ ] Both honour `--dry-run`.
+- [x] `--agents-md` inserts the templated section between marker comments, creating `AGENTS.md` if needed. Re-running updates it in place without duplicating it, and leaves the rest of the file byte-identical.
+- [x] `--gitattributes` adds `docs/ontology/index.html -diff linguist-generated=true` once, idempotently. The `--no-*` flags and the absence of a flag change nothing.
+- [x] Both honour `--dry-run`.
 
 **Verification:** PYTEST (`tests/test_init.py`), LINT
 
