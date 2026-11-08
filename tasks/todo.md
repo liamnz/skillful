@@ -137,13 +137,13 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Turn the Visual design section into `tokens.css` and a static, hand-laid-out mockup that uses sample-project data.
 
 **Acceptance criteria:**
-- [ ] `tokens.css` defines every token in the spec (neutrals, `--kind-1..8`, semantic colours, typography, spacing, radii, motion), with light and dark values and reduced-motion handling.
-- [ ] `examples/design/mockup.html` shows the following, in both themes (with a theme toggle) at 1280×720:
+- [x] `tokens.css` defines every token in the spec (neutrals, `--kind-1..8`, semantic colours, typography, spacing, radii, motion), with light and dark values and reduced-motion handling.
+- [x] `examples/design/mockup.html` shows the following, in both themes (with a theme toggle) at 1280×720:
   - the graph with one concept selected and its neighbourhood highlighted;
   - the detail pane, including a cardinality sentence and an agent-suggestion block;
   - the legend;
   - a finding badge.
-- [ ] **You explicitly approve the mockup.** Feedback is folded into `tokens.css` and the spec's Visual design section, and that spec change is committed.
+- [x] **You explicitly approve the mockup.** Feedback is folded into `tokens.css` and the spec's Visual design section, and that spec change is committed.
 
 **Verification:** Manually: review with you in the browser. Automated: the mockup uses no raw colour values outside `tokens.css` (grep).
 
