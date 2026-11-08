@@ -316,7 +316,7 @@ Deciding whether an unmapped file really introduces a domain concept is the agen
   - Concepts with validator findings get a badge whose colour reflects severity.
   - Edges are directed (`related_to` is drawn undirected and dashed). **Relation type is shown by a text label on the edge** (the relation name, e.g. `is a`, `part of`), not by line pattern, because patterns become indistinguishable beyond three or four types. Every edge touching the selected concept is labelled; any other edge shows its label on hover; zooming in far enough labels all visible edges (see semantic zoom). The label includes the cardinality when one is recorded (e.g. `has · 1:N`). There are no crow's-foot or other cardinality marks, to keep the structure quiet. A legend of kinds, line styles and relation types is always visible, and hovering a legend entry shows its definition.
   - Core kinds have fixed encodings in every project, so the same kind looks the same everywhere. Kind extensions get colour/shape pairs from a fixed palette, assigned deterministically by sorted id so they don't change between builds. Beyond 8 kinds, the extra kinds share a neutral fallback encoding and W113 explains why.
-- **Focus and neighbourhood (main way to cut clutter).** Selecting a concept centres it, opens its detail pane, and highlights its neighbourhood (concepts up to N hops away; default 1, adjustable 1–3) while fading the rest. People explore one neighbourhood at a time instead of the whole hairball.
+- **Focus and neighbourhood (main way to cut clutter).** Selecting a concept centres it, opens its detail pane, and highlights its neighbourhood (concepts up to N hops away, set by the **Hops** control: default 1, adjustable 1–3) while fading the rest. Hops follow relations in either direction. Only edges touching the selected concept are labelled; edges further out show their label on hover. People explore one neighbourhood at a time instead of the whole hairball.
 - **Exploration.** Pan, zoom and fit-to-view. Drag a concept to pin it in place, and reset the layout. Clicking a related concept moves the focus there, and breadcrumbs let you step back.
 - **Hover preview.** Hovering shows the concept's name, kind and the first sentence of its definition, without changing the selection.
 - **Semantic zoom.** When zoomed out, boxes collapse to their kind glyph, except for the selected concept and high-degree concepts, which keep their boxes. Zooming in restores all boxes, and further in, all edge labels. The graph stays readable at about 300 concepts.
@@ -357,7 +357,7 @@ Deciding whether an unmapped file really introduces a domain concept is the agen
 ### Cross-cutting requirements
 
 - **Self-contained.** A single file with the records embedded as JSON and all CSS, JS and vendored libraries inline. No network access, no external fonts, and it works from `file://`.
-- **Navigation state in the URL.** Deep links via `#<concept-id>`, optionally with view state (e.g. `#active-customer?depth=2&overlay=health`), so people can share links to specific views.
+- **Navigation state in the URL.** Deep links via `#<concept-id>`, optionally with view state (e.g. `#active-customer?hops=2&overlay=health`), so people can share links to specific views.
 - **Accessibility.**
   - The list and detail views give complete, non-visual access to everything in the graph.
   - In the graph, concepts are keyboard-reachable: Tab and arrow keys move between connected concepts, and Enter selects.
@@ -605,7 +605,7 @@ def check_encoding_bias(concept: Concept) -> list[Finding]:
   - The graph renders one node per visible concept and one edge per visible relation.
   - Selecting a concept highlights exactly its N-hop neighbourhood and opens the detail pane.
   - Filters and overlays change what is visible or highlighted as specified.
-  - Deep links restore the selection, depth and overlay.
+  - Deep links restore the selection, hops and overlay.
   - Searching a discouraged term shows the redirect and focuses the canonical concept.
   - Keyboard navigation moves between connected concepts.
   - An edge with a recorded cardinality shows it in its hover label, and the detail pane renders it as a sentence in both directions. Edges without one show no cardinality.
@@ -680,7 +680,7 @@ def check_encoding_bias(concept: Concept) -> list[Finding]:
 5a. W106 fires only for changes near a concept's symbol (or anywhere in the file when there's no symbol) since its last review. `review` clears it, and nothing else does once `reviewed_at` exists.
 6. `build` produces a single `index.html` that makes no network requests and works from `file://`. `build --check` detects stale output. Builds are byte-for-byte reproducible.
 7. The page opens on an interactive relationship graph that supports:
-   - neighbourhood focus at depths 1–3;
+   - neighbourhood focus at 1–3 hops;
    - pan, zoom and pinning;
    - the hierarchy toggle;
    - the Health, Mud and Drift overlays;

@@ -286,7 +286,7 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** The main way to cut clutter, and the main reading surface.
 
 **Acceptance criteria:**
-- [ ] Selecting a concept centres it, highlights exactly its N-hop neighbourhood (depth 1–3 control) and fades the rest. Hover, selected and neighbourhood states are each visually distinct. Hovering shows the name, kind and first sentence of the definition without changing the selection.
+- [ ] Selecting a concept centres it, highlights exactly its N-hop neighbourhood (Hops control, 1–3) and fades the rest. Hover, selected and neighbourhood states are each visually distinct. Hovering shows the name, kind and first sentence of the definition without changing the selection.
 - [ ] The detail pane shows:
   - the definition, set in a readable measure;
   - examples and non-examples, rules and open questions;
@@ -309,7 +309,7 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 **Acceptance criteria:**
 - [ ] Pan, zoom (wheel and trackpad), fit-to-view, drag-to-pin and reset layout. Clicking a related concept moves the focus, and breadcrumbs step back.
-- [ ] Deep links (`#id?depth=2&overlay=health`) restore the selection, depth and overlay on load and update as you navigate.
+- [ ] Deep links (`#id?hops=2&overlay=health`) restore the selection, hops and overlay on load and update as you navigate.
 - [ ] Tab and arrow keys move between connected concepts, and Enter selects, with a visible focus ring using `--accent`.
 
 **Verification:** UI, LINT
