@@ -627,7 +627,7 @@
       pane.scrollTop = 0;
     }
     if (state.selected && onGraph && (paneChanged || previous.tab !== "graph" || relaidOut)) {
-      view.centreOn(state.selected);
+      view.centreOn(state.selected, near ? near.keys() : null);
       view.setTabStop(state.selected);
     }
   }

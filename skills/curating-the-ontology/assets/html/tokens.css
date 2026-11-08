@@ -20,21 +20,21 @@
   --surface: #f6f7f8;
   --surface-raised: #eceef1;
   --border: #d8dce0;
-  --text-faint: #666e77;
+  --text-faint: #626a73;
   --text-muted: #4a525b;
   --text: #1c2024;
 
   /* Kind palette. Core kinds have fixed slots and shapes:
      entity 1 circle, event 2 diamond, attribute 3 square, metric 4 triangle.
      Slots 5-8 go to extension kinds by sorted id. Warm red/amber are kept for severity. */
-  --kind-1: #16856d; /* teal green */
-  --kind-2: #7a4fd0; /* violet */
-  --kind-3: #c23a83; /* magenta */
-  --kind-4: #6a8417; /* olive */
-  --kind-5: #a35d24; /* brown */
-  --kind-6: #4c5f96; /* slate blue */
-  --kind-7: #11849a; /* cyan */
-  --kind-8: #86772a; /* khaki */
+  --kind-1: #10725d; /* teal green */
+  --kind-2: #946df6; /* violet */
+  --kind-3: #c84e89; /* magenta */
+  --kind-4: #77985e; /* olive */
+  --kind-5: #82452c; /* brown */
+  --kind-6: #2735e0; /* blue */
+  --kind-7: #3c9aaf; /* cyan */
+  --kind-8: #877201; /* khaki */
   --kind-fallback: #7d858e; /* kinds beyond 8 (see W113) */
 
   /* Semantic colours */
@@ -128,14 +128,14 @@
     --text-faint: #8d959e;
     --text-muted: #b2b9c0;
     --text: #e7eaed;
-    --kind-1: #3cc3a1;
-    --kind-2: #a88cf2;
-    --kind-3: #f07ab8;
-    --kind-4: #a8c64a;
-    --kind-5: #e09a5c;
-    --kind-6: #8fa1dc;
-    --kind-7: #4cc7dc;
-    --kind-8: #cdbb63;
+    --kind-1: #2fa98a;
+    --kind-2: #d79eff;
+    --kind-3: #d993b4;
+    --kind-4: #bbe12d;
+    --kind-5: #c7803e;
+    --kind-6: #888cc9;
+    --kind-7: #84e2f1;
+    --kind-8: #c5b770;
     --kind-fallback: #8d959e;
     --accent: #6fa3ff;
     --error: #ff6d62;
@@ -154,14 +154,14 @@
   --text-faint: #8d959e;
   --text-muted: #b2b9c0;
   --text: #e7eaed;
-  --kind-1: #3cc3a1;
-  --kind-2: #a88cf2;
-  --kind-3: #f07ab8;
-  --kind-4: #a8c64a;
-  --kind-5: #e09a5c;
-  --kind-6: #8fa1dc;
-  --kind-7: #4cc7dc;
-  --kind-8: #cdbb63;
+  --kind-1: #2fa98a;
+  --kind-2: #d79eff;
+  --kind-3: #d993b4;
+  --kind-4: #bbe12d;
+  --kind-5: #c7803e;
+  --kind-6: #888cc9;
+  --kind-7: #84e2f1;
+  --kind-8: #c5b770;
   --kind-fallback: #8d959e;
   --accent: #6fa3ff;
   --error: #ff6d62;

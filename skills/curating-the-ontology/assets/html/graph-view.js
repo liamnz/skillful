@@ -18,6 +18,11 @@
   const PULL_X = 0.03;
   const PULL_Y = 0.06;
   const COLLIDE = 0.8;
+  // The pulls were tuned on a ~25-concept graph. They act on every concept, so in a larger
+  // graph they would crush its clusters together; they shrink with the square root of size.
+  const REFERENCE_SIZE = 25;
+  const UNTANGLE_ABOVE = 2 * REFERENCE_SIZE; // larger graphs get an untangling phase first
+  const UNTANGLE_TICKS = 200;
   // Hierarchy layout: each depth level is pulled hard onto its row.
   const LEVEL_PULL = 1;
   const HIERARCHY_PULL_X = 0.02;
@@ -28,7 +33,10 @@
   const MAX_ZOOM = 4;
   const GLYPH_ONLY_BELOW = 0.6; // boxes collapse to their kind glyph below this scale ...
   const ALL_LABELS_ABOVE = 1.6; // ... and every edge is labelled above this one
-  const HUB_DEGREE = 4; // concepts with at least this many relations keep their box when zoomed out
+  // Hubs keep their box when zoomed out: at least HUB_DEGREE relations and in the top
+  // HUB_SHARE of concepts by degree, so a large ontology keeps only its real hubs.
+  const HUB_DEGREE = 4;
+  const HUB_SHARE = 0.1;
 
   function tokens() {
     const style = getComputedStyle(document.documentElement);
@@ -129,6 +137,7 @@
       n.fy = null;
     }
     const linkDistance = (l) => (l.source.w + l.target.w) / 2 + t.edgeLength;
+    const damping = Math.min(1, Math.sqrt(REFERENCE_SIZE / Math.max(1, nodes.length)));
     const simulation = d3.forceSimulation(nodes).stop().randomSource(G.random(SEED));
     if (mode === "hierarchy") {
       const levels = G.depthLevels(model);
@@ -152,9 +161,18 @@
       simulation
         .force("link", d3.forceLink(model.edges.map((e) => ({ source: e.source, target: e.target }))).id((d) => d.id).distance(linkDistance))
         .force("charge", d3.forceManyBody().strength(CHARGE).distanceMax(REPULSION_RANGE * t.edgeLength))
-        .force("x", d3.forceX(0).strength(PULL_X))
-        .force("y", d3.forceY(0).strength(PULL_Y))
+        .force("x", d3.forceX(0).strength(PULL_X * damping))
+        .force("y", d3.forceY(0).strength(PULL_Y * damping))
         .force("collide", G.forceBoxCollide(t.spacing, COLLIDE));
+    }
+    if (nodes.length > UNTANGLE_ABOVE) {
+      // Large graphs: first let repulsion act at every range so clusters, seeded interleaved,
+      // can pass through each other and separate; then settle with the local forces.
+      const charge = simulation.force("charge");
+      charge.distanceMax(Infinity);
+      for (let i = 0; i < UNTANGLE_TICKS; i++) simulation.tick();
+      charge.distanceMax(REPULSION_RANGE * t.edgeLength);
+      simulation.alpha(1);
     }
     for (let i = 0; i < TICKS; i++) simulation.tick();
     if (mode === "hierarchy") {
@@ -208,6 +226,8 @@
       degree.set(e.source, degree.get(e.source) + 1);
       degree.set(e.target, degree.get(e.target) + 1);
     }
+    const ranked = [...degree.values()].sort((x, y) => y - x);
+    const hubDegree = Math.max(HUB_DEGREE, ranked[Math.max(0, Math.ceil(ranked.length * HUB_SHARE) - 1)] || 0);
     const edges = model.edges.map((e) => ({
       ...e,
       text: G.edgeLabel(e),
@@ -240,7 +260,7 @@
       .selectAll("g")
       .data(nodes, (d) => d.id)
       .join("g")
-      .attr("class", (d) => `node ${d.status}${degree.get(d.id) >= HUB_DEGREE ? " hub" : ""}`)
+      .attr("class", (d) => `node ${d.status}${degree.get(d.id) >= hubDegree ? " hub" : ""}`)
       .attr("data-id", (d) => d.id)
       .attr("tabindex", -1)
       .attr("role", "button")
@@ -417,12 +437,27 @@
     }
 
     // Move the camera so a concept sits in the centre, keeping the current scale.
-    function centreOn(id) {
+    // When `around` (ids, e.g. the neighbourhood) is given and the view is zoomed out so far
+    // that boxes have collapsed, zoom in until those concepts fit around the centre (never past 1:1).
+    function centreOn(id, around) {
       const n = byId.get(id);
       if (!n) return;
       const width = svgElement.clientWidth;
       const height = svgElement.clientHeight;
-      const transform = d3.zoomIdentity.translate(round(width / 2 - scale * n.x), round(height / 2 - scale * n.y)).scale(scale);
+      let k = scale;
+      if (around && scale < GLYPH_ONLY_BELOW) {
+        let dx = n.w / 2;
+        let dy = n.h / 2;
+        for (const other of around) {
+          const o = byId.get(other);
+          if (!o || state.hidden.has(other)) continue;
+          dx = Math.max(dx, Math.abs(o.x - n.x) + o.w / 2);
+          dy = Math.max(dy, Math.abs(o.y - n.y) + o.h / 2);
+        }
+        const fitK = Math.min((width / 2 - t.fitPad) / dx, (height / 2 - t.fitPad) / dy);
+        k = Math.min(1, Math.max(GLYPH_ONLY_BELOW, fitK));
+      }
+      const transform = d3.zoomIdentity.translate(round(width / 2 - k * n.x), round(height / 2 - k * n.y)).scale(k);
       svg.call(zoom.transform, transform);
     }
 

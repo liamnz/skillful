@@ -104,7 +104,7 @@ T1 skeleton ──► T2 schemas+loader+validate ──┬─► T3 init ──�
 - [x] T19: Finding badges, Health/Mud/Drift overlays, Health panel
 - [x] T20: Vocabulary panel, legend definitions, extension encodings
 - [x] T21: Hierarchy layout (layered force) and semantic zoom
-- [ ] T22: Scale and design checks (300-concept fixture, performance, contrast, colour-blind, raw-literal lint)
+- [x] T22: Scale and design checks (300-concept fixture, performance, contrast, colour-blind, raw-literal lint)
 
 **Checkpoint 4 (human):** manual design review against the five principles:
 - both themes;

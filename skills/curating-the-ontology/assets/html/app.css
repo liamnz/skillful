@@ -24,8 +24,8 @@ body {
 /* Read by screen readers, not shown. */
 .visually-hidden {
   position: absolute;
-  width: 1px;
-  height: 1px;
+  width: var(--border-width);
+  height: var(--border-width);
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;

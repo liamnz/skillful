@@ -392,11 +392,11 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### T22: Scale and design checks
 **Acceptance criteria:**
-- [ ] A deterministic generator creates `tests/fixtures/large` (300 concepts, 600 relations, realistic clustering). The first render is under 2 s in Playwright, and selection and zoom stay responsive.
-- [ ] Token tests check:
+- [x] A deterministic generator creates `tests/fixtures/large` (300 concepts, 600 relations, realistic clustering). The first render is under 2 s in Playwright, and selection and zoom stay responsive.
+- [x] Token tests check:
   - WCAG contrast for every text/background pair (≥ 4.5:1) and for kind colours and boundaries (≥ 3:1), in both themes;
   - the kind palette stays distinguishable under protanopia, deuteranopia and tritanopia simulation (CIEDE2000 above a threshold).
-- [ ] A raw-literal lint fails on any colour, size or spacing literal in `app.css` or the JS outside `tokens.css`. `prefers-reduced-motion` sets durations to 0, and dark mode follows `prefers-color-scheme` (Playwright emulation).
+- [x] A raw-literal lint fails on any colour, size or spacing literal in `app.css` or the JS outside `tokens.css`. `prefers-reduced-motion` sets durations to 0, and dark mode follows `prefers-color-scheme` (Playwright emulation).
 
 **Verification:** PYTEST (`tests/test_design_tokens.py`), UI
 
@@ -407,7 +407,7 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Scope:** M
 
 ### Checkpoint 4: View complete (human review)
-- [ ] UI fully green (all Playwright interaction tests in the spec).
+- [x] UI fully green (all Playwright interaction tests in the spec).
 - [ ] **Manual design review with you** against the five principles:
   - both themes;
   - 1280×720 and a large monitor;
