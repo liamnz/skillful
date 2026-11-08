@@ -59,3 +59,44 @@ def project(tmp_path: Path) -> Callable[[str | None], Path]:
 
 def findings_json(result: subprocess.CompletedProcess[str]) -> list[dict]:
     return json.loads(result.stdout)
+
+
+GIT_ENV = {
+    "GIT_AUTHOR_NAME": "Test",
+    "GIT_AUTHOR_EMAIL": "test@example.com",
+    "GIT_COMMITTER_NAME": "Test",
+    "GIT_COMMITTER_EMAIL": "test@example.com",
+}
+
+
+def git(repo: Path, *args: str) -> str:
+    """Run git in `repo` with a fixed identity; return stdout."""
+    import os
+
+    env = {**os.environ, **GIT_ENV}
+    result = subprocess.run(
+        ["git", "-c", "core.autocrlf=false", "-c", "init.defaultBranch=main", *args],
+        cwd=repo,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        env=env,
+        check=True,
+    )
+    return result.stdout.strip()
+
+
+def commit_all(repo: Path, message: str = "change") -> str:
+    git(repo, "add", "-A")
+    git(repo, "commit", "-q", "--allow-empty", "-m", message)
+    return git(repo, "rev-parse", "HEAD")
+
+
+def make_git_project(tmp_path: Path, case: str | None = None, setup: Callable[[Path], None] | None = None) -> Path:
+    """A baseline project (plus optional case overlay and setup edits) as a git repo with one commit."""
+    project = make_project(tmp_path, case)
+    if setup is not None:
+        setup(project)
+    git(project, "init", "-q")
+    commit_all(project, "initial")
+    return project

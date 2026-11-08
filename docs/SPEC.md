@@ -276,6 +276,8 @@ W106 asks: *has code relevant to this concept changed since a human last confirm
    - *With a `symbol`:* the check runs `git diff <baseline>..HEAD` on the path, plus uncommitted changes. It fires only if a changed hunk has added or removed lines within `drift_context_lines` of a line that mentions the symbol, in either the old or the new version. Unrelated edits elsewhere in a shared file (e.g. a new column in a mart model) don't trigger it.
    - *Without a `symbol`:* any change to the file since the baseline counts.
 3. **Clearing it.** The only way to clear W106 is a deliberate review: `onto.py review <id>` sets `reviewed_at` to HEAD for that concept's entries (or a single `--path`). Editing the concept file for some other reason doesn't count as a review once `reviewed_at` exists, so nobody has to make fake edits to silence it. A review is recorded in git like any other change.
+   - `reviewed_at` stores the full commit id of HEAD.
+   - `review` refuses (exit 3) while a reviewed path has uncommitted changes. The review is recorded against a commit, so a review taken before committing would fire again as soon as the code is committed. Commit the code, then review.
 4. **Proposed concepts are skipped.** They have no confirmed definition to drift from yet.
 
 **Known limits, stated plainly.**

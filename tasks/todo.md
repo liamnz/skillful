@@ -96,21 +96,21 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Build the only module that talks to git. Implement W106 exactly as specified and the `review` command, which records `reviewed_at` with a comment-preserving text edit (Decision 2).
 
 **Acceptance criteria:**
-- [ ] All six W106 cases from the spec pass in temp repos:
+- [x] All six W106 cases from the spec pass in temp repos:
   - an unrelated edit elsewhere in a shared file does not fire;
   - an edit near the symbol fires;
   - with no symbol, any change to the file fires;
   - `review` clears it;
   - an unrelated edit to the concept file doesn't clear it once `reviewed_at` exists;
   - an unreachable `reviewed_at` falls back to the concept file's last commit and reports I205.
-- [ ] Uncommitted changes count. `proposed` concepts are skipped. Outside git, or for uncommitted concept files, the check is skipped with an info notice and no crash. Paths work on Windows.
-- [ ] `review <id> [--path]` sets `reviewed_at` to HEAD only on the targeted entries, leaving every other byte of the file unchanged. It refuses an unknown id or path (exit `3`), exits `4` outside a git repo, and supports `--dry-run`.
+- [x] Uncommitted changes count. `proposed` concepts are skipped. Outside git, or for uncommitted concept files, the check is skipped with an info notice and no crash. Paths work on Windows.
+- [x] `review <id> [--path]` sets `reviewed_at` to HEAD only on the targeted entries, leaving every other byte of the file unchanged. It refuses an unknown id or path (exit `3`), exits `4` outside a git repo, and supports `--dry-run`.
 
 **Verification:** PYTEST (`tests/test_drift.py`, `tests/test_review.py`), LINT
 
 **Dependencies:** T2
 
-**Files:** `SK/scripts/ontokit/{gitinfo,drift,review}.py`, `SK/scripts/ontokit/cli.py`, `tests/test_drift.py`, `tests/test_review.py`
+**Files:** `SK/scripts/ontokit/{gitinfo,context,drift,review}.py`, `SK/scripts/ontokit/{checks,validate,cli}.py`, `tests/test_drift.py`, `tests/test_review.py`, `tests/conftest.py`
 
 **Scope:** M (highest-risk task; do it first in this phase)
 

@@ -79,7 +79,7 @@ T1 skeleton ──► T2 schemas+loader+validate ──┬─► T3 init ──�
 **Checkpoint 1 (passed 2026-11-08):** `init → new → validate` round trip works in a temp git repo. pytest and ruff are green.
 
 ### Phase 2: Risk first (drift, build pipeline, design gate)
-- [ ] T5: Git layer, W106 drift, `review`, I205
+- [x] T5: Git layer, W106 drift, `review`, I205
 - [ ] T6: Sample project (`examples/sample-project`)
 - [ ] T7: Design tokens and static mockup. **Human gate: explicit approval.**
 - [ ] T8: Vendor D3 and the build pipeline (`build`, `--check`, W108, data contract)

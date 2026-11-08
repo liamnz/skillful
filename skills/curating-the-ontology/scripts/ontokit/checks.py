@@ -1,20 +1,25 @@
-"""Validator checks: pure functions over a loaded Ontology that return Findings.
+"""Validator checks: functions over a loaded Ontology that return Findings.
 
 Structural findings (E001-E003) are produced while loading (see io.py). Every other
-check is registered in CHECKS and must never print or touch the filesystem directly.
+check is registered in CHECKS. Checks never print; git access goes through
+`ctx.git` (gitinfo.py), and explanations that are not findings go to `ctx.note`.
 """
 
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable
 
+from . import drift
+from .context import Context
 from .findings import Finding
 from .io import Ontology
 
-Check = Callable[[Ontology], Iterable[Finding]]
+Check = Callable[[Ontology, Context], Iterable[Finding]]
 
-CHECKS: list[Check] = []
+CHECKS: list[Check] = [
+    drift.check_drift,
+]
 
 
-def run_checks(ontology: Ontology) -> list[Finding]:
-    return [finding for check in CHECKS for finding in check(ontology)]
+def run_checks(ontology: Ontology, ctx: Context) -> list[Finding]:
+    return [finding for check in CHECKS for finding in check(ontology, ctx)]

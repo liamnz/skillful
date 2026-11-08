@@ -8,14 +8,17 @@ import sys
 from pathlib import Path
 
 from .checks import run_checks
+from .context import Context
 from .findings import EXIT_ENVIRONMENT, EXIT_FINDINGS, EXIT_OK, Finding, sort_findings
+from .gitinfo import Git
 from .io import OntologyNotFound, load
 
 
-def collect(root: Path) -> list[Finding]:
+def collect(root: Path, ctx: Context | None = None) -> list[Finding]:
     """All findings for the ontology at `root`, sorted. Raises OntologyNotFound."""
     ontology, findings = load(root)
-    return sort_findings([*findings, *run_checks(ontology)])
+    ctx = ctx if ctx is not None else Context(git=Git.discover())
+    return sort_findings([*findings, *run_checks(ontology, ctx)])
 
 
 def _plural(n: int, word: str) -> str:
@@ -23,12 +26,15 @@ def _plural(n: int, word: str) -> str:
 
 
 def run(args: argparse.Namespace) -> int:
+    ctx = Context(git=Git.discover())
     try:
-        findings = collect(Path(args.root))
+        findings = collect(Path(args.root), ctx)
     except OntologyNotFound as exc:
         sys.stderr.write(f"Error: {exc}\n")
         return EXIT_ENVIRONMENT
 
+    for note in ctx.notes:
+        sys.stderr.write(f"Note: {note}\n")
     shown = findings[: args.limit] if args.limit is not None else findings
     if args.json:
         print(json.dumps([f.to_dict() for f in shown], indent=2, ensure_ascii=False))
