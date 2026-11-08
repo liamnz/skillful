@@ -86,7 +86,7 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 ### Checkpoint 1: Foundation
 - [x] `init → new → validate` round trip in a temp git repo (`tests/test_roundtrip.py`).
 - [x] PYTEST and LINT green. Copying `SK/` elsewhere still works.
-- [ ] Quick review with you of the CLI ergonomics (`--help` text, error messages).
+- [x] Quick review with you of the CLI ergonomics (`--help` text, error messages).
 
 ---
 

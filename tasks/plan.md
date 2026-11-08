@@ -76,7 +76,7 @@ T1 skeleton ──► T2 schemas+loader+validate ──┬─► T3 init ──�
 - [x] T3: `init` (manifest template with commented-out starter extensions)
 - [x] T4: `new` (proposed stubs)
 
-**Checkpoint 1:** `init → new → validate` round trip works in a temp git repo. pytest and ruff are green.
+**Checkpoint 1 (passed 2026-11-08):** `init → new → validate` round trip works in a temp git repo. pytest and ruff are green.
 
 ### Phase 2: Risk first (drift, build pipeline, design gate)
 - [ ] T5: Git layer, W106 drift, `review`, I205
