@@ -231,9 +231,6 @@
       <li><span class="rel-label">measured by</span> <a href="#">Retention rate</a> <span class="from">retention-rate.yaml</span></li>
     </ul>
 
-    <h3>Neighbourhood <span class="src">· computed from relations</span></h3>
-    <svg id="mini" class="mini" width="358" height="150" role="img" aria-label="Neighbourhood of Customer"></svg>
-
     <p class="key-note">Monospace headings are fields in this concept's YAML file, named as they are there. Other headings are computed and say where from.</p>
   </aside>
 </div>
@@ -427,17 +424,6 @@
   }
 
   draw(document.getElementById("graph"), N, E, { fade: true, edgeLabels: true, badges: true, hoverEdge: HOVER_EDGE });
-
-  // Mini-graph: the selected concept in the middle, its depth-1 neighbours in two columns.
-  const miniIds = [...near].filter((id) => id !== SELECTED);
-  const half = Math.ceil(miniIds.length / 2);
-  const mini = { [SELECTED]: [179, 75, ...N[SELECTED].slice(2)] };
-  miniIds.forEach((id, i) => {
-    const col = i < half ? 0 : 1, row = col ? i - half : i;
-    mini[id] = [col ? 296 : 62, 27 + row * 48, ...N[id].slice(2)];
-  });
-  const miniEdges = E.filter(([s, , t]) => mini[s] && mini[t]);
-  draw(document.getElementById("mini"), mini, miniEdges, { fade: false, edgeLabels: false, badges: false });
 
   // Zoomed-out overview: every concept as its kind glyph at one third scale; the selection keeps its box.
   (function overview() {
