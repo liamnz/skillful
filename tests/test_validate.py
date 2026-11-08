@@ -77,7 +77,8 @@ def test_missing_ontology_is_an_environment_error(tmp_path: Path) -> None:
 
 def test_root_option_points_elsewhere(tmp_path: Path) -> None:
     project = make_project(tmp_path)
-    result = run_onto(["validate", "--json", "--root", str(project / "docs" / "ontology")], cwd=tmp_path)
+    (project / "docs" / "ontology").rename(project / "ontology")
+    result = run_onto(["validate", "--json", "--root", "ontology"], cwd=project)
     assert result.returncode == 0, result.stderr
 
 

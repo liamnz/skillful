@@ -1,0 +1,8 @@
+id: high-value-segment
+name: High-value segment
+kind: segment
+status: defined
+definition: >
+  The group of buyers whose spend over the last year puts them in the top tenth.
+relations:
+  - {type: part_of, target: customer}

@@ -1,0 +1,30 @@
+[
+  {
+    "code": "E004",
+    "severity": "error",
+    "concept": "promo-code",
+    "criterion": "coherence",
+    "message": "Relation 'part_of' targets 'coupon-batch', which is not a concept. Fix the id, or propose it with 'onto.py new coupon-batch ...'."
+  },
+  {
+    "code": "W109",
+    "severity": "warn",
+    "concept": "delivery-note",
+    "criterion": "coherence",
+    "message": "The definition uses 'client', a discouraged term for 'customer'. Use its canonical name, 'Customer', instead."
+  },
+  {
+    "code": "W101",
+    "severity": "warn",
+    "concept": "promo-code",
+    "criterion": "clarity",
+    "message": "The definition has 3 words; at least 8 are expected (min_definition_words). Say what the concept is and what sets it apart."
+  },
+  {
+    "code": "I204",
+    "severity": "info",
+    "concept": "promo-code",
+    "criterion": "clarity",
+    "message": "'promo-code' related_to 'customer': can this relationship be named more precisely?"
+  }
+]

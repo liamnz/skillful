@@ -76,6 +76,43 @@ class Git:
         """Committer date of `commit` in strict ISO 8601."""
         return self._run("log", "-1", "--format=%cI", commit) or None
 
+    def first_commit_date(self, path: str, line_pattern: str | None = None) -> str | None:
+        """Committer date (ISO 8601) of the first commit that added `path`, or None if never committed.
+
+        With `line_pattern` (a regex), the first commit whose diff of `path` adds or removes a
+        line matching it: for example when an entry was added to a shared file.
+        """
+        args = ["log", "--reverse", "--format=%cI"]
+        if line_pattern is not None:
+            args.append(f"-G{line_pattern}")
+        output = self._run(*args, "--", path)
+        return output.splitlines()[0] if output else None
+
+    def merge_base(self, ref: str) -> str | None:
+        return self._run("merge-base", ref, "HEAD")
+
+    def ref_exists(self, ref: str) -> bool:
+        return self._run("rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}") is not None
+
+    def default_branch(self) -> str | None:
+        """origin's default branch if known, else a local main or master; None if it can't be told."""
+        remote = self._run("symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD")
+        if remote:
+            return remote
+        return next((b for b in ("main", "master") if self.ref_exists(f"refs/heads/{b}")), None)
+
+    def changed_files(self, base: str) -> list[str]:
+        """Files changed since `base` (committed since the merge-base, staged, unstaged and untracked).
+
+        Paths are relative to the working directory, and only files under it are listed.
+        """
+        outputs = [
+            self._run("diff", "--name-only", "--relative", "--no-renames", f"{base}...HEAD"),
+            self._run("diff", "--name-only", "--relative", "--no-renames", "HEAD"),
+            self._run("ls-files", "--others", "--exclude-standard"),
+        ]
+        return sorted({line for output in outputs if output for line in output.splitlines() if line})
+
     def short(self, commit: str) -> str:
         return self._run("rev-parse", "--short", commit) or commit[:7]
 

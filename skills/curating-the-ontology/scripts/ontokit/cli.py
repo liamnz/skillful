@@ -29,6 +29,17 @@ class Parser(argparse.ArgumentParser):
         sys.exit(EXIT_USAGE)
 
 
+def _count(text: str) -> int:
+    """A --limit value: a whole number, zero or more."""
+    try:
+        value = int(text)
+    except ValueError:
+        value = -1
+    if value < 0:
+        raise argparse.ArgumentTypeError(f"must be a whole number, 0 or more. Received: {text!r}")
+    return value
+
+
 def _examples(*lines: str) -> str:
     return "Examples:\n" + "\n".join(f"  {RUN} {line}" for line in lines)
 
@@ -42,11 +53,6 @@ def _command(subparsers: argparse._SubParsersAction, name: str, summary: str, ex
         formatter_class=argparse.RawDescriptionHelpFormatter,
         parents=parents,
     )
-
-
-def _not_implemented(args: argparse.Namespace) -> int:
-    sys.stderr.write(f"Error: '{args.command_path}' is not implemented yet.\n")
-    return EXIT_USAGE
 
 
 def build_parser() -> Parser:
@@ -191,7 +197,7 @@ def build_parser() -> Parser:
     )
     p.add_argument("--json", action="store_true", help="machine-readable findings on stdout")
     p.add_argument("--strict", action="store_true", help="exit 1 on warnings as well as errors")
-    p.add_argument("--limit", type=int, metavar="N", help="show at most N findings")
+    p.add_argument("--limit", type=_count, metavar="N", help="show at most N findings")
 
     p = _command(
         sub,
@@ -204,7 +210,7 @@ def build_parser() -> Parser:
         "--base", metavar="GIT-REF", help="compare against this ref (default: merge-base with the default branch)"
     )
     p.add_argument("--json", action="store_true", help="machine-readable output on stdout")
-    p.add_argument("--limit", type=int, metavar="N", help="show at most N entries per list")
+    p.add_argument("--limit", type=_count, metavar="N", help="show at most N entries per list")
 
     p = _command(
         sub,
@@ -220,13 +226,17 @@ def build_parser() -> Parser:
 
 def _handlers() -> dict[str, Handler]:
     """Command path (e.g. "vocab new kind") -> handler, imported lazily to keep --help fast."""
-    from . import build, init, new, review, validate
+    from . import build, impact, init, new, review, validate, vocab
 
     return {
         "init": init.run,
         "new": new.run,
+        "vocab new kind": vocab.run_new,
+        "vocab new relation": vocab.run_new,
+        "vocab list": vocab.run_list,
         "review": review.run,
         "validate": validate.run,
+        "impact": impact.run,
         "build": build.run,
     }
 
@@ -271,4 +281,4 @@ def main(argv: list[str] | None = None) -> int:
         _help_for(parser, path).print_help(sys.stderr)
         return EXIT_USAGE
 
-    return _handlers().get(path, _not_implemented)(args)
+    return _handlers()[path](args)

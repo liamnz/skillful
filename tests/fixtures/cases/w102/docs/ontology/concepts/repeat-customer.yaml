@@ -1,0 +1,8 @@
+id: repeat-customer
+name: Repeat customer
+kind: entity
+status: defined
+definition: >
+  A repeat customer is a customer with two or more paid orders in their history.
+relations:
+  - {type: is_a, target: customer}

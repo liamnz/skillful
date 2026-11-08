@@ -1,0 +1,8 @@
+id: credit-policy
+name: Credit policy
+kind: entity
+status: defined
+definition: >
+  The terms under which a buyer may receive goods before paying for them.
+relations:
+  - {type: governs, target: order}

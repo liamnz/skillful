@@ -1,0 +1,10 @@
+id: account
+name: Account
+kind: entity
+status: defined
+definition: >
+  A login that lets a person reach the product and manage their settings.
+discouraged_terms:
+  - {term: Client, note: "Used by the support team"}
+relations:
+  - {type: placed_by, target: customer}

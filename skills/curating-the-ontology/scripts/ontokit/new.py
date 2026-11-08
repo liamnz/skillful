@@ -15,7 +15,7 @@ from pathlib import Path, PurePosixPath
 import yaml
 
 from .findings import EXIT_ENVIRONMENT, EXIT_OK, EXIT_REFUSED, EXIT_USAGE
-from .io import CONCEPTS_DIR, OntologyNotFound, display_path, load
+from .io import CONCEPTS_DIR, OntologyUnavailable, display_path, load
 from .schema import schema_errors
 
 ID_PATTERN = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
@@ -99,7 +99,7 @@ def run(args: argparse.Namespace) -> int:
     root = Path(args.root)
     try:
         ontology, _ = load(root)
-    except OntologyNotFound as exc:
+    except OntologyUnavailable as exc:
         sys.stderr.write(f"Error: {exc}\n")
         return EXIT_ENVIRONMENT
 

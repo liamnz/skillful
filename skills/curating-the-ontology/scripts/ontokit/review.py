@@ -18,7 +18,7 @@ from yaml.nodes import MappingNode, Node, ScalarNode, SequenceNode
 
 from .findings import EXIT_ENVIRONMENT, EXIT_OK, EXIT_REFUSED
 from .gitinfo import Git
-from .io import CONCEPTS_DIR, OntologyNotFound, display_path, load
+from .io import CONCEPTS_DIR, OntologyUnavailable, display_path, load
 from .schema import schema_errors
 
 BOM = "﻿"
@@ -119,7 +119,7 @@ def run(args: argparse.Namespace) -> int:
     root = Path(args.root)
     try:
         ontology, _ = load(root)
-    except OntologyNotFound as exc:
+    except OntologyUnavailable as exc:
         sys.stderr.write(f"Error: {exc}\n")
         return EXIT_ENVIRONMENT
 

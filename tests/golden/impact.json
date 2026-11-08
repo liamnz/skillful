@@ -1,0 +1,15 @@
+{
+  "base": "main",
+  "changed_files": [
+    {"path": "models/dim_customer.sql", "concepts": ["active-customer", "customer"]},
+    {"path": "models/fct_orders.sql", "concepts": ["order", "order-line"]},
+    {"path": "models/fct_refunds.sql", "concepts": []}
+  ],
+  "concepts": [
+    {"id": "active-customer", "paths": ["models/dim_customer.sql"]},
+    {"id": "customer", "paths": ["models/dim_customer.sql"]},
+    {"id": "order", "paths": ["models/fct_orders.sql"]},
+    {"id": "order-line", "paths": ["models/fct_orders.sql"]}
+  ],
+  "unmapped_files": ["models/fct_refunds.sql"]
+}

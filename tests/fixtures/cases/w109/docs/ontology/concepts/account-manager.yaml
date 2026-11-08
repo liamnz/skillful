@@ -1,0 +1,8 @@
+id: account-manager
+name: Account manager
+kind: entity
+status: defined
+definition: >
+  An employee responsible for looking after a client's relationship with the company.
+relations:
+  - {type: placed_by, target: customer}

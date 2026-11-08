@@ -198,9 +198,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** The graph-integrity checks over relations, including the cardinality rules.
 
 **Acceptance criteria:**
-- [ ] E004, E006 (cycles in any `acyclic` type, core or extension, with the cycle path in the message), E013, E014, W104, W111 and I204 each have a triggering fixture and produce exactly their code.
-- [ ] E013 covers cardinality on `is_a`/`attribute_of` and `1:N`/`N:1` on `related_to`. E014 covers the same relationship stated twice with conflicting cardinality.
-- [ ] The baseline stays clean.
+- [x] E004, E006 (cycles in any `acyclic` type, core or extension, with the cycle path in the message), E013, E014, W104, W111 and I204 each have a triggering fixture and produce exactly their code.
+- [x] E013 covers cardinality on `is_a`/`attribute_of` and `1:N`/`N:1` on `related_to`. E014 covers the same relationship stated twice with conflicting cardinality.
+- [x] The baseline stays clean.
 
 **Verification:** PYTEST (`tests/test_checks_relations.py`), LINT
 
@@ -214,9 +214,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Checks for the one-term-per-concept rule and definition quality.
 
 **Acceptance criteria:**
-- [ ] E007, E008, W101 (uses `min_definition_words`), W102, W103, W109, I201 and I202 each have a triggering fixture and produce exactly their code.
-- [ ] Term matching is case-insensitive and whole-word, so "customer" doesn't match "customers_raw". This is documented in the check docstrings and tested with near-miss fixtures.
-- [ ] The baseline stays clean.
+- [x] E007, E008, W101 (uses `min_definition_words`), W102, W103, W109, I201 and I202 each have a triggering fixture and produce exactly their code.
+- [x] Term matching is case-insensitive and whole-word, so "customer" doesn't match "customers_raw". This is documented in the check docstrings and tested with near-miss fixtures.
+- [x] The baseline stays clean.
 
 **Verification:** PYTEST (`tests/test_checks_terms.py`), LINT
 
@@ -230,9 +230,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Govern extensions like concepts. Covers `vocab new kind|relation` (comment-preserving insertion into `ontology.yaml`) and `vocab list` with usage counts.
 
 **Acceptance criteria:**
-- [ ] E005, E010, E011, E012, W110, W112, W113 and I203 each have a triggering fixture.
-- [ ] `vocab new` adds only `proposed` extensions with a rationale. It refuses core ids and duplicates (exit `3`), leaves the rest of `ontology.yaml` byte-identical, and supports `--dry-run`. `vocab list [--json]` shows core and extensions, with status, `from`/`to` and usage counts.
-- [ ] Success criterion 2a: uncommenting all the starter extensions in a fresh `init` manifest validates cleanly.
+- [x] E005, E010, E011, E012, W110, W112, W113 and I203 each have a triggering fixture.
+- [x] `vocab new` adds only `proposed` extensions with a rationale. It refuses core ids and duplicates (exit `3`), leaves the rest of `ontology.yaml` byte-identical, and supports `--dry-run`. `vocab list [--json]` shows core and extensions, with status, `from`/`to` and usage counts.
+- [x] Success criterion 2a: uncommenting all the starter extensions in a fresh `init` manifest validates cleanly.
 
 **Verification:** PYTEST (`tests/test_vocab.py`), LINT
 
@@ -246,9 +246,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** The remaining code-linked checks, and the `impact` command that drives end-of-task proposals.
 
 **Acceptance criteria:**
-- [ ] E009, W105 and W107 (using the git date and `stale_proposal_days`, for concepts and extensions alike) are tested, including the graceful skip outside git.
-- [ ] `impact [--base] [--json] [--limit]` lists changed files (committed since the merge-base with the default branch, plus uncommitted and untracked files), the concepts referencing each file, and unmapped changed files. When the default branch can't be determined, it exits `4` with advice to pass `--base`.
-- [ ] Deterministic ordering, with golden JSON for one temp-repo scenario.
+- [x] E009, W105 and W107 (using the git date and `stale_proposal_days`, for concepts and extensions alike) are tested, including the graceful skip outside git.
+- [x] `impact [--base] [--json] [--limit]` lists changed files (committed since the merge-base with the default branch, plus uncommitted and untracked files), the concepts referencing each file, and unmapped changed files. When the default branch can't be determined, it exits `4` with advice to pass `--base`.
+- [x] Deterministic ordering, with golden JSON for one temp-repo scenario.
 
 **Verification:** PYTEST (`tests/test_impact.py`, `tests/test_checks_files.py`), LINT
 
@@ -262,9 +262,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Make the script conventions hold across all commands, and lock the output formats.
 
 **Acceptance criteria:**
-- [ ] `validate --strict` exits `1` on warnings. `--limit` caps findings and impact lists, reporting the truncation on stderr. A `schema_version` mismatch gives an actionable message.
-- [ ] Golden `--json` files exist for `validate` (baseline + multi-finding fixture), `vocab list` and `impact`. Each exit code 0–4 has at least one test.
-- [ ] A sweep test confirms every command supports `--help`, runs with stdin closed without hanging (with a timeout), and that every write command writes nothing under `--dry-run`.
+- [x] `validate --strict` exits `1` on warnings. `--limit` caps findings and impact lists, reporting the truncation on stderr. A `schema_version` mismatch gives an actionable message.
+- [x] Golden `--json` files exist for `validate` (baseline + multi-finding fixture), `vocab list` and `impact`. Each exit code 0–4 has at least one test.
+- [x] A sweep test confirms every command supports `--help`, runs with stdin closed without hanging (with a timeout), and that every write command writes nothing under `--dry-run`.
 
 **Verification:** PYTEST (`tests/test_conventions.py`), LINT
 
@@ -275,8 +275,8 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Scope:** S–M
 
 ### Checkpoint 3: Validator complete
-- [ ] Every finding code in the spec table has a fixture that triggers it. The baseline triggers none (a parametrised test that reads the code list from the checks registry).
-- [ ] Success criteria 1–5a pass. PYTEST and LINT green.
+- [x] Every finding code in the spec table has a fixture that triggers it. The baseline triggers none (a parametrised test that reads the code list from the checks registry).
+- [x] Success criteria 1–5a pass. PYTEST and LINT green.
 
 ---
 

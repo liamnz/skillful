@@ -11,11 +11,11 @@ from .checks import run_checks
 from .context import Context
 from .findings import EXIT_ENVIRONMENT, EXIT_FINDINGS, EXIT_OK, Finding, sort_findings
 from .gitinfo import Git
-from .io import OntologyNotFound, load
+from .io import OntologyUnavailable, load
 
 
 def collect(root: Path, ctx: Context | None = None) -> list[Finding]:
-    """All findings for the ontology at `root`, sorted. Raises OntologyNotFound."""
+    """All findings for the ontology at `root`, sorted. Raises OntologyUnavailable."""
     ontology, findings = load(root)
     ctx = ctx if ctx is not None else Context(git=Git.discover())
     return sort_findings([*findings, *run_checks(ontology, ctx)])
@@ -29,7 +29,7 @@ def run(args: argparse.Namespace) -> int:
     ctx = Context(git=Git.discover())
     try:
         findings = collect(Path(args.root), ctx)
-    except OntologyNotFound as exc:
+    except OntologyUnavailable as exc:
         sys.stderr.write(f"Error: {exc}\n")
         return EXIT_ENVIRONMENT
 

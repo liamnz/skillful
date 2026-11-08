@@ -1,0 +1,9 @@
+id: legacy-account
+name: Legacy account
+kind: entity
+status: deprecated
+definition: >
+  A customer record imported from the old billing system before the migration.
+replaced_by: customer
+relations:
+  - {type: is_a, target: customer}

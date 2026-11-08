@@ -1,0 +1,8 @@
+id: wishlist
+name: Wishlist
+kind: entity
+status: defined
+definition: >
+  A saved list of products that a shopper intends to buy at some later time.
+relations:
+  - {type: related_to, target: customer}

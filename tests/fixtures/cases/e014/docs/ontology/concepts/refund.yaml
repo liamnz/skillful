@@ -1,0 +1,9 @@
+id: refund
+name: Refund
+kind: entity
+status: defined
+definition: >
+  Money returned to a buyer after a purchase is cancelled or goods are sent back.
+relations:
+  - {type: placed_by, target: customer, cardinality: "N:1"}
+  - {type: placed_by, target: customer, cardinality: "1:1"}

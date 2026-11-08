@@ -1,0 +1,8 @@
+id: refund-limit
+name: Refund limit
+kind: rule
+status: defined
+definition: >
+  No refund may exceed the amount originally charged for the order it reverses.
+relations:
+  - {type: part_of, target: order}

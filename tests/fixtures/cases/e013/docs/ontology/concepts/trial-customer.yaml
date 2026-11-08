@@ -1,0 +1,8 @@
+id: trial-customer
+name: Trial customer
+kind: entity
+status: defined
+definition: >
+  A customer using the product on a free trial who has not yet paid for anything.
+relations:
+  - {type: is_a, target: customer, cardinality: "N:1"}
