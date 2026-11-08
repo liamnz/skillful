@@ -19,12 +19,14 @@
       "additionalProperties": false,
       "properties": {
         "kinds": {
-          "type": "object",
+          "description": "Empty (null) while no extensions of this type are declared.",
+          "type": ["object", "null"],
           "propertyNames": { "$ref": "#/$defs/vocabularyId" },
           "additionalProperties": { "$ref": "#/$defs/kindExtension" }
         },
         "relation_types": {
-          "type": "object",
+          "description": "Empty (null) while no extensions of this type are declared.",
+          "type": ["object", "null"],
           "propertyNames": { "$ref": "#/$defs/vocabularyId" },
           "additionalProperties": { "$ref": "#/$defs/relationExtension" }
         }

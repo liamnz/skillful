@@ -55,9 +55,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Scaffold `docs/ontology/` with a manifest that has no active extensions and the commented-out starter extensions (`rule`, `has`, `derived_from`, `measures`).
 
 **Acceptance criteria:**
-- [ ] `init [--name]` in an empty git repo creates `ontology.yaml` and `concepts/`, and `validate` then exits `0` with no warnings.
-- [ ] Re-running is idempotent: existing files are left byte-identical, and stderr reports what already exists. `--dry-run` writes nothing and lists the planned writes.
-- [ ] Without `--agents-md`/`--no-agents-md`, it prints a one-line hint about the `AGENTS.md` pointer to stderr. The flags themselves are implemented in T23.
+- [x] `init [--name]` in an empty git repo creates `ontology.yaml` and `concepts/`, and `validate` then exits `0` with no warnings.
+- [x] Re-running is idempotent: existing files are left byte-identical, and stderr reports what already exists. `--dry-run` writes nothing and lists the planned writes.
+- [x] Without `--agents-md`/`--no-agents-md`, it prints a one-line hint about the `AGENTS.md` pointer to stderr. The flags themselves are implemented in T23.
 
 **Verification:** PYTEST (`tests/test_init.py`), LINT
 

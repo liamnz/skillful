@@ -73,7 +73,7 @@ T1 skeleton ──► T2 schemas+loader+validate ──┬─► T3 init ──�
 ### Phase 1: Foundation
 - [x] T1: Walking skeleton (skill dir, CLI shell, Finding, dev config)
 - [x] T2: Schemas, core vocabulary, loader and `validate` (E001–E003)
-- [ ] T3: `init` (manifest template with commented-out starter extensions)
+- [x] T3: `init` (manifest template with commented-out starter extensions)
 - [ ] T4: `new` (proposed stubs)
 
 **Checkpoint 1:** `init → new → validate` round trip works in a temp git repo. pytest and ruff are green.

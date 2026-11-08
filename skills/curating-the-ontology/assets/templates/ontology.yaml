@@ -1,0 +1,61 @@
+schema_version: 1
+name: {{name}}
+description: ""   # one line on what this ontology covers
+
+# The core vocabulary is built in and cannot be redefined here:
+#   kinds:          entity, event, attribute, metric
+#   relation types: is_a, part_of, attribute_of, related_to
+#
+# Project-specific kinds and relation types are declared under `extensions`.
+# None are active yet. The commented-out starters below are common in data
+# projects. To adopt one, uncomment it, rewrite its definition in your own words
+# (the suggestion is only a starting point), and set `status: defined` once the
+# team agrees. Every extension in use should be a deliberate choice.
+extensions:
+  kinds:
+    # rule:
+    #   status: proposed
+    #   definition: ""
+    #   proposal:
+    #     rationale: >-
+    #       Starter extension. Suggested definition: a business policy or
+    #       constraint the domain must obey, such as "a refund cannot exceed
+    #       the original order amount".
+  relation_types:
+    # has:
+    #   status: proposed
+    #   definition: ""
+    #   inverse: belongs_to
+    #   from: [entity]
+    #   to: [entity]
+    #   proposal:
+    #     rationale: >-
+    #       Starter extension. Suggested definition: the source entity is
+    #       associated with instances of the target entity over time, as in
+    #       "a customer has orders".
+    # derived_from:
+    #   status: proposed
+    #   definition: ""
+    #   inverse: source_of
+    #   acyclic: true
+    #   proposal:
+    #     rationale: >-
+    #       Starter extension. Suggested definition: the source is computed or
+    #       copied from the target, so a change in the target's meaning changes
+    #       the source's meaning too.
+    # measures:
+    #   status: proposed
+    #   definition: ""
+    #   inverse: measured_by
+    #   from: [metric]
+    #   to: [entity, event]
+    #   proposal:
+    #     rationale: >-
+    #       Starter extension. Suggested definition: the source metric is
+    #       computed from instances of the target and summarises some aspect
+    #       of them.
+
+settings:
+  stale_proposal_days: 30     # W107: proposals older than this are flagged
+  min_definition_words: 8     # W101: shorter definitions are flagged
+  drift_context_lines: 3      # W106: changes within this many lines of a symbol count as "near" it
