@@ -10,7 +10,7 @@ description: >-
   concepts, glossary, definitions, terminology or what a domain term means.
 compatibility: Requires git and uv (uv provides Python 3.11+ and script dependencies).
 metadata:
-  version: "0.1.0"
+  version: "1.0.0"
 ---
 
 # Curating the ontology

@@ -512,4 +512,4 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### Done
 - [ ] Success criteria 1–10 met.
-- [ ] `SK/` ready to copy into the agentic-toolkit repo, with `metadata.version` set to `1.0.0`.
+- [x] `SK/` ready to copy into the agentic-toolkit repo, with `metadata.version` set to `1.0.0`.
