@@ -1,6 +1,6 @@
 # Spec: `curating-the-ontology` skill
 
-*Status: APPROVED 2026-11-08. Source intent: [docs/intent/ontology-skill.md](intent/ontology-skill.md).*
+*Status: APPROVED 2026-11-08. Source intent: [docs/ontology-skill/intent.md](intent.md).*
 
 ## Objective
 
@@ -556,8 +556,8 @@ tests/
   test_html_ui.py             # Playwright: graph interactions, determinism, performance, a11y smoke
 examples/sample-project/      # small dbt-style repo with a populated ontology, used for manual and eval runs
 examples/design/mockup.html   # static design mockup reviewed at the design gate (not shipped)
-docs/intent/ontology-skill.md
-docs/SPEC.md
+docs/ontology-skill/intent.md
+docs/ontology-skill/SPEC.md
 ```
 
 ## Code Style

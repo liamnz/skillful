@@ -83,7 +83,7 @@ SCENARIOS: dict[str, Callable[[Path, pytest.MonkeyPatch], Path]] = {
 
 
 def test_registry_matches_the_spec_table() -> None:
-    spec = (REPO / "docs" / "SPEC.md").read_text(encoding="utf-8")
+    spec = (REPO / "docs" / "ontology-skill" / "SPEC.md").read_text(encoding="utf-8")
     table = dict(re.findall(r"^\| ([EWI]\d{3}) \| (error|warn|info) \|", spec, flags=re.MULTILINE))
     assert table == {code: severity for code, (severity, _) in CODES.items()}
 
