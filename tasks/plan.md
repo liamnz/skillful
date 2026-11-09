@@ -120,7 +120,7 @@ Success criteria 6–8 pass.
 - [x] T25: `references/schema.md`, `vocabulary.md`, `gruber-criteria.md`
 - [x] T26: Packaging, conformance and isolation tests
 
-**Checkpoint 5 (criteria met 2026-11-09; 490 tests green from a clean clone; merge awaits your approval):** the full automated suite is green. Success criterion 9 passes.
+**Checkpoint 5 (passed 2026-11-09; 490 tests green from a clean clone):** the full automated suite is green. Success criterion 9 passes.
 
 ### Phase 6: Acceptance
 - [ ] T27: Cursor eval scenarios (a)–(f), run by you in `examples/sample-project`
