@@ -5,8 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from conftest import codes_in, collect_findings, make_project
 from ontokit.terms import first_sentence, mentions
+from ontotest import codes_in, collect_findings, make_project
 
 CONCEPTS = Path("docs/ontology/concepts")
 CODES = ["E007", "E008", "W101", "W102", "W103", "W109", "I201", "I202"]

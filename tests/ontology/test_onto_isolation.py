@@ -10,7 +10,7 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from conftest import BASELINE, FIXTURES, SKILL_DIR, commit_all, git, run_onto
+from ontotest import BASELINE, FIXTURES, SKILL_DIR, commit_all, git, run_onto
 
 HOST = FIXTURES / "host-project"
 ENVIRONMENT = ("pyproject.toml", "uv.lock", ".venv")

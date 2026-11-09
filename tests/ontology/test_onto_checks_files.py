@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from conftest import (
+from ontotest import (
     codes_in,
     collect_findings,
     commit_all,

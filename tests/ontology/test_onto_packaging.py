@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-from conftest import REPO, SKILL_DIR, commit_all, git, make_project, run_onto
+from ontotest import REPO, SKILL_DIR, commit_all, git, make_project, run_onto
 
 SKILLS_REF = "skills-ref==0.1.1"
 SKILL_MD = SKILL_DIR / "SKILL.md"

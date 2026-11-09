@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import yaml
-from conftest import commit_all, git, make_git_project, make_project, run_onto
+from ontotest import commit_all, git, make_git_project, make_project, run_onto
 
 CONCEPTS = Path("docs") / "ontology" / "concepts"
 

@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pytest
 import yaml
-from conftest import codes_in, collect_findings, findings_json, make_project, run_onto
 from ontokit.vocab import insert_extension
+from ontotest import codes_in, collect_findings, findings_json, make_project, run_onto
 
 MANIFEST = Path("docs/ontology/ontology.yaml")
 CODES = ["E005", "E010", "E011", "E012", "W110", "W112", "W113", "I203"]

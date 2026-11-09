@@ -5,7 +5,7 @@ Twelve clusters model a realistic analytics domain: each has a hub entity with s
 and a seeded share of extra relations links clusters together. The records carry no
 errors, so the view shows structure rather than validator noise.
 
-    python tests/gen_large_fixture.py            # writes tests/fixtures/large (git-ignored)
+    python tests/ontology/gen_large_fixture.py            # writes tests/ontology/fixtures/large (git-ignored)
 """
 
 from __future__ import annotations

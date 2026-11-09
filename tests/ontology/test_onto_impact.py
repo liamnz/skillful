@@ -5,9 +5,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from conftest import REPO, commit_all, git, make_git_project, make_project, run_onto
+from ontotest import REPO, commit_all, git, make_git_project, make_project, run_onto
 
-GOLDEN = REPO / "tests" / "golden" / "impact.json"
+GOLDEN = REPO / "tests" / "ontology" / "golden" / "impact.json"
 
 
 def scenario(tmp_path: Path) -> Path:

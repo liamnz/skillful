@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from conftest import commit_all, findings_json, make_git_project, make_project, run_onto
+from ontotest import commit_all, findings_json, make_git_project, make_project, run_onto
 
 CONCEPTS = Path("docs") / "ontology" / "concepts"
 

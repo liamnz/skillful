@@ -9,7 +9,7 @@ import shutil
 from pathlib import Path
 
 import pytest
-from conftest import REPO, SKILL_DIR, commit_all, findings_json, git, make_project, run_onto
+from ontotest import REPO, SKILL_DIR, commit_all, findings_json, git, make_project, run_onto
 
 VENDOR = SKILL_DIR / "assets" / "vendor"
 SAMPLE = REPO / "examples" / "ontology" / "sample-project"

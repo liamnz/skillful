@@ -1,7 +1,8 @@
 """T9: the graph renders deterministically from file://, offline, with every encoding.
 
 Dev only. Needs pytest-playwright and Playwright's Chromium:
-    uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema pytest tests/test_html_ui.py -q
+    uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema \
+        pytest tests/ontology/test_onto_html_ui.py -q
 """
 
 from __future__ import annotations
@@ -12,7 +13,7 @@ import pytest
 
 pytest.importorskip("playwright")
 
-from conftest import build, make_project, overlaps
+from ontotest import build, make_project, overlaps
 
 # --- Loading ----------------------------------------------------------------------
 

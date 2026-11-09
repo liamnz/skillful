@@ -7,7 +7,7 @@ import subprocess
 from pathlib import Path
 
 import yaml
-from conftest import findings_json, run_onto
+from ontotest import findings_json, run_onto
 
 ONTOLOGY = Path("docs") / "ontology"
 

@@ -9,9 +9,9 @@ import pytest
 
 pytest.importorskip("playwright")
 
-from conftest import REPO, build, overlaps
+from ontotest import REPO, build, overlaps
 
-sys.path.insert(0, str(REPO / "tests"))
+sys.path.insert(0, str(REPO / "tests" / "ontology"))
 from gen_large_fixture import CONCEPTS, RELATIONS, generate
 
 FIRST_RENDER_MS = 2000

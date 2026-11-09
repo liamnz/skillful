@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from conftest import codes_in, collect_findings, make_project
+from ontotest import codes_in, collect_findings, make_project
 
 ONTOLOGY = Path("docs/ontology")
 

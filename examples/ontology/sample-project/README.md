@@ -43,6 +43,6 @@ intentional. Don't "fix" these without updating the tests and evals that rely on
 ## Expected findings
 
 [`expected-findings.yaml`](expected-findings.yaml) lists every validator finding
-this project may produce. `tests/test_sample_project.py` fails if `validate`
+this project may produce. `tests/ontology/test_onto_sample_project.py` fails if `validate`
 reports anything else, so a new check that fires here must be either a deliberate
 imperfection (add it to the file) or a fix to the sample.

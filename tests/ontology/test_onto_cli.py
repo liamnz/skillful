@@ -7,7 +7,7 @@ import shutil
 from pathlib import Path
 
 import pytest
-from conftest import ONTO, REPO, SKILL_DIR, run_onto
+from ontotest import ONTO, REPO, SKILL_DIR, run_onto
 
 SUBCOMMANDS = [
     ["init"],

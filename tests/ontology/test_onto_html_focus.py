@@ -10,7 +10,7 @@ import pytest
 pytest.importorskip("playwright")
 
 import yaml
-from conftest import SAMPLE
+from ontotest import SAMPLE
 
 CONCEPTS = SAMPLE / "docs" / "ontology" / "concepts"
 

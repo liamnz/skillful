@@ -1,4 +1,8 @@
-"""Shared test helpers: running the CLI and building fixture projects."""
+"""Helpers for the ontology tests: running the CLI and building fixture projects.
+
+Named uniquely so another skill's test suite can sit beside this one. Pytest fixtures
+stay in conftest.py.
+"""
 
 from __future__ import annotations
 
@@ -6,19 +10,17 @@ import json
 import shutil
 import subprocess
 import sys
-from collections.abc import Callable, Iterator
+from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-import pytest
-
 if TYPE_CHECKING:
-    from playwright.sync_api import Browser, Page
+    from playwright.sync_api import Page
 
-REPO = Path(__file__).resolve().parents[1]
+REPO = Path(__file__).resolve().parents[2]
 SKILL_DIR = REPO / "skills" / "curating-the-ontology"
 ONTO = SKILL_DIR / "scripts" / "onto.py"
-FIXTURES = REPO / "tests" / "fixtures"
+FIXTURES = REPO / "tests" / "ontology" / "fixtures"
 BASELINE = FIXTURES / "baseline"
 CASES = FIXTURES / "cases"
 
@@ -54,11 +56,6 @@ def make_project(tmp_path: Path, case: str | None = None) -> Path:
         assert overlay.is_dir(), f"no fixture case {case!r}"
         shutil.copytree(overlay, project, dirs_exist_ok=True, ignore=_ignore)
     return project
-
-
-@pytest.fixture
-def project(tmp_path: Path) -> Callable[[str | None], Path]:
-    return lambda case=None: make_project(tmp_path, case)
 
 
 def collect_findings(project: Path) -> list:
@@ -137,14 +134,6 @@ def build(project: Path) -> Path:
     return project / OUTPUT
 
 
-@pytest.fixture(scope="session")
-def sample_page(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    """The sample project built once per session, outside the repo."""
-    project = tmp_path_factory.mktemp("ui") / "sample"
-    shutil.copytree(SAMPLE, project, ignore=shutil.ignore_patterns("index.html"))
-    return build(project)
-
-
 class Loaded:
     """A page opened from file:// with every non-file request blocked and recorded."""
 
@@ -166,23 +155,6 @@ class Loaded:
 
     def positions(self) -> dict[str, list[float]]:
         return self.page.evaluate("window.ontologyView.positions()")
-
-
-@pytest.fixture
-def open_page(browser: Browser) -> Iterator[Callable[..., Loaded]]:
-    contexts = []
-
-    def opener(path: Path, viewport: dict[str, int] = VIEWPORT, hash: str = "") -> Loaded:
-        context = browser.new_context(viewport=viewport, offline=True)
-        contexts.append(context)
-        loaded = Loaded(context.new_page())
-        loaded.page.goto(path.as_uri() + hash)
-        loaded.page.wait_for_function("window.ontologyView && window.ontologyView.ready")
-        return loaded
-
-    yield opener
-    for context in contexts:
-        context.close()
 
 
 def overlaps(boxes: list[dict[str, float]]) -> list[tuple[int, int]]:

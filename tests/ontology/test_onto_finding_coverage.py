@@ -12,7 +12,8 @@ from collections.abc import Callable
 from pathlib import Path
 
 import pytest
-from conftest import (
+from ontokit.findings import CODES
+from ontotest import (
     CASES,
     REPO,
     codes_in,
@@ -23,7 +24,6 @@ from conftest import (
     make_project,
     run_onto,
 )
-from ontokit.findings import CODES
 
 ONTOLOGY = Path("docs/ontology")
 OLD = "2020-01-01T12:00:00+00:00"

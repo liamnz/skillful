@@ -8,7 +8,7 @@ import pytest
 
 pytest.importorskip("playwright")
 
-from conftest import build, make_project, overlaps
+from ontotest import build, make_project, overlaps
 
 
 def test_legend_is_always_visible_and_explains_on_hover(sample_page: Path, open_page) -> None:

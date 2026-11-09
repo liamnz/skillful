@@ -221,7 +221,7 @@ Global option: `--root <path>` (default `docs/ontology`).
 Development commands in this repo:
 
 ```
-uv run --with pytest --with pyyaml --with jsonschema pytest tests/ -q
+uv run --with pytest --with pyyaml --with jsonschema pytest tests/ontology -q
 uv run --with ruff ruff check . && uv run --with ruff ruff format --check .
 skills-ref validate skills/curating-the-ontology     # Agent Skills reference validator (pinned version, run via uvx; exact invocation set during implementation)
 ```
@@ -548,12 +548,14 @@ skills/curating-the-ontology/   # SELF-CONTAINED: this folder is what gets copie
     vendor/                     # pinned D3 UMD builds (one file per module), inlined by build.py
     vendor/MANIFEST.json        # module, exact version, source URL, SHA-256, concatenation order
     vendor/LICENSE-d3.txt       # ISC licence text; its notice is also emitted as a comment in index.html
-tests/
-  fixtures/<case>/docs/ontology/...   # one fixture per check code + a valid baseline
+tests/ontology/
+  fixtures/cases/<case>/...     # one fixture per check code, overlaid on fixtures/baseline/
   fixtures/large/             # generated 300-concept / 600-relation ontology for performance checks
-  test_validate.py  test_new.py  test_vocab.py  test_impact.py  test_build.py  test_isolation.py
-  test_packaging.py           # skill dir is self-contained, harness-neutral, and works after being copied anywhere
-  test_html_ui.py             # Playwright: graph interactions, determinism, performance, a11y smoke
+  conftest.py                 # pytest fixtures only
+  ontotest.py                 # shared helpers, uniquely named so another suite can sit beside this one
+  test_onto_validate.py  test_onto_new.py  test_onto_vocab.py  test_onto_impact.py  test_onto_build.py  test_onto_isolation.py
+  test_onto_packaging.py         # skill dir is self-contained, harness-neutral, and works after being copied anywhere
+  test_onto_html_ui.py           # Playwright: graph interactions, determinism, performance, a11y smoke
 examples/ontology/sample-project/      # small dbt-style repo with a populated ontology, used for manual and eval runs
 examples/ontology/design/mockup.html   # static design mockup reviewed at the design gate (not shipped)
 docs/ontology-skill/intent.md

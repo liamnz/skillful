@@ -8,7 +8,7 @@ import pytest
 
 pytest.importorskip("playwright")
 
-from conftest import overlaps
+from ontotest import overlaps
 
 
 def hierarchy(page) -> None:

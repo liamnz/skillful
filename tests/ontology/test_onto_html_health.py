@@ -9,7 +9,7 @@ import pytest
 
 pytest.importorskip("playwright")
 
-from conftest import CASES, build, make_project
+from ontotest import CASES, build, make_project
 
 CONCEPTS = Path("docs/ontology/concepts")
 MUDDY = """id: refund-window

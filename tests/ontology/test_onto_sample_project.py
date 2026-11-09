@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import yaml
-from conftest import REPO, findings_json, run_onto
+from ontotest import REPO, findings_json, run_onto
 
 SAMPLE = REPO / "examples" / "ontology" / "sample-project"
 

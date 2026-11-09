@@ -1,7 +1,8 @@
 """T14: script conventions across every command, and golden output.
 
 Regenerate the golden files after an intended output change with:
-    UPDATE_GOLDEN=1 uv run --with pytest --with pyyaml --with jsonschema pytest tests/test_conventions.py -q
+    UPDATE_GOLDEN=1 uv run --with pytest --with pyyaml --with jsonschema \
+        pytest tests/ontology/test_onto_conventions.py -q
 """
 
 from __future__ import annotations
@@ -11,9 +12,9 @@ import os
 from pathlib import Path
 
 import pytest
-from conftest import REPO, make_git_project, make_project, run_onto
+from ontotest import REPO, make_git_project, make_project, run_onto
 
-GOLDEN = REPO / "tests" / "golden"
+GOLDEN = REPO / "tests" / "ontology" / "golden"
 MANIFEST = Path("docs/ontology/ontology.yaml")
 
 

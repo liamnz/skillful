@@ -5,8 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from conftest import findings_json, make_project, run_onto
 from ontokit.findings import Finding, sort_findings
+from ontotest import findings_json, make_project, run_onto
 
 ERRORS_AND_WARNINGS = {"error", "warn"}
 

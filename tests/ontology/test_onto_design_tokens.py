@@ -14,7 +14,7 @@ import re
 from pathlib import Path
 
 import pytest
-from conftest import SKILL_DIR
+from ontotest import SKILL_DIR
 
 HTML = SKILL_DIR / "assets" / "html"
 TOKENS = (HTML / "tokens.css").read_text(encoding="utf-8")

@@ -5,7 +5,7 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-from conftest import findings_json, run_onto
+from ontotest import findings_json, run_onto
 
 
 def test_init_new_validate_round_trip(tmp_path: Path) -> None:
