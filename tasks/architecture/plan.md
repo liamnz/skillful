@@ -71,12 +71,12 @@ A1 skeleton ──► A2 schemas+loader ──► A3 init ──► A4 apply eng
 ## Task list
 
 ### Phase 0: Repository reorganisation
-- [ ] P0: Commit and merge the approved spec, intent and this plan
-- [ ] R1: Move docs and tasks
-- [ ] R2: Move examples
-- [ ] R3: Move tests, introduce `ontotest.py`
-- [ ] R4: Rewrite `CLAUDE.md` for several skills
-- [ ] R5: Rename the ontology page to "explorer", version 1.0.1
+- [x] P0: Commit and merge the approved spec, intent and this plan
+- [x] R1: Move docs and tasks
+- [x] R2: Move examples
+- [x] R3: Move tests, introduce `ontotest.py`
+- [x] R4: Rewrite `CLAUDE.md` for several skills
+- [x] R5: Rename the ontology page to "explorer", version 1.0.1
 
 **Checkpoint 0:** R1–R4 leave `skills/curating-the-ontology/` unchanged and collect 490 tests with the same results. R5 passes separately. Phase 0 is reviewed and merged before A1 starts.
 

@@ -27,7 +27,7 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Acceptance criteria:**
 - [x] `docs/architecture-skill/{SPEC,intent}.md` and `tasks/architecture/{plan,todo}.md` are committed on `docs/architecture-skill-spec`.
 - [x] Approved spec changes (same-day replay, W114, Project Structure comment) are made and dated in the status line.
-- [ ] The branch is merged into `main` with `--no-ff` after your approval.
+- [x] The branch is merged into `main` with `--no-ff` after your approval.
 
 **Verification:** `git status` clean; `git log` shows the merge.
 
@@ -37,9 +37,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Give the ontology skill's docs and task records their own folders. First record the before-state of all tests.
 
 **Acceptance criteria:**
-- [ ] Per-test results from ALL (490 collected) are saved outside the repo as the comparison baseline.
-- [ ] `docs/SPEC.md` → `docs/ontology-skill/SPEC.md`, `docs/intent/ontology-skill.md` → `docs/ontology-skill/intent.md`, `tasks/plan.md` and `todo.md` → `tasks/ontology/`, all with `git mv`.
-- [ ] The finding-coverage test's spec path and the ontology spec's links and Project Structure are updated. `tasks/ontology/` contents are unchanged.
+- [x] Per-test results from ALL (490 collected) are saved outside the repo as the comparison baseline.
+- [x] `docs/SPEC.md` → `docs/ontology-skill/SPEC.md`, `docs/intent/ontology-skill.md` → `docs/ontology-skill/intent.md`, `tasks/plan.md` and `todo.md` → `tasks/ontology/`, all with `git mv`.
+- [x] The finding-coverage test's spec path and the ontology spec's links and Project Structure are updated. `tasks/ontology/` contents are unchanged.
 
 **Verification:** ALL gives identical results; LINT; `git diff main -- OK/` empty.
 
@@ -49,9 +49,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Move the ontology examples under `examples/ontology/`.
 
 **Acceptance criteria:**
-- [ ] `sample-project/`, `design/`, `evals.md` and `evals/` are under `examples/ontology/` with `git mv`.
-- [ ] `SAMPLE` in tests and `REPO` in `setup_eval.py` (now one level deeper) resolve correctly, and `setup_eval.py a` works.
-- [ ] References in the ontology spec, `evals.md`, the sample README and the mockup caption are updated, and the sample's `index.html` is still current.
+- [x] `sample-project/`, `design/`, `evals.md` and `evals/` are under `examples/ontology/` with `git mv`.
+- [x] `SAMPLE` in tests and `REPO` in `setup_eval.py` (now one level deeper) resolve correctly, and `setup_eval.py a` works.
+- [x] References in the ontology spec, `evals.md`, the sample README and the mockup caption are updated, and the sample's `index.html` is still current.
 
 **Verification:** ALL identical to baseline; LINT; `git diff main -- OK/` empty.
 
@@ -61,9 +61,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Move all tests to `tests/ontology/` with the `test_onto_` prefix, and take shared helpers out of `conftest` so a second suite can't collide.
 
 **Acceptance criteria:**
-- [ ] All of `tests/` moves to `tests/ontology/`, and each `test_<name>.py` becomes `test_onto_<name>.py`, with `git mv`.
-- [ ] Helpers and constants move from `conftest.py` to `ontotest.py`, all 25 importing modules use it, and `conftest.py` holds only pytest fixtures. `REPO` uses `parents[2]`.
-- [ ] `.gitignore`, usage comments and the ontology spec's Project Structure and Testing Strategy are updated. Running pytest with a throwaway `tests/architecture/conftest.py` beside it collects without conflict.
+- [x] All of `tests/` moves to `tests/ontology/`, and each `test_<name>.py` becomes `test_onto_<name>.py`, with `git mv`.
+- [x] Helpers and constants move from `conftest.py` to `ontotest.py`, all 25 importing modules use it, and `conftest.py` holds only pytest fixtures. `REPO` uses `parents[2]`.
+- [x] `.gitignore`, usage comments and the ontology spec's Project Structure and Testing Strategy are updated. Running pytest with a throwaway `tests/architecture/conftest.py` beside it collects without conflict.
 
 **Verification:** ALL gives the same 490 tests and outcomes (names mapped by prefix); golden regeneration gives no diff; LINT; `git diff main -- OK/` empty.
 
@@ -73,9 +73,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Describe the repo as a home for several skills.
 
 **Acceptance criteria:**
-- [ ] Shared conventions come first, followed by one section per skill. The ontology content is kept and its paths corrected.
-- [ ] Commands are given for one skill's tests and for all tests, and every command shown has been run.
-- [ ] The architecture section is a short stub pointing to its spec, and A33 completes it.
+- [x] Shared conventions come first, followed by one section per skill. The ontology content is kept and its paths corrected.
+- [x] Commands are given for one skill's tests and for all tests, and every command shown has been run.
+- [x] The architecture section is a short stub pointing to its spec, and A33 completes it.
 
 **Verification:** Run each command in `CLAUDE.md`; ALL identical to baseline.
 
@@ -85,17 +85,17 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** With two skills in one repo, "view" must mean only an architecture view. Starts only after the R1–R4 checks pass.
 
 **Acceptance criteria:**
-- [ ] Wording that means the page is changed in `SKILL.md`, references, script help and messages, the ontology spec's "HTML view" section, `CLAUDE.md` and test comments. `SKILL.md` says "the ontology explorer" on first mention.
-- [ ] "Fit to view", the graph, list and hierarchy screens, `graph-view.js`, `build`, `index.html`, schemas and finding codes are unchanged.
-- [ ] `metadata.version` is `1.0.1`, the sample page and affected golden files are regenerated, and a dated amendment is recorded in the ontology spec.
+- [x] Wording that means the page is changed in `SKILL.md`, references, script help and messages, the ontology spec's "HTML view" section, `CLAUDE.md` and test comments. `SKILL.md` says "the ontology explorer" on first mention.
+- [x] "Fit to view", the graph, list and hierarchy screens, `graph-view.js`, `build`, `index.html`, schemas and finding codes are unchanged.
+- [x] `metadata.version` is `1.0.1`, the sample page and affected golden files are regenerated, and a dated amendment is recorded in the ontology spec.
 
 **Verification:** ALL passes; the diff of `OK/` shows only wording and version; `build --check` passes on the sample project.
 
 **Dependencies:** R4. **Files:** about 12 files in `OK/` with one-line wording edits, sample `index.html`, spec, `CLAUDE.md`. **Scope:** M
 
 ### Checkpoint 0
-- [ ] R1–R4 evidence shown: empty `OK/` diff, 490 tests, same outcomes.
-- [ ] R5 evidence shown: suite green, wording-only diff.
+- [x] R1–R4 evidence shown: empty `OK/` diff, 490 tests, same outcomes.
+- [x] R5 evidence shown: suite green, wording-only diff.
 - [ ] You approve; `phase-0-repo-reorg` merged with `--no-ff`.
 
 ---
