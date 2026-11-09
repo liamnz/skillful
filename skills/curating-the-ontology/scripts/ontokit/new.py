@@ -140,6 +140,6 @@ def run(args: argparse.Namespace) -> int:
     print(f"created {display_path(path)}")
     sys.stderr.write(
         "Next: ask the human to write the definition in their own words, "
-        "then set status: defined. Rebuild the view with 'onto.py build'.\n"
+        "then set status: defined. Rebuild the explorer with 'onto.py build'.\n"
     )
     return EXIT_OK

@@ -1,4 +1,4 @@
-"""The `build` command: write the self-contained docs/ontology/index.html view.
+"""The `build` command: write the self-contained docs/ontology/index.html explorer.
 
 The page inlines the design tokens, the app's CSS and JS, the vendored D3 modules
 and one JSON blob (the data contract below). It loads nothing from the network,

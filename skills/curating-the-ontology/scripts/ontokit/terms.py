@@ -184,7 +184,7 @@ def _commitment(concept: Concept, incoming: set[str]) -> Iterator[Finding]:
                 "I202",
                 concept.id,
                 f"'{concept.id}' is deprecated without replaced_by. If it was renamed or merged, set replaced_by "
-                "so readers and the view can follow it.",
+                "so readers and the explorer can follow it.",
             )
         return
     if not concept.relations and not concept.implemented_in and concept.id not in incoming:

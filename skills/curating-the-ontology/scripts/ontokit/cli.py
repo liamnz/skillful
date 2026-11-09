@@ -215,7 +215,7 @@ def build_parser() -> Parser:
     p = _command(
         sub,
         "build",
-        "Write the self-contained docs/ontology/index.html view.",
+        "Write the self-contained docs/ontology/index.html explorer.",
         _examples("build", "build --check"),
         [*common, dry_run],
     )

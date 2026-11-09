@@ -75,7 +75,7 @@ open_questions: ["Should refunded orders count?"]
 | `relations` | — | List of `{type, target, cardinality?}`. `type` is a core relation type or a declared extension (E005); `target` is another concept's id (E004). See below. |
 | `implemented_in` | — | List of `{path, symbol?, reviewed_at?}`. `path` is relative to the project root and must exist (E009). `symbol` is text searched for in the file (W105 if missing) and narrows drift checks to nearby changes. `reviewed_at` is set only by `onto.py review`. |
 | `open_questions` | — | What nobody knows yet. Better than guessing. |
-| `proposal` | — | Agent-written, while `proposed`: `rationale` (why the concept was raised) and an optional `suggested_definition`, which the view shows apart from the definition. Remove it once the concept is defined. |
+| `proposal` | — | Agent-written, while `proposed`: `rationale` (why the concept was raised) and an optional `suggested_definition`, which the explorer shows apart from the definition. Remove it once the concept is defined. |
 | `replaced_by` | — | For a deprecated concept that was renamed or merged: the id that replaces it (I202 if missing). |
 
 ### Relations and cardinality
@@ -131,7 +131,7 @@ settings:
 | Field | Meaning and rules |
 |---|---|
 | `schema_version` | The record format. This skill reads `1`; any other value stops every command with advice. |
-| `name`, `description` | Shown in the view's toolbar and title. |
+| `name`, `description` | Shown in the explorer's toolbar and title. |
 | `extensions.kinds.<id>` | `status` (required), `definition` (human-written; required once `defined`, E011), `proposal.rationale`. |
 | `extensions.relation_types.<id>` | As above, plus `inverse` (required: the label read from target to source), `acyclic` (forbid loops), `from` and `to` (allowed source and target kinds; E012 if a kind is unknown). |
 | `settings.stale_proposal_days` | A proposal older than this (by git date) is W107. |

@@ -91,7 +91,7 @@ extension) have no concept; they concern `ontology.yaml`.
 
 - **`index.html`:** take either side, resolve the YAML conflicts, run `onto.py build`,
   and commit the rebuilt file. Never hand-merge the HTML. `onto.py build --check` exits
-  1 if the committed view is stale.
+  1 if the committed explorer is stale.
 - **A concept file:** merge the YAML by meaning. If both sides changed the definition,
   do not choose: show the user both versions and ask them to write the result.
 - **`ontology.yaml`:** keep both sides' extensions unless they share an id; then ask.

@@ -2,7 +2,7 @@
 ## Domain ontology
 
 This repository keeps a human-owned domain ontology in `{{root}}/`: one YAML file per
-concept, each with a definition written by a person, and a generated view in
+concept, each with a definition written by a person, and a generated explorer in
 `{{root}}/index.html`.
 
 - Use the canonical concept names from the ontology in code, docs and conversation.

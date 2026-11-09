@@ -4,13 +4,13 @@ description: >-
   Curates a human-owned domain ontology kept in docs/ontology/: proposes new or
   changed domain concepts at the end of coding tasks, critiques human-written
   definitions against the code, runs health checks for consistency and drift, and
-  builds an interactive HTML graph of the concepts. Use when working in a repo that
+  builds the ontology explorer, an interactive HTML graph of the concepts. Use when working in a repo that
   has docs/ontology/, when a task introduces or changes domain terms, data models,
   metrics or business rules, or when the user mentions the ontology, domain
   concepts, glossary, definitions, terminology or what a domain term means.
 compatibility: Requires git and uv (uv provides Python 3.11+ and script dependencies).
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Curating the ontology
@@ -18,7 +18,7 @@ metadata:
 The ontology in `docs/ontology/` is the team's shared mental model of the domain: one
 YAML file per concept, each defined **by a person**. Your job is to keep it honest and
 in use: notice when work touches a concept, propose what is missing, question
-definitions that disagree with the code, and keep the view built. You never decide
+definitions that disagree with the code, and keep the ontology explorer built. You never decide
 what a concept means.
 
 ## Hard rules
