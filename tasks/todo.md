@@ -498,7 +498,7 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** You run scenarios (a)–(f) in `examples/sample-project` with the skill copied into Cursor's project skills folder. I prepare the script and fix the `SKILL.md`/reference wording based on what you see.
 
 **Acceptance criteria:**
-- [ ] `examples/evals.md` gives each scenario a setup, a prompt to give the agent, and explicit pass/fail expectations.
+- [x] `examples/evals.md` gives each scenario a setup, a prompt to give the agent, and explicit pass/fail expectations.
 - [ ] All six scenarios pass in Cursor, including (b): the agent never authors a definition or sets `defined` on its own.
 - [ ] Any failures lead to wording fixes and are re-run.
 
