@@ -1,6 +1,6 @@
 # Spec: `curating-the-ontology` skill
 
-*Status: APPROVED 2026-11-08. Source intent: [docs/ontology-skill/intent.md](intent.md).*
+*Status: APPROVED 2026-11-08. Amended 2026-11-10 (version 1.0.1): the generated page is called the *explorer*, because this repo now also holds an architecture skill in which a *view* means an architecture view. "HTML view" elsewhere in this spec means the explorer. Screen names such as the graph, list and hierarchy views, "Fit to view", file names, commands, schemas and finding codes are unchanged. Source intent: [docs/ontology-skill/intent.md](intent.md).*
 
 ## Objective
 
@@ -296,9 +296,9 @@ This command gives the agent a deterministic starting point for its end-of-task 
 
 Deciding whether an unmapped file really introduces a domain concept is the agent's job, not the script's.
 
-## HTML view (`index.html`)
+## HTML explorer (`index.html`)
 
-**Design principle: visual first.** The HTML view is how the skill gets humans to *use* the ontology, so it is a core part of the design, not a report bolted on at the end. Reading lists of terms takes a lot of effort and discourages use. A well-designed, interactive picture of how concepts connect is cheaper to take in, easier to explore and easier to remember, and it gives people a mental map. **The interactive relationship graph is the primary view in v1.** The list and detail views support it.
+**Design principle: visual first.** The HTML explorer is how the skill gets humans to *use* the ontology, so it is a core part of the design, not a report bolted on at the end. Reading lists of terms takes a lot of effort and discourages use. A well-designed, interactive picture of how concepts connect is cheaper to take in, easier to explore and easier to remember, and it gives people a mental map. **The interactive relationship graph is the primary view in v1.** The list and detail views support it.
 
 ### Overall layout
 

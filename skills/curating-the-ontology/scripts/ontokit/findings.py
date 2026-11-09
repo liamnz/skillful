@@ -19,7 +19,7 @@ _SEVERITY_ORDER: dict[str, int] = {"error": 0, "warn": 1, "info": 2}
 
 
 # Every finding code, with its severity and Gruber criterion (see SPEC "Validator checks").
-# Criterion ids are stable: the view groups findings by them.
+# Criterion ids are stable: the explorer groups findings by them.
 CODES: dict[str, tuple[Severity, str | None]] = {
     "E001": ("error", None),
     "E002": ("error", None),

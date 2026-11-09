@@ -4,7 +4,7 @@
   severity colours >= 3:1 against --bg, and a badge's --bg symbol >= 3:1 on its colour.
 - The kind palette stays distinguishable (CIEDE2000) under protanopia, deuteranopia and
   tritanopia simulation (Machado et al. 2009, full severity), in both themes.
-- No raw colour, size, spacing or timing literal in app.css or the view's JS.
+- No raw colour, size, spacing or timing literal in app.css or the explorer's JS.
 """
 
 from __future__ import annotations

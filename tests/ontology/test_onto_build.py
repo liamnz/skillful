@@ -188,7 +188,7 @@ def test_comment_and_formatting_edits_do_not_make_it_stale(tmp_path: Path) -> No
 def test_validate_reports_w108_only_when_stale(tmp_path: Path) -> None:
     project = make_project(tmp_path)
     never = run_onto(["validate", "--json"], cwd=project)
-    assert findings_json(never) == [], "an unbuilt view is a note, not a finding"
+    assert findings_json(never) == [], "an unbuilt explorer is a note, not a finding"
     assert "has not been built" in never.stderr
 
     built(project)

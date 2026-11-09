@@ -1,4 +1,4 @@
-"""Freshness of the built view: the input hash and W108.
+"""Freshness of the built explorer: the input hash and W108.
 
 The hash covers the *parsed* records plus the skill version, not raw bytes, so
 line endings (e.g. a Windows checkout with core.autocrlf), comments and

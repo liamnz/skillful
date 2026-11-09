@@ -84,7 +84,7 @@ python tests/ontology/gen_large_fixture.py
 
 Changing finding codes is an "ask first" item in the spec.
 
-**HTML view.** `build.py` assembles one self-contained `index.html` by filling `{{PLACEHOLDER}}`s in `assets/html/index.html` with the CSS, the vendored D3 modules (in `vendor/MANIFEST.json` order), the app scripts (`APP_SCRIPTS` order) and the records as embedded JSON. Output must be byte-for-byte reproducible, with no timestamps, and is covered by a CSP of `default-src 'none'`. `graph-model.js` holds pure graph logic with no D3; `graph-view.js` does layout and rendering, with D3 used only for physics and gestures. The layout is seeded and runs a fixed number of ticks, so positions are deterministic.
+**HTML explorer.** `build.py` assembles one self-contained `index.html` by filling `{{PLACEHOLDER}}`s in `assets/html/index.html` with the CSS, the vendored D3 modules (in `vendor/MANIFEST.json` order), the app scripts (`APP_SCRIPTS` order) and the records as embedded JSON. Output must be byte-for-byte reproducible, with no timestamps, and is covered by a CSP of `default-src 'none'`. `graph-model.js` holds pure graph logic with no D3; `graph-view.js` does layout and rendering, with D3 used only for physics and gestures. The layout is seeded and runs a fixed number of ticks, so positions are deterministic.
 
 **Tests.** `conftest.py` holds pytest fixtures, and helpers are imported from `ontotest.py`. `make_project` overlays `tests/ontology/fixtures/cases/<case>/` onto a copy of `tests/ontology/fixtures/baseline/`, so a case contains only the files it adds or replaces. The baseline must stay free of findings. `run_onto` runs the real CLI through `uv` with stdin closed, while `collect_findings` is the fast in-process route for check tests. `examples/ontology/sample-project` is also a test input: its findings must match `expected-findings.yaml`, and the eval scenarios depend on deliberate flaws in it (such as the 90-day definition against the 30-day code in `active-customer`), so don't "fix" those.
 
@@ -93,7 +93,7 @@ Changing finding codes is an "ask first" item in the spec.
 - **Harness terms** are listed in `DENYLIST` in `test_onto_packaging.py`.
 - **`SKILL.md` limits.** The body stays under 500 lines and about 3,800 words, "Hard rules" is the first section, and every file in `references/` is linked with a "read when" trigger. References don't link onward.
 - **Version** lives in `SKILL.md` under `metadata.version`, and `--version` reads it from there.
-- **View styling.** Raw colour, size and spacing values belong only in `assets/html/tokens.css`, and contrast and colour-blind safety are tested. Chrome stays neutral grey, with colour reserved for kind, severity and focus. No shadows, gradients or decoration. Desktop only, minimum 1280×720.
+- **Explorer styling.** Raw colour, size and spacing values belong only in `assets/html/tokens.css`, and contrast and colour-blind safety are tested. Chrome stays neutral grey, with colour reserved for kind, severity and focus. No shadows, gradients or decoration. Desktop only, minimum 1280×720.
 - **Vendored D3** is pinned and checksummed in `vendor/MANIFEST.json`; every file there must be listed.
 - **Authorship.** Agents never write or alter a `definition`, set `status: defined`, or run `review` on their own authority.
 - **Ask first** also covers changing the concept schema or `schema_version`.

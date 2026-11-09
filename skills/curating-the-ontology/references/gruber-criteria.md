@@ -103,5 +103,5 @@ than `stale_proposal_days` (staleness).
 ## Structural findings
 
 E001 (YAML does not parse), E002 (schema violation), E003 (id does not match the file),
-E008 (defined without a definition) and W108 (the view is stale) carry no criterion:
+E008 (defined without a definition) and W108 (the explorer is stale) carry no criterion:
 they are about the records themselves, not the conceptualisation.
