@@ -125,7 +125,7 @@ def test_every_command_has_help_with_examples(command: list[str]) -> None:
 
 
 WRITE_COMMANDS = [
-    ["init", "--name", "Fresh"],  # T23 adds --agents-md and --gitattributes here
+    ["init", "--name", "Fresh", "--agents-md", "--gitattributes"],
     ["new", "churned-account", "--name", "Churned account", "--kind", "entity", "--rationale", "seen in code"],
     ["vocab", "new", "kind", "rule", "--rationale", "policies recur"],
     ["vocab", "new", "relation", "governs", "--inverse", "governed_by", "--rationale", "limits recur"],

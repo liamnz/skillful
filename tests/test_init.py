@@ -125,3 +125,99 @@ def test_written_files_use_lf_line_endings(tmp_path: Path) -> None:
     repo = git_repo(tmp_path)
     run_onto(["init"], cwd=repo)
     assert b"\r\n" not in (repo / ONTOLOGY / "ontology.yaml").read_bytes()
+
+
+# --- T23: --agents-md and --gitattributes ---------------------------------------------------
+
+START = "<!-- curating-the-ontology:start"
+END = "<!-- curating-the-ontology:end -->"
+ATTRIBUTE = "docs/ontology/index.html -diff linguist-generated=true"
+
+
+def init(repo: Path, *flags: str):
+    return run_onto(["init", *flags], cwd=repo)
+
+
+def test_agents_md_is_created_with_the_marked_section(tmp_path: Path) -> None:
+    repo = git_repo(tmp_path)
+    result = init(repo, "--agents-md", "--no-gitattributes")
+    assert result.returncode == 0, result.stderr
+    text = (repo / "AGENTS.md").read_text(encoding="utf-8")
+    assert text.startswith(START) and text.rstrip().endswith(END)
+    assert "`docs/ontology/`" in text and "curating-the-ontology" in text
+    assert "created AGENTS.md" in result.stdout
+
+
+def test_agents_md_section_is_added_and_updated_in_place(tmp_path: Path) -> None:
+    repo = git_repo(tmp_path)
+    before, after = "# Agents\n\nHouse rules here.\n", "\n## Later section\nKeep me.\n"
+    (repo / "AGENTS.md").write_text(before, encoding="utf-8", newline="\n")
+    assert init(repo, "--agents-md").returncode == 0
+    first = (repo / "AGENTS.md").read_text(encoding="utf-8")
+    assert first.startswith(before + "\n" + START)
+    # Someone adds text after the section and edits inside it; re-running restores only the section.
+    edited = first.replace("Use the canonical", "Use the CANONICAL") + after
+    (repo / "AGENTS.md").write_text(edited, encoding="utf-8", newline="\n")
+    result = init(repo, "--agents-md")
+    assert result.returncode == 0 and "updated AGENTS.md" in result.stdout
+    second = (repo / "AGENTS.md").read_text(encoding="utf-8")
+    assert second == first + after, "only the marked section changes"
+    assert second.count(START) == 1
+    third = init(repo, "--agents-md")
+    assert "already has the ontology section" in third.stderr
+    assert (repo / "AGENTS.md").read_text(encoding="utf-8") == second
+
+
+def test_agents_md_keeps_crlf_line_endings(tmp_path: Path) -> None:
+    repo = git_repo(tmp_path)
+    (repo / "AGENTS.md").write_bytes(b"# Agents\r\n")
+    assert init(repo, "--agents-md").returncode == 0
+    raw = (repo / "AGENTS.md").read_bytes()
+    assert raw.startswith(b"# Agents\r\n\r\n<!-- curating") and b"\n" not in raw.replace(b"\r\n", b"")
+
+
+def test_broken_markers_are_refused_before_any_write(tmp_path: Path) -> None:
+    repo = git_repo(tmp_path)
+    (repo / "AGENTS.md").write_text(f"{START} -->\nhalf a section\n", encoding="utf-8")
+    before = snapshot(repo)
+    result = init(repo, "--agents-md", "--gitattributes")
+    assert result.returncode == 3 and "markers" in result.stderr
+    assert snapshot(repo) == before
+
+
+def test_gitattributes_line_is_added_once(tmp_path: Path) -> None:
+    repo = git_repo(tmp_path)
+    (repo / ".gitattributes").write_text("* text=auto", encoding="utf-8", newline="\n")
+    assert init(repo, "--gitattributes").returncode == 0
+    assert (repo / ".gitattributes").read_text(encoding="utf-8") == f"* text=auto\n{ATTRIBUTE}\n"
+    result = init(repo, "--gitattributes")
+    assert "already has the index.html line" in result.stderr
+    assert (repo / ".gitattributes").read_text(encoding="utf-8").count(ATTRIBUTE) == 1
+
+
+def test_gitattributes_follows_root(tmp_path: Path) -> None:
+    repo = git_repo(tmp_path)
+    assert init(repo, "--root", "ontology", "--gitattributes", "--agents-md").returncode == 0
+    assert (repo / ".gitattributes").read_text(
+        encoding="utf-8"
+    ) == "ontology/index.html -diff linguist-generated=true\n"
+    assert "`ontology/`" in (repo / "AGENTS.md").read_text(encoding="utf-8")
+
+
+def test_no_flags_and_no_dash_flags_change_nothing(tmp_path: Path) -> None:
+    repo = git_repo(tmp_path)
+    (repo / "AGENTS.md").write_text("# Agents\n", encoding="utf-8")
+    for flags in ([], ["--no-agents-md", "--no-gitattributes"]):
+        init(repo, *flags)
+        assert (repo / "AGENTS.md").read_text(encoding="utf-8") == "# Agents\n"
+        assert not (repo / ".gitattributes").exists()
+
+
+def test_dry_run_writes_neither_file(tmp_path: Path) -> None:
+    repo = git_repo(tmp_path)
+    (repo / "AGENTS.md").write_text("# Agents\n", encoding="utf-8")
+    before = snapshot(repo)
+    result = init(repo, "--agents-md", "--gitattributes", "--dry-run")
+    assert result.returncode == 0
+    assert "would update AGENTS.md" in result.stdout and "would create .gitattributes" in result.stdout
+    assert snapshot(repo) == before

@@ -421,9 +421,9 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### T23: `init --agents-md` / `--gitattributes`
 **Acceptance criteria:**
-- [ ] `--agents-md` inserts the templated section between marker comments, creating `AGENTS.md` if needed. Re-running updates it in place without duplicating it, and leaves the rest of the file byte-identical.
-- [ ] `--gitattributes` adds `docs/ontology/index.html -diff linguist-generated=true` once, idempotently. The `--no-*` flags and the absence of a flag change nothing.
-- [ ] Both honour `--dry-run`.
+- [x] `--agents-md` inserts the templated section between marker comments, creating `AGENTS.md` if needed. Re-running updates it in place without duplicating it, and leaves the rest of the file byte-identical.
+- [x] `--gitattributes` adds `docs/ontology/index.html -diff linguist-generated=true` once, idempotently. The `--no-*` flags and the absence of a flag change nothing.
+- [x] Both honour `--dry-run`.
 
 **Verification:** PYTEST (`tests/test_init.py`), LINT
 
@@ -435,14 +435,14 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### T24: `SKILL.md` body and `references/workflow.md`
 **Acceptance criteria:**
-- [ ] The `SKILL.md` body (under 500 lines and about 5k tokens) covers:
+- [x] The `SKILL.md` body (under 500 lines and about 5k tokens) covers:
   - how to resolve `$SKILL`;
   - the hard rules near the top (authorship, canonical terms, consent, never run `review` unconfirmed);
   - the seven workflow steps, with exact commands;
   - gotchas (rebuild to resolve conflicts, stdin, exit codes);
   - "when to read" links to each reference.
-- [ ] `workflow.md` details the proposal, review, health-check and conflict-resolution procedures, including cardinality suggestions with evidence.
-- [ ] No harness-specific vocabulary. Instructions are phrased as actions any shell-capable agent can take.
+- [x] `workflow.md` details the proposal, review, health-check and conflict-resolution procedures, including cardinality suggestions with evidence.
+- [x] No harness-specific vocabulary. Instructions are phrased as actions any shell-capable agent can take.
 
 **Verification:** Manually: read-through with you. Automated: the T26 lint once it exists.
 
@@ -454,10 +454,10 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 
 ### T25: Remaining references
 **Acceptance criteria:**
-- [ ] `schema.md` covers every concept and manifest field, with the authorship and one-term rules.
-- [ ] `vocabulary.md` covers the core meanings, when and how to extend the vocabulary, and how to challenge near-duplicates.
-- [ ] `gruber-criteria.md` gives the five criteria, each with good and bad definition examples, and the cardinality-versus-table-grain note under minimal encoding bias. Each finding code maps to its criterion.
-- [ ] References are one level deep and contain no onward links.
+- [x] `schema.md` covers every concept and manifest field, with the authorship and one-term rules.
+- [x] `vocabulary.md` covers the core meanings, when and how to extend the vocabulary, and how to challenge near-duplicates.
+- [x] `gruber-criteria.md` gives the five criteria, each with good and bad definition examples, and the cardinality-versus-table-grain note under minimal encoding bias. Each finding code maps to its criterion.
+- [x] References are one level deep and contain no onward links.
 
 **Verification:** Manually: read-through. Automated: the T26 lint.
 
@@ -471,12 +471,12 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Description:** Prove the copy-anywhere, harness-neutral, spec-conformant and isolation guarantees. **Asks you before downloading `skills-ref`.**
 
 **Acceptance criteria:**
-- [ ] Copy tests: copy `SK/` into differently nested locations in a temp project and run every command from the project root. A static scan finds no references outside `SK/`.
-- [ ] Conformance tests:
+- [x] Copy tests: copy `SK/` into differently nested locations in a temp project and run every command from the project root. A static scan finds no references outside `SK/`.
+- [x] Conformance tests:
   - `skills-ref validate` (pinned version) passes;
   - `SKILL.md` lint passes: body under 500 lines, references relative, resolving and one level deep, nothing from the harness-term denylist;
   - vendor integrity passes.
-- [ ] Isolation test: running every command in a fixture project with its own `pyproject.toml`, `uv.lock` and `.venv` leaves them byte-identical.
+- [x] Isolation test: running every command in a fixture project with its own `pyproject.toml`, `uv.lock` and `.venv` leaves them byte-identical.
 
 **Verification:** PYTEST (`tests/test_packaging.py`, `tests/test_isolation.py`), LINT
 
@@ -487,8 +487,8 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 **Scope:** M
 
 ### Checkpoint 5: Packaged
-- [ ] PYTEST, UI and LINT all green from a clean clone.
-- [ ] Success criterion 9 passes.
+- [x] PYTEST, UI and LINT all green from a clean clone.
+- [x] Success criterion 9 passes.
 
 ---
 
