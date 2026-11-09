@@ -3,9 +3,9 @@
 # ///
 """Make a throwaway copy of the sample project for one Cursor eval scenario.
 
-    uv run examples/evals/setup_eval.py <scenario> [destination]
+    uv run examples/ontology/evals/setup_eval.py <scenario> [destination]
 
-<scenario> is a letter from a to f (see examples/evals.md). The destination defaults to
+<scenario> is a letter from a to f (see examples/ontology/evals.md). The destination defaults to
 ~/ontology-evals/scenario-<letter> and must not exist yet. The copy is its own git
 repository (branch `main`, then a working branch `eval-<letter>`), with the skill in
 .cursor/skills/ and the AGENTS.md pointer installed, so it behaves like a real project.
@@ -20,8 +20,8 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parent.parent
-SAMPLE = REPO / "examples" / "sample-project"
+REPO = HERE.parents[2]
+SAMPLE = REPO / "examples" / "ontology" / "sample-project"
 SKILL = REPO / "skills" / "curating-the-ontology"
 SCENARIOS = "abcdef"
 SETUP_IDENTITY = ["-c", "user.name=Eval setup", "-c", "user.email=eval-setup@example.invalid"]
@@ -95,7 +95,7 @@ def main(argv: list[str] | None = None) -> int:
     run(["git", "checkout", "-q", "-b", f"eval-{args.scenario}"], dest)
 
     print(f"Scenario ({args.scenario}) is ready in {dest}")
-    print("Open that folder in Cursor, start a new agent chat, and follow examples/evals.md.")
+    print("Open that folder in Cursor, start a new agent chat, and follow examples/ontology/evals.md.")
     return 0
 
 

@@ -126,7 +126,7 @@ def make_git_project(tmp_path: Path, case: str | None = None, setup: Callable[[P
 
 # --- Browser (UI) tests: used only by modules that import playwright -------------------------
 
-SAMPLE = REPO / "examples" / "sample-project"
+SAMPLE = REPO / "examples" / "ontology" / "sample-project"
 OUTPUT = Path("docs/ontology/index.html")
 VIEWPORT = {"width": 1280, "height": 720}  # the minimum supported viewport
 

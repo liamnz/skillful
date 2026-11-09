@@ -12,7 +12,7 @@ import pytest
 from conftest import REPO, SKILL_DIR, commit_all, findings_json, git, make_project, run_onto
 
 VENDOR = SKILL_DIR / "assets" / "vendor"
-SAMPLE = REPO / "examples" / "sample-project"
+SAMPLE = REPO / "examples" / "ontology" / "sample-project"
 OUTPUT = Path("docs/ontology/index.html")
 DATA = re.compile(r'<script type="application/json" id="ontology-data">\n(.*?)\n</script>', re.DOTALL)
 
@@ -228,6 +228,6 @@ def test_missing_ontology_is_an_environment_error(tmp_path: Path) -> None:
 @pytest.mark.parametrize("args", [[], ["--check"]])
 def test_committed_sample_view_is_fresh(args: list[str]) -> None:
     if args:
-        assert build(SAMPLE, *args).returncode == 0, "rebuild examples/sample-project and commit it"
+        assert build(SAMPLE, *args).returncode == 0, "rebuild examples/ontology/sample-project and commit it"
     else:
         assert (SAMPLE / OUTPUT).is_file()

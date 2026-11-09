@@ -5,7 +5,7 @@ from __future__ import annotations
 import yaml
 from conftest import REPO, findings_json, run_onto
 
-SAMPLE = REPO / "examples" / "sample-project"
+SAMPLE = REPO / "examples" / "ontology" / "sample-project"
 
 
 def test_sample_project_has_only_deliberate_findings() -> None:

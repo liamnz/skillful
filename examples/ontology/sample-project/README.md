@@ -4,9 +4,9 @@ A small dbt-style warehouse for **Acme**, an online shop that sells coffee
 and coffee subscriptions. It has a populated ontology in
 [`docs/ontology/`](docs/ontology/), and is used for:
 
-- the design mockup (`examples/design/mockup.html`);
+- the design mockup (`examples/ontology/design/mockup.html`);
 - manual review of the HTML view;
-- the Cursor evaluation scenarios (`examples/evals.md`).
+- the Cursor evaluation scenarios (`examples/ontology/evals.md`).
 
 It is development material only and is never copied into projects with the skill.
 The SQL is illustrative: it is never run.

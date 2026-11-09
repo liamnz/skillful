@@ -432,14 +432,14 @@ All styling flows from CSS custom properties defined once in `assets/html/tokens
 
 ### Design mockup gate
 
-Before the full view is implemented, a **static mockup** is produced and reviewed with the user. It uses the tokens above and the `examples/sample-project` data, and it shows:
+Before the full view is implemented, a **static mockup** is produced and reviewed with the user. It uses the tokens above and the `examples/ontology/sample-project` data, and it shows:
 - the graph view with one concept selected;
 - the detail pane;
 - the legend;
 - a finding badge;
 - light and dark themes.
 
-Feedback is folded into the tokens and this section, and implementation proceeds only after explicit approval. The mockup lives in `examples/design/mockup.html` and is not part of the shipped skill.
+Feedback is folded into the tokens and this section, and implementation proceeds only after explicit approval. The mockup lives in `examples/ontology/design/mockup.html` and is not part of the shipped skill.
 
 ## Agent workflow (`SKILL.md` behaviour)
 
@@ -554,8 +554,8 @@ tests/
   test_validate.py  test_new.py  test_vocab.py  test_impact.py  test_build.py  test_isolation.py
   test_packaging.py           # skill dir is self-contained, harness-neutral, and works after being copied anywhere
   test_html_ui.py             # Playwright: graph interactions, determinism, performance, a11y smoke
-examples/sample-project/      # small dbt-style repo with a populated ontology, used for manual and eval runs
-examples/design/mockup.html   # static design mockup reviewed at the design gate (not shipped)
+examples/ontology/sample-project/      # small dbt-style repo with a populated ontology, used for manual and eval runs
+examples/ontology/design/mockup.html   # static design mockup reviewed at the design gate (not shipped)
 docs/ontology-skill/intent.md
 docs/ontology-skill/SPEC.md
 ```
@@ -634,7 +634,7 @@ def check_encoding_bias(concept: Concept) -> list[Finding]:
     - each documented exit code is tested.
   - `init --agents-md` is idempotent: re-running it updates the marked section without duplicating it, and leaves the rest of `AGENTS.md` untouched.
   - **Vendor integrity:** every file in `assets/vendor/` is listed in `MANIFEST.json` and matches its SHA-256 checksum; nothing unlisted is present; the ISC notice appears in built `index.html`.
-- **Skill behaviour (manual / eval scenarios)** in `examples/sample-project`, run in **Cursor** only. Harness-agnosticism is enforced by design rules and the packaging tests, not by running the scenarios in other harnesses:
+- **Skill behaviour (manual / eval scenarios)** in `examples/ontology/sample-project`, run in **Cursor** only. Harness-agnosticism is enforced by design rules and the packaging tests, not by running the scenarios in other harnesses:
   - (a) a task that introduces a concept triggers ≤ 3 proposals and creates a stub only after consent;
   - (b) the agent never sets `status: defined` or writes `definition` without dictated text;
   - (c) a health check groups findings by criterion;

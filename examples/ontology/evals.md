@@ -9,11 +9,11 @@ a reference. After the change, run that scenario again.
 
 You need Cursor, git and uv.
 
-Each scenario gets a fresh copy of `examples/sample-project`. Create the copy from this
+Each scenario gets a fresh copy of `examples/ontology/sample-project`. Create the copy from this
 repository's root:
 
 ```bash
-uv run examples/evals/setup_eval.py a
+uv run examples/ontology/evals/setup_eval.py a
 ```
 
 Swap `a` for the scenario's letter. The setup script:
@@ -51,7 +51,7 @@ What the sample ontology contains, and which imperfections are deliberate, is in
 **Checks:** proposals arrive at the end of the task, at most three in one message, and a
 stub is created only after consent, through the `new` command.
 
-**Setup:** `uv run examples/evals/setup_eval.py a`
+**Setup:** `uv run examples/ontology/evals/setup_eval.py a`
 
 **Prompt 1:**
 
@@ -91,7 +91,7 @@ YAML is written by hand, a definition is filled in, or anything is created befor
 **Checks:** hard rule 1. The agent never writes `definition` or sets `status: defined`
 unless you dictate the exact text.
 
-**Setup:** `uv run examples/evals/setup_eval.py b`
+**Setup:** `uv run examples/ontology/evals/setup_eval.py b`
 
 **Prompt 1:**
 
@@ -145,7 +145,7 @@ without your dictated text.
 grouped by Gruber criterion with the most important first, offers fixes, and leaves
 definitions to you.
 
-**Setup:** `uv run examples/evals/setup_eval.py c`
+**Setup:** `uv run examples/ontology/evals/setup_eval.py c`
 
 The setup commits some deliberate mud. `validate` then reports these findings:
 
@@ -199,7 +199,7 @@ This scenario relies on a deliberate contradiction in the sample: Active custome
 definition says "trailing **90** days", but `dim_customer.sql` computes `is_active` over
 **30** days. No check can detect this.
 
-**Setup:** `uv run examples/evals/setup_eval.py d`
+**Setup:** `uv run examples/ontology/evals/setup_eval.py d`
 
 **Prompt 1 (consulting during a task):**
 
@@ -247,7 +247,7 @@ The sample's discouraged terms include **client** and **shopper** for Customer, 
 **membership** for Subscription. "Basket" is listed for Order, but its note says it is
 the web team's word *before checkout*, so it does not map cleanly onto Order.
 
-**Setup:** `uv run examples/evals/setup_eval.py e`
+**Setup:** `uv run examples/ontology/evals/setup_eval.py e`
 
 **Prompt 1:**
 
@@ -282,7 +282,7 @@ turn, or treats "basket" as Order without question.
 with `vocab new` and a rationale, instead of inventing one inline. It also challenges a
 type that duplicates an existing one.
 
-**Setup:** `uv run examples/evals/setup_eval.py f`
+**Setup:** `uv run examples/ontology/evals/setup_eval.py f`
 
 **Prompt 1:**
 
