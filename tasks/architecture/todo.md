@@ -96,7 +96,7 @@ uv run --with pytest --with pytest-playwright --with pyyaml --with jsonschema py
 ### Checkpoint 0
 - [x] R1–R4 evidence shown: empty `OK/` diff, 490 tests, same outcomes.
 - [x] R5 evidence shown: suite green, wording-only diff.
-- [ ] You approve; `phase-0-repo-reorg` merged with `--no-ff`.
+- [x] You approve; `phase-0-repo-reorg` merged with `--no-ff`.
 
 ---
 
